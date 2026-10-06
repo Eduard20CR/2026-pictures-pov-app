@@ -4,7 +4,7 @@
 |---|---|
 | Proyecto | Pictures POV App |
 | Documento | Requerimientos funcionales |
-| Versión | 0.1 |
+| Versión | 0.2 |
 | Estado | Listo |
 | Fecha | 2026-10-06 |
 | Responsable | Oscar |
@@ -14,6 +14,7 @@
 | Versión | Fecha | Descripción |
 |---|---|---|
 | 0.1 | 2026-10-06 | Versión inicial. |
+| 0.2 | 2026-10-06 | La descarga del ZIP se genera en segundo plano, se almacena en Amazon S3 y se ofrece mediante un enlace temporal en la página del evento; se elimina la notificación por correo del ZIP (RF-ORG-14, RF-SIS-06). |
 ---
 
 ## 1. Introducción
@@ -182,11 +183,13 @@ Aplica a administradores y organizadores. Los invitados no se autentican.
 3. Dos dispositivos que indiquen el mismo nombre se presentan como grupos distintos.
 
 **CA RF-ORG-14**
-1. El archivo se genera de forma asíncrona.
-2. Al finalizar la generación, el sistema notifica al organizador por correo con un enlace de descarga (RF-SIS-06) y muestra el mismo enlace en la página del evento.
-3. El enlace de descarga caduca conforme a P-07.
-4. Si las fotos del evento no han cambiado desde la última generación, el sistema reutiliza el archivo existente.
-5. El número de generaciones por evento está limitado por P-08 (RN-08).
+1. Al solicitar la descarga, el sistema genera el archivo mediante un proceso en segundo plano; el organizador no necesita mantener la página abierta mientras se genera.
+2. El archivo generado se almacena en Amazon S3.
+3. La página del evento muestra el estado de la generación (en curso, disponible o fallida) y, cuando el archivo está disponible, un enlace para descargarlo.
+4. El enlace de descarga es una URL firmada y temporal que caduca conforme a P-07 (RNF-SEG-05).
+5. El sistema no envía el archivo ni el enlace por correo.
+6. Si las fotos del evento no han cambiado desde la última generación, el sistema reutiliza el archivo existente.
+7. El número de generaciones por evento está limitado por P-08 (RN-08).
 
 ### 6.4 Moderación
 
@@ -256,7 +259,7 @@ Comportamiento que el sistema ejecuta sin intervención directa de un usuario.
 | RF-SIS-03 | El sistema debe **corregir la orientación** de las imágenes según sus metadatos EXIF y **eliminar los metadatos de ubicación** de las imágenes mostradas a terceros. | S |
 | RF-SIS-04 | El sistema debe generar el enlace de cada evento con un **identificador no secuencial y no predecible**. | M |
 | RF-SIS-05 | El sistema debe **eliminar automáticamente las fotos** de un evento una vez transcurrido el plazo de retención P-05 desde la fecha del evento. | S |
-| RF-SIS-06 | El sistema debe **notificar por correo al organizador** cuando se le asigna un evento, cuando su archivo ZIP está disponible y antes de la eliminación automática de sus fotos. | S |
+| RF-SIS-06 | El sistema debe **notificar por correo al organizador** cuando se le asigna un evento y antes de la eliminación automática de sus fotos. | S |
 | RF-SIS-07 | El sistema debe **mostrar las fotos nuevas** en la galería sin que el invitado recargue la página manualmente. | C |
 
 **CA RF-SIS-01**

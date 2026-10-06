@@ -4,7 +4,7 @@
 |---|---|
 | Proyecto | Pictures POV App |
 | Documento | Requerimientos no funcionales |
-| Versión | 0.1 |
+| Versión | 0.2 |
 | Estado | Borrador |
 | Fecha | 2026-10-06 |
 | Responsable | Oscar |
@@ -14,6 +14,7 @@
 | Versión | Fecha | Descripción |
 |---|---|---|
 | 0.1 | 2026-10-06 | Versión inicial. |
+| 0.2 | 2026-10-06 | Los archivos ZIP se incluyen en RNF-SEG-05 y RNF-REN-06 pasa a medir la generación en segundo plano. |
 
 ---
 
@@ -46,7 +47,7 @@ Este documento define los atributos de calidad y las restricciones que Pictures 
 | RNF-SEG-02 | La autorización de cada operación debe validarse en el servidor, con independencia de lo que muestre la interfaz (RN-04, RN-05). | M |
 | RNF-SEG-03 | El sistema debe validar el tipo real de cada archivo subido a partir de su contenido, no de su extensión ni del tipo declarado por el cliente. Los archivos que no superen la validación no deben publicarse (RF-SIS-01). | M |
 | RNF-SEG-04 | El identificador público de cada evento debe tener al menos 128 bits de entropía y no ser secuencial (RF-ORG-02). | M |
-| RNF-SEG-05 | Las fotos no deben ser accesibles mediante URLs públicas permanentes; el acceso debe realizarse con enlaces firmados y temporales (RN-08). | M |
+| RNF-SEG-05 | Las fotos y los archivos ZIP no deben ser accesibles mediante URLs públicas permanentes; el acceso debe realizarse con enlaces firmados y temporales (RN-08, RF-ORG-14). | M |
 | RNF-SEG-06 | Los endpoints accesibles sin autenticación deben limitar la tasa de peticiones por dispositivo y por dirección IP. | S |
 | RNF-SEG-07 | Las credenciales y secretos no deben almacenarse en el código fuente ni en el repositorio. | M |
 
@@ -67,7 +68,7 @@ Este documento define los atributos de calidad y las restricciones que Pictures 
 | RNF-REN-03 | Una foto subida debe estar disponible en la galería en menos de 10 segundos (p95) desde que finaliza la subida. | S |
 | RNF-REN-04 | Las operaciones de la API, excluida la transferencia de archivos, deben responder en menos de 500 ms (p95) y en menos de 1,5 s (p99). | S |
 | RNF-REN-05 | La galería abierta debe reflejar las fotos nuevas en un plazo máximo de 30 segundos (RF-SIS-07). | C |
-| RNF-REN-06 | La generación del archivo ZIP de un evento de 2.000 fotos debe completarse en menos de 15 minutos (RF-ORG-14). | S |
+| RNF-REN-06 | La generación en segundo plano del archivo ZIP de un evento de 2.000 fotos, desde la solicitud hasta que el enlace de descarga está disponible en la página del evento, debe completarse en menos de 15 minutos (RF-ORG-14). | S |
 
 ## 6. Capacidad
 
