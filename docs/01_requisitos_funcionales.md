@@ -30,8 +30,7 @@ El documento cubre los requerimientos funcionales de los tres roles del sistema 
 
 | Documento | Descripción |
 |---|---|
-| [01_overview.md](01_overview.md) | Reglas de negocio (RN) y parámetros configurables (P). |
-| [03_requisitos_no_funcionales.md](03_requisitos_no_funcionales.md) | Requerimientos no funcionales (RNF) |
+| [02_requisitos_no_funcionales.md](02_requisitos_no_funcionales.md) | Requerimientos no funcionales (RNF) |
 
 ---
 

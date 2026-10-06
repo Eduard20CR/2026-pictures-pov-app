@@ -27,8 +27,7 @@ Este documento define los atributos de calidad y las restricciones que Pictures 
 
 | Documento | Descripción |
 |---|---|
-| [01_overview.md](01_overview.md) | Reglas de negocio (RN) y parámetros configurables (P). |
-| [02_requisitos_funcionales.md](02_requisitos_funcionales.md) | Requerimientos funcionales (RF) y glosario. |
+| [01_requisitos_funcionales.md](01_requisitos_funcionales.md) | Requerimientos funcionales (RF) y glosario. |
 
 ## 2. Convenciones
 
