@@ -63,7 +63,7 @@ La aplicación se despliega en AWS sobre servicios administrados.
 flowchart LR
     U[Navegador] --> CF[CloudFront + S3<br/>Frontend]
     U -->|API| APIGW[API Gateway]
-    APIGW --> L[Lambda<br/>NestJS]
+    APIGW --> L[Lambda<br/>Spring Boot]
     L --> DB[(PostgreSQL<br/>RDS)]
     L -->|URL prefirmada| U
     U -->|Subida directa| S3[(S3<br/>Fotos)]
@@ -74,8 +74,8 @@ flowchart LR
 
 | Componente | Tecnología |
 |---|---|
-| Frontend | Aplicación de página única con React, Vite, TypeScript, React Router, TanStack Query y Tailwind, servida desde Amazon S3 y Amazon CloudFront. |
-| Backend | API con NestJS ejecutada en AWS Lambda detrás de Amazon API Gateway (HTTP API). |
+| Frontend | Aplicación de página única con React, Vite, TypeScript, React Router, TanStack Query y Tailwind, gestionada con npm y servida desde Amazon S3 y Amazon CloudFront. Los tipos del cliente de la API se generan con openapi-typescript. Ver [ADR 0002](docs/adr/0002-npm-sin-workspaces.md). |
+| Backend | API con Spring Boot 3 y Java 21, construida con Gradle y ejecutada en AWS Lambda con SnapStart detrás de Amazon API Gateway (HTTP API). Contrato OpenAPI generado con springdoc-openapi. Ver [ADR 0001](docs/adr/0001-backend-spring-boot-en-lambda.md). |
 | Base de datos | PostgreSQL en Amazon RDS. |
 | Autenticación | Amazon Cognito con inicio de sesión administrado (Google y correo/contraseña) y grupo de administradores. Los invitados no se autentican. |
 | Almacenamiento de fotos | Amazon S3. El navegador sube las fotos directamente mediante URLs prefirmadas, sin que el backend reciba los archivos. |
@@ -83,17 +83,16 @@ flowchart LR
 | Infraestructura | Terraform con módulos reutilizables, entornos de desarrollo y producción en cuentas de AWS separadas y estado remoto en S3. |
 | CI/CD | GitHub Actions con autenticación OIDC hacia AWS y despliegue independiente por componente. |
 
-Las decisiones de arquitectura y su justificación se registran en [docs/adr](docs/adr).
+Las decisiones de arquitectura y su justificación se registran en [docs/adr](docs/adr/README.md).
 
 ## Estructura del repositorio
 
 ```
 .
 ├── apps/
-│   ├── web/          # Frontend (React)
-│   └── api/          # Backend (NestJS)
-├── packages/
-│   └── shared/       # Tipos compartidos generados desde el contrato OpenAPI
+│   ├── web/          # Frontend (React, npm)
+│   │   └── src/api/  # Tipos del cliente generados desde el contrato OpenAPI
+│   └── api/          # Backend (Spring Boot, Gradle)
 ├── infra/            # Infraestructura como código (Terraform)
 └── docs/             # Documentación del proyecto
 ```
@@ -108,5 +107,5 @@ Pendiente. Se documentará al completar la fase 1 (cimientos).
 |---|---|
 | [Requerimientos funcionales](docs/01_requisitos_funcionales.md) | Listo |
 | [Requerimientos no funcionales](docs/02_requisitos_no_funcionales.md) | Listo |
-| [Registros de decisiones de arquitectura (ADR)](docs/adr) | Pendiente |
+| [Registros de decisiones de arquitectura (ADR)](docs/adr/README.md) | En curso |
 
