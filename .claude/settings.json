@@ -3,7 +3,21 @@
         "deny": [
             "Read(legacy/**)",
             "Read(/docs/c4_model.excalidraw)",
-            "Read(*.log)"
+            "Read(*.log)",
+            "Edit(/docs/c4_model.excalidraw)"
+        ]
+    },
+    "hooks": {
+        "PreToolUse": [
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "jq -r \".tool_input.command // empty\" | grep -q \"c4_model\\.excalidraw\" && { echo \"Bloqueado: docs/c4_model.excalidraw está protegido y no debe modificarse.\" >&2; exit 2; } || exit 0"
+                    }
+                ]
+            }
         ]
     }
 }

@@ -1,111 +1,110 @@
 # Pictures POV App
 
-Aplicación web para recopilar en una galería común las fotos que los invitados toman durante un evento, mediante un código QR y sin necesidad de crear una cuenta.
+Web application that collects, in a shared gallery, the photos guests take during an event, through a QR code and without needing to create an account.
 
-## Descripción
+## Description
 
-### Problema
+### Problem
 
-En bodas, cumpleaños y fiestas, los asistentes toman una gran cantidad de fotos con sus teléfonos que rara vez llegan a los organizadores. Las alternativas habituales, como grupos de mensajería o carpetas compartidas, exigen que cada invitado instale una aplicación, cree una cuenta o reciba un enlace de forma individual, reducen la calidad de las imágenes y dispersan las fotos en varios canales.
+At weddings, birthdays and parties, attendees take a large number of photos with their phones that rarely reach the organizers. The usual alternatives, such as messaging groups or shared folders, require each guest to install an app, create an account or receive a link individually; they reduce image quality and scatter the photos across several channels.
 
-### Cómo funciona
+### How it works
 
-1. Un administrador crea el evento y lo asigna al correo del cliente que lo organiza.
-2. El organizador obtiene el enlace y el código QR del evento y los coloca en el lugar de la celebración.
-3. Los invitados escanean el código, acceden a la página del evento sin crear una cuenta y suben fotos desde la galería de su teléfono o tomándolas con la cámara, hasta un límite por dispositivo (10 por defecto).
-4. Todas las fotos se muestran en una galería común del evento.
-5. El organizador inicia sesión para consultar las fotos, moderarlas y descargarlas en un archivo ZIP.
+1. An administrator creates the event and assigns it to the email of the customer organizing it.
+2. The organizer gets the event's link and QR code and places them at the venue.
+3. Guests scan the code, open the event page without creating an account and upload photos from their phone's gallery or by taking them with the camera, up to a per-device limit (10 by default).
+4. All photos are shown in a shared event gallery.
+5. The organizer signs in to view, moderate and download the photos in a ZIP file.
 
 ### Roles
 
-| Rol | Descripción | Capacidades principales |
+| Role | Description | Main capabilities |
 |---|---|---|
-| Invitado | Asistente al evento. No dispone de cuenta. | Acceder al evento mediante el QR o el enlace, subir fotos dentro de su límite, consultar la galería. |
-| Organizador | Cliente al que se asignan uno o más eventos. | Consultar sus eventos, obtener el enlace y el QR, personalizar el evento, moderar y descargar las fotos. |
-| Administrador | Miembro del equipo de la plataforma. | Crear, asignar y gestionar eventos y usuarios de toda la plataforma. |
+| Guest | Event attendee. Has no account. | Access the event through the QR code or link, upload photos within their limit, view the gallery. |
+| Organizer | Customer to whom one or more events are assigned. | View their events, get the link and QR code, customize the event, moderate and download the photos. |
+| Administrator | Member of the platform team. | Create, assign and manage events and users across the whole platform. |
 
-### Principios
+### Principles
 
-- **Sin fricción para el invitado.** No se exige cuenta, instalación ni datos personales para participar.
-- **Control para el organizador.** El organizador decide qué fotos se muestran y quién puede ver la galería.
-- **Límite por dispositivo, no por red.** Los asistentes a un evento comparten habitualmente la misma red WiFi, por lo que el límite de subida se aplica por dispositivo y no por dirección IP.
-- **Privacidad por defecto.** Las fotos se conservan durante un plazo limitado y los enlaces de descarga son temporales.
+- **Frictionless for guests.** No account, installation or personal data is required to participate.
+- **Control for the organizer.** The organizer decides which photos are shown and who can see the gallery.
+- **Per-device limit, not per network.** Attendees of an event usually share the same WiFi network, so the upload limit applies per device and not per IP address.
+- **Privacy by default.** Photos are kept for a limited period and download links are temporary.
 
-## Alcance
+## Scope
 
-### Incluido
+### Included
 
-- Acceso de invitados sin registro mediante código QR o enlace.
-- Subida de fotos desde el navegador con un límite por dispositivo y un límite total por evento.
-- Galería del evento con visibilidad configurable: pública, protegida con PIN o visible solo para el organizador.
-- Inicio de sesión de organizadores y administradores con Google o con correo y contraseña.
-- Moderación de fotos: ocultar, volver a mostrar y eliminar.
-- Descarga de fotos individuales y del evento completo en un archivo ZIP.
-- Panel de administración para la gestión de eventos y usuarios.
-- Generación de miniaturas y eliminación automática de fotos tras un plazo de retención.
+- Guest access without registration through a QR code or link.
+- Photo uploads from the browser with a per-device limit and a total limit per event.
+- Event gallery with configurable visibility: public, PIN-protected or visible only to the organizer.
+- Sign-in for organizers and administrators with Google or with email and password.
+- Photo moderation: hide, show again and delete.
+- Download of individual photos and of the whole event in a ZIP file.
+- Administration panel for managing events and users.
+- Thumbnail generation and automatic photo deletion after a retention period.
 
-### Excluido de la primera versión
+### Excluded from the first version
 
-- Subida de videos.
-- Pagos y planes de suscripción.
-- Registro autónomo de organizadores.
-- Comentarios, reacciones y edición de fotos.
-- Reconocimiento facial.
-- Aplicación móvil nativa.
+- Video uploads.
+- Payments and subscription plans.
+- Self-service organizer registration.
+- Comments, reactions and photo editing.
+- Facial recognition.
+- Native mobile app.
 
-El detalle se especifica en los [requerimientos funcionales](docs/requerimientos/requerimientos-funcionales.md) y las [reglas de negocio](docs/requerimientos/reglas-de-negocio.md).
+Details are specified in the [functional requirements](docs/requerimientos/01_requisitos_funcionales.md).
 
-## Arquitectura
+## Architecture
 
-La aplicación se despliega en AWS sobre servicios administrados.
+The application is deployed on AWS using managed services.
 
 ```mermaid
 flowchart LR
-    U[Navegador] --> CF[CloudFront + S3<br/>Frontend]
+    U[Browser] --> CF[CloudFront + S3<br/>Frontend]
     U -->|API| APIGW[API Gateway]
     APIGW --> L[Lambda<br/>Spring Boot]
     L --> DB[(PostgreSQL<br/>RDS)]
-    L -->|URL prefirmada| U
-    U -->|Subida directa| S3[(S3<br/>Fotos)]
-    S3 -->|Evento| T[Lambda<br/>Miniaturas]
+    L -->|Presigned URL| U
+    U -->|Direct upload| S3[(S3<br/>Photos)]
+    S3 -->|Event| T[Lambda<br/>Thumbnails]
     T --> S3
-    U -->|Inicio de sesión| COG[Cognito]
+    U -->|Sign-in| COG[Cognito]
 ```
 
-| Componente | Tecnología |
+| Component | Technology |
 |---|---|
-| Frontend | Aplicación de página única con React, Vite, TypeScript, React Router, TanStack Query y Tailwind, gestionada con npm y servida desde Amazon S3 y Amazon CloudFront. Los tipos del cliente de la API se generan con openapi-typescript. Ver [ADR 0002](docs/adr/0002-npm-sin-workspaces.md). |
-| Backend | API con Spring Boot 3 y Java 21, construida con Gradle y ejecutada en AWS Lambda con SnapStart detrás de Amazon API Gateway (HTTP API). Contrato OpenAPI generado con springdoc-openapi. Ver [ADR 0001](docs/adr/0001-backend-spring-boot-en-lambda.md). |
-| Base de datos | PostgreSQL en Amazon RDS. |
-| Autenticación | Amazon Cognito con inicio de sesión administrado (Google y correo/contraseña) y grupo de administradores. Los invitados no se autentican. |
-| Almacenamiento de fotos | Amazon S3. El navegador sube las fotos directamente mediante URLs prefirmadas, sin que el backend reciba los archivos. |
-| Procesamiento de imágenes | Función Lambda disparada por S3 que genera miniaturas en formato WebP. |
-| Infraestructura | Terraform con módulos reutilizables, entornos de desarrollo y producción en cuentas de AWS separadas y estado remoto en S3. |
-| CI/CD | GitHub Actions con autenticación OIDC hacia AWS y despliegue independiente por componente. |
+| Frontend | Single-page application with React, Vite, TypeScript, React Router, TanStack Query and Tailwind, managed with npm and served from Amazon S3 and Amazon CloudFront. API client types are generated with openapi-typescript. See [ADR 0002](docs/adr/0002-npm-sin-workspaces.md). |
+| Backend | API with Spring Boot 3 and Java 21, built with Gradle and running on AWS Lambda with SnapStart behind Amazon API Gateway (HTTP API). OpenAPI contract generated with springdoc-openapi. See [ADR 0001](docs/adr/0001-backend-spring-boot-en-lambda.md). |
+| Database | PostgreSQL on Amazon RDS. |
+| Authentication | Amazon Cognito with managed sign-in (Google and email/password) and an administrators group. Guests do not authenticate. |
+| Photo storage | Amazon S3. The browser uploads photos directly using presigned URLs, without the backend receiving the files. |
+| Image processing | Lambda function triggered by S3 that generates WebP thumbnails. |
+| Infrastructure | Terraform with reusable modules, development and production environments in separate AWS accounts and remote state in S3. |
+| CI/CD | GitHub Actions with OIDC authentication to AWS and independent deployment per component. |
 
-Las decisiones de arquitectura y su justificación se registran en [docs/adr](docs/adr/README.md).
+Architecture decisions and their rationale are recorded in [docs/adr](docs/adr/README.md).
 
-## Estructura del repositorio
+## Repository structure
 
 ```
 .
 ├── apps/
 │   ├── web/          # Frontend (React, npm)
-│   │   └── src/api/  # Tipos del cliente generados desde el contrato OpenAPI
+│   │   └── src/api/  # Client types generated from the OpenAPI contract
 │   └── api/          # Backend (Spring Boot, Gradle)
-├── infra/            # Infraestructura como código (Terraform)
-└── docs/             # Documentación del proyecto
+├── infra/            # Infrastructure as code (Terraform)
+└── docs/             # Project documentation
 ```
 
-## Cómo empezar
+## Getting started
 
-Pendiente. Se documentará al completar la fase 1 (cimientos).
+Pending. Will be documented once phase 1 (foundations) is complete.
 
-## Documentación
+## Documentation
 
-| Documento | Estado |
+| Document | Status |
 |---|---|
-| [Requerimientos funcionales](docs/01_requisitos_funcionales.md) | Listo |
-| [Requerimientos no funcionales](docs/02_requisitos_no_funcionales.md) | Listo |
-| [Registros de decisiones de arquitectura (ADR)](docs/adr/README.md) | En curso |
-
+| [Functional requirements](docs/01_requisitos_funcionales.md) | Ready |
+| [Non-functional requirements](docs/02_requisitos_no_funcionales.md) | Ready |
+| [Architecture Decision Records (ADR)](docs/adr/README.md) | In progress |

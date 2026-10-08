@@ -1,61 +1,61 @@
-# Registros de decisiones de arquitectura (ADR)
+# Architecture Decision Records (ADR)
 
-Este directorio recoge las decisiones de arquitectura relevantes del proyecto en formato [MADR](https://adr.github.io/madr/). Cada registro documenta el contexto, las opciones consideradas, la decisión adoptada y sus consecuencias.
+This directory contains the project's relevant architecture decisions in [MADR](https://adr.github.io/madr/) format. Each record documents the context, the options considered, the decision made and its consequences.
 
-## Índice
+## Index
 
-| Número | Título | Estado | Fecha |
+| Number | Title | Status | Date |
 |---|---|---|---|
-| [0001](0001-backend-spring-boot-en-lambda.md) | Backend con Spring Boot en AWS Lambda | Aceptado | 2026-10-08 |
-| [0002](0002-npm-sin-workspaces.md) | npm sin workspaces | Aceptado | 2026-10-08 |
+| [0001](0001-backend-spring-boot-en-lambda.md) | Spring Boot backend on AWS Lambda | Accepted | 2026-10-08 |
+| [0002](0002-npm-sin-workspaces.md) | npm without workspaces | Accepted | 2026-10-08 |
 
-## Convenciones
+## Conventions
 
-- **Nombre del archivo.** `NNNN-titulo-en-minusculas-con-guiones.md`, con numeración correlativa de cuatro dígitos. Un número no se reutiliza.
-- **Estados.** Propuesto, Aceptado, Rechazado, Obsoleto o Reemplazado por `NNNN`.
-- **Inmutabilidad.** Un ADR aceptado no se modifica en lo sustancial. Si la decisión cambia, se crea un nuevo ADR y el anterior pasa a estado *Reemplazado por `NNNN`*.
-- **Fuente única.** La justificación de cada decisión reside únicamente en su ADR; el resto de la documentación enlaza a él.
+- **File name.** `NNNN-lowercase-title-with-hyphens.md`, with sequential four-digit numbering. A number is never reused.
+- **Statuses.** Proposed, Accepted, Rejected, Deprecated or Superseded by `NNNN`.
+- **Immutability.** An accepted ADR is not substantially modified. If the decision changes, a new ADR is created and the previous one moves to *Superseded by `NNNN`*.
+- **Single source.** The rationale for each decision lives only in its ADR; the rest of the documentation links to it.
 
-## Plantilla
+## Template
 
 ```markdown
-# NNNN. Título de la decisión
+# NNNN. Decision title
 
-- **Estado:** Propuesto | Aceptado | Rechazado | Obsoleto | Reemplazado por NNNN
-- **Fecha:** AAAA-MM-DD
+- **Status:** Proposed | Accepted | Rejected | Deprecated | Superseded by NNNN
+- **Date:** YYYY-MM-DD
 
-## Contexto y planteamiento del problema
+## Context and problem statement
 
-Situación que motiva la decisión y restricciones aplicables.
+Situation that motivates the decision and applicable constraints.
 
-## Factores de decisión
+## Decision drivers
 
-- Factor 1.
-- Factor 2.
+- Driver 1.
+- Driver 2.
 
-## Opciones consideradas
+## Considered options
 
-1. Opción A.
-2. Opción B.
+1. Option A.
+2. Option B.
 
-## Decisión
+## Decision
 
-Opción elegida y motivo principal.
+Chosen option and main reason.
 
-## Ventajas y desventajas de las opciones
+## Pros and cons of the options
 
-### Opción A
+### Option A
 
-- A favor: …
-- En contra: …
+- Pro: …
+- Con: …
 
-## Consecuencias
+## Consequences
 
-### Positivas
+### Positive
 
 - …
 
-### Negativas y riesgos
+### Negative and risks
 
 - …
 ```

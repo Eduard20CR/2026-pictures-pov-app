@@ -1,288 +1,289 @@
-# Especificación de requerimientos funcionales
+# Functional Requirements Specification
 
-| Campo | Valor |
+| Field | Value |
 |---|---|
-| Proyecto | Pictures POV App |
-| Documento | Requerimientos funcionales |
-| Versión | 0.2 |
-| Estado | Listo |
-| Fecha | 2026-10-06 |
-| Responsable | Oscar |
+| Project | Pictures POV App |
+| Document | Functional requirements |
+| Version | 0.3 |
+| Status | Ready |
+| Date | 2026-10-08 |
+| Owner | Oscar |
 
-## Historial de cambios
+## Change history
 
-| Versión | Fecha | Descripción |
+| Version | Date | Description |
 |---|---|---|
-| 0.1 | 2026-10-06 | Versión inicial. |
-| 0.2 | 2026-10-06 | La descarga del ZIP se genera en segundo plano, se almacena en Amazon S3 y se ofrece mediante un enlace temporal en la página del evento; se elimina la notificación por correo del ZIP (RF-ORG-14, RF-SIS-06). |
+| 0.1 | 2026-10-06 | Initial version. |
+| 0.2 | 2026-10-06 | The ZIP download is generated in the background, stored in Amazon S3 and offered through a temporary link on the event page; the ZIP email notification is removed (RF-ORG-14, RF-SIS-06). |
+| 0.3 | 2026-10-08 | Document translated into English. Requirement identifiers are unchanged. |
 ---
 
-## 1. Introducción
+## 1. Introduction
 
-### 1.1 Propósito
+### 1.1 Purpose
 
-Este documento define las capacidades funcionales de Pictures POV App, una aplicación web que permite a los invitados de un evento subir fotos mediante un código QR, sin crear una cuenta, y a los organizadores consultar, moderar y descargar dichas fotos.
+This document defines the functional capabilities of Pictures POV App, a web application that allows the guests of an event to upload photos through a QR code, without creating an account, and allows organizers to view, moderate and download those photos.
 
-### 1.2 Alcance
+### 1.2 Scope
 
-El documento cubre los requerimientos funcionales de los tres roles del sistema (administrador, organizador e invitado) y el comportamiento automático del sistema. Los requerimientos no funcionales y las reglas de negocio se especifican en documentos separados.
+The document covers the functional requirements of the system's three roles (administrator, organizer and guest) and the system's automatic behavior. Non-functional requirements and business rules are specified in separate documents.
 
-### 1.3 Documentos relacionados
+### 1.3 Related documents
 
-| Documento | Descripción |
+| Document | Description |
 |---|---|
-| [02_requisitos_no_funcionales.md](02_requisitos_no_funcionales.md) | Requerimientos no funcionales (RNF) |
+| [02_requisitos_no_funcionales.md](02_requisitos_no_funcionales.md) | Non-functional requirements (RNF) |
 
 ---
 
-## 2. Convenciones
+## 2. Conventions
 
-- **Identificador.** Cada requerimiento tiene un identificador estable con el formato `RF-<ÁREA>-<NN>`. Un identificador no se reutiliza; los requerimientos eliminados se marcan como *Retirado*.
-- **Áreas.** `AUT` autenticación, `ADM` administrador, `ORG` organizador, `INV` invitado, `SIS` sistema.
-- **Redacción.** Cada requerimiento describe una única capacidad verificable con la forma "El sistema debe permitir que el [rol] …" o "El sistema debe …".
-- **Prioridad (MoSCoW).** **M** (Must): obligatorio para la primera versión. **S** (Should): importante, no bloqueante. **C** (Could): deseable. **W** (Won't): fuera del alcance de esta versión.
-- **Criterios de aceptación (CA).** Se incluyen en los requerimientos que requieren precisión adicional para ser verificables.
-- **Referencias.** `RN-NN` remite a una regla de negocio y `P-NN` a un parámetro configurable, ambos definidos en [reglas-de-negocio.md](reglas-de-negocio.md).
+- **Identifier.** Each requirement has a stable identifier in the format `RF-<AREA>-<NN>`. An identifier is never reused; removed requirements are marked as *Retired*.
+- **Areas.** `AUT` authentication, `ADM` administrator, `ORG` organizer, `INV` guest, `SIS` system.
+- **Wording.** Each requirement describes a single verifiable capability, in the form "The system must allow the [role] to …" or "The system must …".
+- **Priority (MoSCoW).** **M** (Must): mandatory for the first version. **S** (Should): important, not blocking. **C** (Could): desirable. **W** (Won't): out of scope for this version.
+- **Acceptance criteria (AC).** Included for requirements that need additional precision to be verifiable.
+- **References.** `RN-NN` refers to a business rule and `P-NN` to a configurable parameter, both defined in [reglas-de-negocio.md](reglas-de-negocio.md).
 
-## 3. Glosario
+## 3. Glossary
 
-| Término | Definición |
+| Term | Definition |
 |---|---|
-| Administrador | Miembro del equipo de la plataforma con permisos sobre todos los eventos y usuarios. |
-| Organizador | Cliente al que se asignan uno o más eventos. También denominado dueño del evento. |
-| Invitado | Asistente a un evento. No dispone de cuenta en el sistema. |
-| Dispositivo | Navegador identificado mediante un identificador único almacenado en una cookie, emitido por evento. No constituye una identidad verificada (RN-02). |
-| Evento | Celebración para la que se recopilan fotos. Tiene un enlace público, un código QR y un ciclo de vida (RN-06). |
-| Galería | Conjunto de fotos visibles de un evento. |
-| Foto oculta | Foto que no se muestra en la galería pero se conserva y puede volver a mostrarse. |
-| Foto eliminada | Foto retirada de forma permanente para los usuarios (RN-07). |
-| Ventana de subida | Intervalo de fechas y horas en el que los invitados pueden subir fotos a un evento. |
+| Administrator | Member of the platform team with permissions over all events and users. |
+| Organizer | Customer to whom one or more events are assigned. Also called the event owner. |
+| Guest | Attendee of an event. Has no account in the system. |
+| Device | Browser identified by a unique identifier stored in a cookie, issued per event. It is not a verified identity (RN-02). |
+| Event | Celebration for which photos are collected. It has a public link, a QR code and a lifecycle (RN-06). |
+| Gallery | Set of visible photos of an event. |
+| Hidden photo | Photo that is not shown in the gallery but is kept and can be shown again. |
+| Deleted photo | Photo permanently removed for users (RN-07). |
+| Upload window | Date and time interval during which guests can upload photos to an event. |
 
 ---
 
-## 4. Autenticación
+## 4. Authentication
 
-Aplica a administradores y organizadores. Los invitados no se autentican.
+Applies to administrators and organizers. Guests do not authenticate.
 
-| ID | Requerimiento | Prioridad |
+| ID | Requirement | Priority |
 |---|---|---|
-| RF-AUT-01 | El sistema debe permitir que administradores y organizadores **inicien sesión** con una cuenta de Google o con correo y contraseña. | M |
-| RF-AUT-02 | El sistema debe permitir que administradores y organizadores **cierren sesión**. | M |
-| RF-AUT-03 | El sistema debe permitir que un usuario con correo y contraseña **recupere su contraseña**. | M |
-| RF-AUT-04 | El sistema debe exigir **autenticación multifactor** a los administradores. | S |
+| RF-AUT-01 | The system must allow administrators and organizers to **sign in** with a Google account or with email and password. | M |
+| RF-AUT-02 | The system must allow administrators and organizers to **sign out**. | M |
+| RF-AUT-03 | The system must allow a user with email and password to **recover their password**. | M |
+| RF-AUT-04 | The system must require **multi-factor authentication** for administrators. | S |
 
 ---
 
-## 5. Administrador
+## 5. Administrator
 
-### 5.1 Gestión de eventos
+### 5.1 Event management
 
-| ID | Requerimiento | Prioridad |
+| ID | Requirement | Priority |
 |---|---|---|
-| RF-ADM-01 | El sistema debe permitir que el administrador **cree un evento** indicando nombre, fecha del evento y correo del organizador. | M |
-| RF-ADM-02 | El sistema debe permitir que el administrador **asigne un evento a un correo**, aunque el organizador aún no tenga cuenta. | M |
-| RF-ADM-03 | El sistema debe permitir que el administrador **edite** los datos de un evento y **lo reasigne** a otro correo. | S |
-| RF-ADM-04 | El sistema debe permitir que el administrador **elimine un evento**. | M |
-| RF-ADM-05 | El sistema debe permitir que el administrador **consulte todos los eventos**, con paginación y ordenados por fecha. | M |
-| RF-ADM-06 | El sistema debe permitir que el administrador **busque eventos por correo del organizador**. | M |
-| RF-ADM-07 | El sistema debe permitir que el administrador **configure por evento** el límite de fotos por dispositivo y la ventana de subida. | S |
-| RF-ADM-08 | El sistema debe mostrar al administrador, por evento, el **número de fotos y el almacenamiento utilizado**. | S |
+| RF-ADM-01 | The system must allow the administrator to **create an event** by providing a name, the event date and the organizer's email. | M |
+| RF-ADM-02 | The system must allow the administrator to **assign an event to an email**, even if the organizer does not yet have an account. | M |
+| RF-ADM-03 | The system must allow the administrator to **edit** an event's data and **reassign it** to another email. | S |
+| RF-ADM-04 | The system must allow the administrator to **delete an event**. | M |
+| RF-ADM-05 | The system must allow the administrator to **view all events**, paginated and sorted by date. | M |
+| RF-ADM-06 | The system must allow the administrator to **search events by organizer email**. | M |
+| RF-ADM-07 | The system must allow the administrator to **configure, per event,** the per-device photo limit and the upload window. | S |
+| RF-ADM-08 | The system must show the administrator, per event, the **number of photos and the storage used**. | S |
 
-**CA RF-ADM-02**
-1. Un usuario que inicia sesión con un correo verificado igual al correo asignado visualiza el evento en su lista de eventos.
-2. Un usuario cuyo correo no está verificado no visualiza el evento (RN-04).
-3. Al asignar el evento, el sistema notifica por correo al organizador (RF-SIS-06).
+**AC RF-ADM-02**
+1. A user who signs in with a verified email matching the assigned email sees the event in their list of events.
+2. A user whose email is not verified does not see the event (RN-04).
+3. When the event is assigned, the system notifies the organizer by email (RF-SIS-06).
 
-**CA RF-ADM-04**
-1. El sistema solicita confirmación mediante la escritura del nombre del evento.
-2. El evento deja de ser accesible de inmediato y sus fotos se eliminan conforme a RN-07.
+**AC RF-ADM-04**
+1. The system asks for confirmation by having the user type the event name.
+2. The event becomes inaccessible immediately and its photos are deleted in accordance with RN-07.
 
-**CA RF-ADM-07**
-1. Si no se configura un límite, se aplica el valor por defecto P-01.
-2. Si no se configura una ventana de subida, las subidas permanecen abiertas mientras el evento esté en estado Activo (RN-06).
+**AC RF-ADM-07**
+1. If no limit is configured, the default value P-01 applies.
+2. If no upload window is configured, uploads remain open while the event is in the Active state (RN-06).
 
-### 5.2 Gestión de usuarios
+### 5.2 User management
 
-| ID | Requerimiento | Prioridad |
+| ID | Requirement | Priority |
 |---|---|---|
-| RF-ADM-09 | El sistema debe permitir que el administrador **busque organizadores** por correo. | M |
-| RF-ADM-10 | El sistema debe permitir que el administrador **bloquee y desbloquee** a un organizador. | M |
-| RF-ADM-11 | El sistema debe permitir que el administrador **elimine** a un organizador. | S |
-| RF-ADM-12 | El sistema debe permitir que el administrador **otorgue y revoque el rol de administrador** a otro usuario. | S |
+| RF-ADM-09 | The system must allow the administrator to **search organizers** by email. | M |
+| RF-ADM-10 | The system must allow the administrator to **block and unblock** an organizer. | M |
+| RF-ADM-11 | The system must allow the administrator to **delete** an organizer. | S |
+| RF-ADM-12 | The system must allow the administrator to **grant and revoke the administrator role** for another user. | S |
 
-**CA RF-ADM-10**
-1. Un usuario bloqueado no puede iniciar sesión.
-2. Las sesiones activas de un usuario bloqueado se invalidan en un plazo no superior a P-09.
-3. Los eventos de un organizador bloqueado permanecen accesibles para los invitados (RN-09).
+**AC RF-ADM-10**
+1. A blocked user cannot sign in.
+2. The active sessions of a blocked user are invalidated within a period not exceeding P-09.
+3. The events of a blocked organizer remain accessible to guests (RN-09).
 
-**CA RF-ADM-11**
-1. Antes de eliminar, el sistema muestra los eventos asignados al organizador.
-2. El sistema no permite eliminar a un organizador con eventos asignados hasta que estos se reasignen o eliminen.
+**AC RF-ADM-11**
+1. Before deleting, the system shows the events assigned to the organizer.
+2. The system does not allow deleting an organizer with assigned events until those events are reassigned or deleted.
 
-**CA RF-ADM-12**
-1. El sistema no permite revocar el rol al último administrador.
-2. El primer administrador se aprovisiona fuera de la aplicación, como parte de la infraestructura.
+**AC RF-ADM-12**
+1. The system does not allow revoking the role from the last administrator.
+2. The first administrator is provisioned outside the application, as part of the infrastructure.
 
-### 5.3 Auditoría
+### 5.3 Audit
 
-| ID | Requerimiento | Prioridad |
+| ID | Requirement | Priority |
 |---|---|---|
-| RF-ADM-13 | El sistema debe **registrar** el autor y la fecha de la creación, eliminación y reasignación de eventos, del bloqueo y eliminación de usuarios y de los cambios de rol, y permitir que el administrador consulte dicho registro. | C |
+| RF-ADM-13 | The system must **record** the author and date of the creation, deletion and reassignment of events, the blocking and deletion of users and role changes, and allow the administrator to view that record. | C |
 
 ---
 
-## 6. Organizador
+## 6. Organizer
 
-### 6.1 Gestión de sus eventos
+### 6.1 Managing their events
 
-| ID | Requerimiento | Prioridad |
+| ID | Requirement | Priority |
 |---|---|---|
-| RF-ORG-01 | El sistema debe permitir que el organizador **consulte la lista de sus eventos**. | M |
-| RF-ORG-02 | El sistema debe permitir que el organizador **obtenga el enlace del evento** para compartirlo con los invitados. | M |
-| RF-ORG-03 | El sistema debe permitir que el organizador **descargue el código QR** del evento en formato imprimible (PNG y PDF). | M |
-| RF-ORG-04 | El sistema debe permitir que el organizador **abra o cierre las subidas** manualmente, con independencia de la ventana de subida. | S |
-| RF-ORG-05 | El sistema debe mostrar al organizador **estadísticas del evento**: fotos subidas, dispositivos participantes y fotos ocultas. | C |
+| RF-ORG-01 | The system must allow the organizer to **view the list of their events**. | M |
+| RF-ORG-02 | The system must allow the organizer to **get the event link** to share it with guests. | M |
+| RF-ORG-03 | The system must allow the organizer to **download the event's QR code** in a printable format (PNG and PDF). | M |
+| RF-ORG-04 | The system must allow the organizer to **open or close uploads** manually, regardless of the upload window. | S |
+| RF-ORG-05 | The system must show the organizer **event statistics**: uploaded photos, participating devices and hidden photos. | C |
 
-**CA RF-ORG-01:** la lista contiene únicamente los eventos asignados al correo verificado del organizador (RN-04).
+**AC RF-ORG-01:** the list contains only the events assigned to the organizer's verified email (RN-04).
 
-### 6.2 Personalización
+### 6.2 Customization
 
-| ID | Requerimiento | Prioridad |
+| ID | Requirement | Priority |
 |---|---|---|
-| RF-ORG-06 | El sistema debe permitir que el organizador **cambie el nombre** del evento. | M |
-| RF-ORG-07 | El sistema debe permitir que el organizador **suba o cambie la foto de portada** del evento. | S |
-| RF-ORG-08 | El sistema debe permitir que el organizador **elija el color principal** del evento. | S |
-| RF-ORG-09 | El sistema debe permitir que el organizador **defina un mensaje de bienvenida** para los invitados. | C |
-| RF-ORG-21 | El sistema debe permitir que el organizador **configure la visibilidad de la galería**: pública mediante el enlace, protegida con PIN o visible solo para el organizador. | S |
+| RF-ORG-06 | The system must allow the organizer to **change the event name**. | M |
+| RF-ORG-07 | The system must allow the organizer to **upload or change the event's cover photo**. | S |
+| RF-ORG-08 | The system must allow the organizer to **choose the event's main color**. | S |
+| RF-ORG-09 | The system must allow the organizer to **set a welcome message** for guests. | C |
+| RF-ORG-21 | The system must allow the organizer to **configure the gallery visibility**: public through the link, PIN-protected or visible only to the organizer. | S |
 
-**CA RF-ORG-08:** el color se selecciona de una paleta predefinida cuyos colores cumplen un contraste mínimo de 4.5:1 con el texto (WCAG 2.1 nivel AA).
+**AC RF-ORG-08:** the color is selected from a predefined palette whose colors meet a minimum contrast of 4.5:1 with the text (WCAG 2.1 level AA).
 
-**CA RF-ORG-21**
-1. La visibilidad por defecto es pública mediante el enlace.
-2. La configuración de visibilidad no afecta a la subida de fotos.
-3. El organizador puede cambiar el PIN en cualquier momento.
+**AC RF-ORG-21**
+1. The default visibility is public through the link.
+2. The visibility setting does not affect photo uploads.
+3. The organizer can change the PIN at any time.
 
-### 6.3 Consulta y descarga de fotos
+### 6.3 Viewing and downloading photos
 
-| ID | Requerimiento | Prioridad |
+| ID | Requirement | Priority |
 |---|---|---|
-| RF-ORG-10 | El sistema debe permitir que el organizador **consulte todas las fotos** de su evento, incluidas las ocultas. | M |
-| RF-ORG-11 | El sistema debe permitir que el organizador **vea cada foto en tamaño completo** y navegue entre ellas. | M |
-| RF-ORG-12 | El sistema debe permitir que el organizador **filtre y agrupe las fotos por quien las subió**. | S |
-| RF-ORG-13 | El sistema debe permitir que el organizador **descargue una foto individual** en su resolución original. | M |
-| RF-ORG-14 | El sistema debe permitir que el organizador **descargue todas las fotos del evento** en un archivo ZIP. | M |
-| RF-ORG-15 | El sistema debe permitir que el organizador **seleccione varias fotos** y las descargue en un archivo ZIP. | C |
+| RF-ORG-10 | The system must allow the organizer to **view all photos** of their event, including hidden ones. | M |
+| RF-ORG-11 | The system must allow the organizer to **view each photo at full size** and navigate between them. | M |
+| RF-ORG-12 | The system must allow the organizer to **filter and group photos by uploader**. | S |
+| RF-ORG-13 | The system must allow the organizer to **download an individual photo** at its original resolution. | M |
+| RF-ORG-14 | The system must allow the organizer to **download all of the event's photos** in a ZIP file. | M |
+| RF-ORG-15 | The system must allow the organizer to **select several photos** and download them in a ZIP file. | C |
 
-**CA RF-ORG-10:** las fotos ocultas se distinguen visualmente de las visibles.
+**AC RF-ORG-10:** hidden photos are visually distinguished from visible ones.
 
-**CA RF-ORG-11:** la vista de cuadrícula muestra miniaturas; la imagen original se solicita únicamente al abrir una foto.
+**AC RF-ORG-11:** the grid view shows thumbnails; the original image is requested only when a photo is opened.
 
-**CA RF-ORG-12**
-1. Las fotos se agrupan por dispositivo.
-2. Cada grupo muestra el nombre indicado por el invitado; si no lo indicó, se muestra una etiqueta genérica.
-3. Dos dispositivos que indiquen el mismo nombre se presentan como grupos distintos.
+**AC RF-ORG-12**
+1. Photos are grouped by device.
+2. Each group shows the name provided by the guest; if none was provided, a generic label is shown.
+3. Two devices that provide the same name are presented as separate groups.
 
-**CA RF-ORG-14**
-1. Al solicitar la descarga, el sistema genera el archivo mediante un proceso en segundo plano; el organizador no necesita mantener la página abierta mientras se genera.
-2. El archivo generado se almacena en Amazon S3.
-3. La página del evento muestra el estado de la generación (en curso, disponible o fallida) y, cuando el archivo está disponible, un enlace para descargarlo.
-4. El enlace de descarga es una URL firmada y temporal que caduca conforme a P-07 (RNF-SEG-05).
-5. El sistema no envía el archivo ni el enlace por correo.
-6. Si las fotos del evento no han cambiado desde la última generación, el sistema reutiliza el archivo existente.
-7. El número de generaciones por evento está limitado por P-08 (RN-08).
+**AC RF-ORG-14**
+1. When the download is requested, the system generates the file in a background process; the organizer does not need to keep the page open while it is generated.
+2. The generated file is stored in Amazon S3.
+3. The event page shows the generation status (in progress, available or failed) and, when the file is available, a link to download it.
+4. The download link is a signed, temporary URL that expires in accordance with P-07 (RNF-SEG-05).
+5. The system does not send the file or the link by email.
+6. If the event's photos have not changed since the last generation, the system reuses the existing file.
+7. The number of generations per event is limited by P-08 (RN-08).
 
-### 6.4 Moderación
+### 6.4 Moderation
 
-| ID | Requerimiento | Prioridad |
+| ID | Requirement | Priority |
 |---|---|---|
-| RF-ORG-16 | El sistema debe permitir que el organizador **oculte** una foto de la galería. | M |
-| RF-ORG-17 | El sistema debe permitir que el organizador **vuelva a mostrar** una foto oculta. | M |
-| RF-ORG-18 | El sistema debe permitir que el organizador **elimine** una foto. | M |
-| RF-ORG-19 | El sistema debe permitir que el organizador **oculte o elimine todas las fotos de un dispositivo** en una sola acción. | S |
-| RF-ORG-20 | El sistema debe permitir que el organizador elija entre **moderación posterior**, en la que las fotos se publican al subirse, y **moderación previa**, en la que se publican tras su aprobación. | C |
+| RF-ORG-16 | The system must allow the organizer to **hide** a photo from the gallery. | M |
+| RF-ORG-17 | The system must allow the organizer to **show again** a hidden photo. | M |
+| RF-ORG-18 | The system must allow the organizer to **delete** a photo. | M |
+| RF-ORG-19 | The system must allow the organizer to **hide or delete all photos from a device** in a single action. | S |
+| RF-ORG-20 | The system must allow the organizer to choose between **post-moderation**, in which photos are published when uploaded, and **pre-moderation**, in which they are published after approval. | C |
 
-**CA RF-ORG-18**
-1. El sistema solicita confirmación antes de eliminar.
-2. La foto deja de ser visible de inmediato y se elimina conforme a RN-07.
-3. La eliminación no restituye el cupo del invitado (RN-03).
+**AC RF-ORG-18**
+1. The system asks for confirmation before deleting.
+2. The photo stops being visible immediately and is deleted in accordance with RN-07.
+3. Deletion does not restore the guest's quota (RN-03).
 
-**CA RF-ORG-20:** el modo por defecto es moderación posterior.
+**AC RF-ORG-20:** the default mode is post-moderation.
 
 ---
 
-## 7. Invitado
+## 7. Guest
 
-| ID | Requerimiento | Prioridad |
+| ID | Requirement | Priority |
 |---|---|---|
-| RF-INV-01 | El sistema debe permitir que el invitado **acceda a la página del evento** desde el código QR o el enlace **sin iniciar sesión**. | M |
-| RF-INV-02 | El sistema debe permitir que el invitado **suba fotos desde la galería de su dispositivo o tomándolas con la cámara**. | M |
-| RF-INV-03 | El sistema debe **limitar el número de fotos** que un dispositivo puede subir a un evento (RN-01). | M |
-| RF-INV-04 | El sistema debe mostrar al invitado **el número de fotos que le quedan** por subir. | M |
-| RF-INV-05 | El sistema debe permitir que el invitado **seleccione varias fotos a la vez**, debe mostrar el **progreso** de cada subida y debe permitir **reintentar** una subida fallida. | M |
-| RF-INV-06 | El sistema debe permitir que el invitado **indique su nombre** para identificar sus fotos. | S |
-| RF-INV-07 | El sistema debe permitir que el invitado **consulte la galería del evento**. | M |
-| RF-INV-08 | El sistema debe permitir que el invitado **consulte las fotos que subió** desde su dispositivo. | S |
-| RF-INV-09 | *Retirado.* | — |
-| RF-INV-10 | El sistema debe permitir que el invitado **reporte una foto** como inapropiada al organizador. | C |
-| RF-INV-11 | El sistema debe informar al invitado cuando el evento **no existe**, **está cerrado** o **la ventana de subida ha finalizado**. | M |
-| RF-INV-12 | El sistema debe solicitar al invitado la **aceptación de los términos de uso** antes de su primera subida. | S |
+| RF-INV-01 | The system must allow the guest to **access the event page** from the QR code or the link **without signing in**. | M |
+| RF-INV-02 | The system must allow the guest to **upload photos from their device's gallery or by taking them with the camera**. | M |
+| RF-INV-03 | The system must **limit the number of photos** a device can upload to an event (RN-01). | M |
+| RF-INV-04 | The system must show the guest **the number of photos they have left** to upload. | M |
+| RF-INV-05 | The system must allow the guest to **select several photos at once**, must show the **progress** of each upload and must allow **retrying** a failed upload. | M |
+| RF-INV-06 | The system must allow the guest to **provide their name** to identify their photos. | S |
+| RF-INV-07 | The system must allow the guest to **view the event gallery**. | M |
+| RF-INV-08 | The system must allow the guest to **view the photos they uploaded** from their device. | S |
+| RF-INV-09 | *Retired.* | — |
+| RF-INV-10 | The system must allow the guest to **report a photo** as inappropriate to the organizer. | C |
+| RF-INV-11 | The system must inform the guest when the event **does not exist**, **is closed** or **the upload window has ended**. | M |
+| RF-INV-12 | The system must ask the guest to **accept the terms of use** before their first upload. | S |
 
-**CA RF-INV-03**
-1. El límite se valida en el servidor; el sistema no autoriza nuevas subidas a un dispositivo que alcanzó el límite.
-2. Si el invitado selecciona más fotos de las que le quedan, el sistema se lo informa antes de iniciar la subida.
-3. El cupo se reserva al autorizar cada subida. Si la subida no se completa en el plazo P-10, el cupo reservado se libera.
+**AC RF-INV-03**
+1. The limit is validated on the server; the system does not authorize new uploads for a device that has reached the limit.
+2. If the guest selects more photos than they have left, the system informs them before starting the upload.
+3. Quota is reserved when each upload is authorized. If the upload is not completed within period P-10, the reserved quota is released.
 
-**CA RF-INV-04:** el número se muestra antes de seleccionar fotos y se actualiza tras cada subida completada.
+**AC RF-INV-04:** the number is shown before photos are selected and is updated after each completed upload.
 
-**CA RF-INV-06**
-1. El nombre es opcional y admite hasta 40 caracteres.
-2. El nombre se recuerda en el dispositivo para el mismo evento y puede modificarse.
+**AC RF-INV-06**
+1. The name is optional and accepts up to 40 characters.
+2. The name is remembered on the device for the same event and can be changed.
 
-**CA RF-INV-07**
-1. La galería muestra únicamente fotos visibles, ni ocultas ni eliminadas.
-2. La galería muestra miniaturas y carga las fotos de forma progresiva.
-3. Si la galería está protegida con PIN (RF-ORG-21), el sistema solicita el PIN antes de mostrar las fotos y limita los intentos fallidos conforme a P-11.
-4. Si la galería es visible solo para el organizador, el invitado no puede consultarla.
+**AC RF-INV-07**
+1. The gallery shows only visible photos, neither hidden nor deleted.
+2. The gallery shows thumbnails and loads photos progressively.
+3. If the gallery is PIN-protected (RF-ORG-21), the system asks for the PIN before showing the photos and limits failed attempts in accordance with P-11.
+4. If the gallery is visible only to the organizer, the guest cannot view it.
 
-**CA RF-INV-11:** cuando la ventana de subida ha finalizado y el evento está en estado Cerrado, la galería continúa disponible según su configuración de visibilidad.
+**AC RF-INV-11:** when the upload window has ended and the event is in the Closed state, the gallery remains available according to its visibility setting.
 
 ---
 
-## 8. Sistema
+## 8. System
 
-Comportamiento que el sistema ejecuta sin intervención directa de un usuario.
+Behavior the system performs without direct user intervention.
 
-| ID | Requerimiento | Prioridad |
+| ID | Requirement | Priority |
 |---|---|---|
-| RF-SIS-01 | El sistema debe **aceptar únicamente imágenes** en formato JPEG, PNG, WebP o HEIC, con un tamaño no superior a P-02. | M |
-| RF-SIS-02 | El sistema debe **generar una miniatura** en formato WebP de cada foto subida. | M |
-| RF-SIS-03 | El sistema debe **corregir la orientación** de las imágenes según sus metadatos EXIF y **eliminar los metadatos de ubicación** de las imágenes mostradas a terceros. | S |
-| RF-SIS-04 | El sistema debe generar el enlace de cada evento con un **identificador no secuencial y no predecible**. | M |
-| RF-SIS-05 | El sistema debe **eliminar automáticamente las fotos** de un evento una vez transcurrido el plazo de retención P-05 desde la fecha del evento. | S |
-| RF-SIS-06 | El sistema debe **notificar por correo al organizador** cuando se le asigna un evento y antes de la eliminación automática de sus fotos. | S |
-| RF-SIS-07 | El sistema debe **mostrar las fotos nuevas** en la galería sin que el invitado recargue la página manualmente. | C |
+| RF-SIS-01 | The system must **accept only images** in JPEG, PNG, WebP or HEIC format, with a size not exceeding P-02. | M |
+| RF-SIS-02 | The system must **generate a thumbnail** in WebP format for each uploaded photo. | M |
+| RF-SIS-03 | The system must **correct the orientation** of images according to their EXIF metadata and **remove location metadata** from images shown to third parties. | S |
+| RF-SIS-04 | The system must generate each event's link with a **non-sequential, unpredictable identifier**. | M |
+| RF-SIS-05 | The system must **automatically delete the photos** of an event once the retention period P-05 has elapsed since the event date. | S |
+| RF-SIS-06 | The system must **notify the organizer by email** when an event is assigned to them and before the automatic deletion of their photos. | S |
+| RF-SIS-07 | The system must **show new photos** in the gallery without the guest manually reloading the page. | C |
 
-**CA RF-SIS-01**
-1. El sistema valida el tipo real del contenido, no solo la extensión o el tipo declarado por el cliente.
-2. Los archivos que no cumplen la validación se descartan y no se muestran en la galería.
+**AC RF-SIS-01**
+1. The system validates the actual content type, not just the extension or the type declared by the client.
+2. Files that fail validation are discarded and not shown in the gallery.
 
-**CA RF-SIS-05:** el aviso previo al organizador se envía con la antelación P-06.
+**AC RF-SIS-05:** the advance notice to the organizer is sent with the lead time P-06.
 
-**CA RF-SIS-07:** la galería se actualiza al menos cada 30 segundos mientras está abierta.
+**AC RF-SIS-07:** the gallery refreshes at least every 30 seconds while it is open.
 
 ---
 
-## 9. Fuera de alcance
+## 9. Out of scope
 
-Las siguientes capacidades no forman parte de esta versión (prioridad W):
+The following capabilities are not part of this version (priority W):
 
-| Capacidad | Observación |
+| Capability | Note |
 |---|---|
-| Subida de videos | — |
-| Pagos y planes de suscripción | — |
-| Registro autónomo de organizadores | Los eventos se asignan únicamente por un administrador. |
-| Comentarios y reacciones en las fotos | — |
-| Edición de fotos | Incluye filtros y recortes. |
-| Reconocimiento facial y agrupación automática por persona | — |
-| Aplicación móvil nativa | La aplicación es web y adaptable a dispositivos móviles. |
-| Eliminación de fotos por parte del invitado | Requerimiento RF-INV-09 retirado. |
+| Video uploads | — |
+| Payments and subscription plans | — |
+| Self-service organizer registration | Events are assigned only by an administrator. |
+| Comments and reactions on photos | — |
+| Photo editing | Includes filters and cropping. |
+| Facial recognition and automatic grouping by person | — |
+| Native mobile app | The application is web-based and responsive on mobile devices. |
+| Photo deletion by the guest | Requirement RF-INV-09 retired. |

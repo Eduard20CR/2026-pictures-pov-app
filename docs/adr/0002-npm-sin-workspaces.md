@@ -1,57 +1,57 @@
-# 0002. npm sin workspaces
+# 0002. npm without workspaces
 
-- **Estado:** Aceptado
-- **Fecha:** 2026-10-08
+- **Status:** Accepted
+- **Date:** 2026-10-08
 
-## Contexto y planteamiento del problema
+## Context and problem statement
 
-El repositorio estaba previsto como un monorepo gestionado con pnpm y workspaces, con un paquete `packages/shared` que contendría los tipos generados desde el contrato OpenAPI para compartirlos entre el frontend y el backend.
+The repository was planned as a monorepo managed with pnpm and workspaces, with a `packages/shared` package containing the types generated from the OpenAPI contract so they could be shared between the frontend and the backend.
 
-A raíz de la [decisión 0001](0001-backend-spring-boot-en-lambda.md), el backend pasa a desarrollarse con Spring Boot y se construye con Gradle. En consecuencia, `apps/web` queda como el único proyecto JavaScript del repositorio y el backend ya no consume tipos de TypeScript.
+As a result of [decision 0001](0001-backend-spring-boot-en-lambda.md), the backend is now developed with Spring Boot and built with Gradle. Consequently, `apps/web` becomes the only JavaScript project in the repository and the backend no longer consumes TypeScript types.
 
-## Factores de decisión
+## Decision drivers
 
-- Número de proyectos JavaScript en el repositorio.
-- Simplicidad de la configuración local y de CI.
-- Mantenimiento de un único punto de generación de los tipos del cliente de la API.
+- Number of JavaScript projects in the repository.
+- Simplicity of the local and CI configuration.
+- Keeping a single place where the API client types are generated.
 
-## Opciones consideradas
+## Considered options
 
-1. Mantener pnpm con workspaces y el paquete `packages/shared`.
-2. Usar npm sin workspaces y generar los tipos dentro de `apps/web`.
+1. Keep pnpm with workspaces and the `packages/shared` package.
+2. Use npm without workspaces and generate the types inside `apps/web`.
 
-## Decisión
+## Decision
 
-Se elige la **opción 2: npm sin workspaces**.
+**Option 2 is chosen: npm without workspaces.**
 
-- `apps/web` se gestiona con npm.
-- Se elimina el paquete `packages/shared`.
-- Los tipos del cliente de la API se generan con openapi-typescript a partir del contrato OpenAPI y se ubican en `apps/web/src/api/`.
+- `apps/web` is managed with npm.
+- The `packages/shared` package is removed.
+- The API client types are generated with openapi-typescript from the OpenAPI contract and placed in `apps/web/src/api/`.
 
-## Ventajas y desventajas de las opciones
+## Pros and cons of the options
 
-### Opción 1: pnpm con workspaces y `packages/shared`
+### Option 1: pnpm with workspaces and `packages/shared`
 
-- A favor: facilita compartir código si en el futuro se incorporan más proyectos JavaScript.
-- En contra: añade una herramienta y una configuración de workspaces que no aportan valor con un único proyecto JavaScript; el paquete compartido no tiene más consumidor que el frontend.
+- Pro: makes it easier to share code if more JavaScript projects are added in the future.
+- Con: adds a tool and a workspace configuration that bring no value with a single JavaScript project; the shared package has no consumer other than the frontend.
 
-### Opción 2: npm sin workspaces
+### Option 2: npm without workspaces
 
-- A favor: utiliza el gestor incluido con Node.js, sin instalación adicional; reduce la configuración del repositorio y de CI; los tipos se ubican junto al único código que los consume.
-- En contra: si en el futuro se añade otro proyecto JavaScript que necesite los mismos tipos, será necesario reconsiderar la estructura.
+- Pro: uses the package manager bundled with Node.js, with no additional installation; reduces the repository and CI configuration; the types live next to the only code that consumes them.
+- Con: if another JavaScript project that needs the same types is added in the future, the structure will need to be reconsidered.
 
-## Consecuencias
+## Consequences
 
-### Positivas
+### Positive
 
-- La configuración del repositorio y del pipeline de CI para el frontend es más sencilla.
-- Los tipos de la API se mantienen junto al código que los utiliza.
+- The repository and CI pipeline configuration for the frontend is simpler.
+- The API types are kept next to the code that uses them.
 
-### Negativas y riesgos
+### Negative and risks
 
-- Los tipos generados en `apps/web/src/api/` deben regenerarse cada vez que cambie el contrato OpenAPI producido por el backend; el proceso de CI debe detectar desfases entre ambos.
-- La incorporación de un nuevo proyecto JavaScript obligaría a revisar esta decisión.
+- The types generated in `apps/web/src/api/` must be regenerated every time the OpenAPI contract produced by the backend changes; the CI process must detect mismatches between the two.
+- Adding a new JavaScript project would require revisiting this decision.
 
-## Decisiones relacionadas
+## Related decisions
 
-- [0001. Backend con Spring Boot en AWS Lambda](0001-backend-spring-boot-en-lambda.md)
+- [0001. Spring Boot backend on AWS Lambda](0001-backend-spring-boot-en-lambda.md)
