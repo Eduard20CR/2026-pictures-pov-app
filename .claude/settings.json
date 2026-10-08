@@ -1,0 +1,9 @@
+{
+    "permissions": {
+        "deny": [
+            "Read(legacy/**)",
+            "Read(/docs/c4_model.excalidraw)",
+            "Read(*.log)"
+        ]
+    }
+}
