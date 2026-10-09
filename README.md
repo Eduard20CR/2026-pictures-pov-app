@@ -64,23 +64,28 @@ flowchart LR
     U[Browser] --> CF[CloudFront + S3<br/>Frontend]
     U -->|API| APIGW[API Gateway]
     APIGW --> L[Lambda<br/>Spring Boot]
-    L --> DB[(PostgreSQL<br/>RDS)]
+    L --> DB[(Aurora Serverless v2<br/>PostgreSQL)]
     L -->|Presigned URL| U
     U -->|Direct upload| S3[(S3<br/>Photos)]
     S3 -->|Event| T[Lambda<br/>Thumbnails]
     T --> S3
+    L -->|ZIP request| Q[SQS]
+    Q --> Z[Lambda<br/>ZIP generation]
+    Z --> S3
+    Z --> DB
     U -->|Sign-in| COG[Cognito]
 ```
 
 | Component | Technology |
 |---|---|
-| Frontend | Single-page application with React, Vite, TypeScript, React Router, TanStack Query and Tailwind, managed with npm and served from Amazon S3 and Amazon CloudFront. API client types are generated with openapi-typescript. See [ADR 0002](docs/adr/0002-npm-sin-workspaces.md). |
-| Backend | API with Spring Boot 3 and Java 21, built with Gradle and running on AWS Lambda with SnapStart behind Amazon API Gateway (HTTP API). OpenAPI contract generated with springdoc-openapi. See [ADR 0001](docs/adr/0001-backend-spring-boot-en-lambda.md). |
-| Database | PostgreSQL on Amazon RDS. |
-| Authentication | Amazon Cognito with managed sign-in (Google and email/password) and an administrators group. Guests do not authenticate. |
+| Frontend | Single-page application with React, Vite, TypeScript, React Router, TanStack Query and Tailwind, managed with npm and served from Amazon S3 and Amazon CloudFront. API client types are generated with openapi-typescript. See [ADR 0002](docs/adr/0002-npm-sin-workspaces.md) and [ADR 0003](docs/adr/0003-frontend-react.md). |
+| Backend | API with Spring Boot 3 and Java 21, built with Gradle and running on AWS Lambda with SnapStart behind Amazon API Gateway (HTTP API). OpenAPI contract generated with springdoc-openapi. See [ADR 0001](docs/adr/0001-backend-spring-boot-en-lambda.md) and [ADR 0005](docs/adr/0005-compute-aws-lambda.md). |
+| Database | Amazon Aurora Serverless v2 (PostgreSQL), scaling to 0 ACU when idle. See [ADR 0004](docs/adr/0004-database-aurora-serverless-v2.md). |
+| Authentication | Amazon Cognito with managed sign-in (email/password, with Google planned) and an administrators group. Guests do not authenticate. See [ADR 0006](docs/adr/0006-authentication-amazon-cognito.md). |
 | Photo storage | Amazon S3. The browser uploads photos directly using presigned URLs, without the backend receiving the files. |
 | Image processing | Lambda function triggered by S3 that generates WebP thumbnails. |
-| Infrastructure | Terraform with reusable modules, development and production environments in separate AWS accounts and remote state in S3. |
+| ZIP generation | Lambda function triggered through Amazon SQS that generates the event's ZIP in the background and stores it in Amazon S3. See [ADR 0008](docs/adr/0008-background-zip-generation.md). |
+| Infrastructure | Terraform with reusable modules, development and production environments in separate AWS accounts and remote state in HCP Terraform. See [ADR 0007](docs/adr/0007-infrastructure-as-code-terraform.md). |
 | CI/CD | GitHub Actions with OIDC authentication to AWS and independent deployment per component. |
 
 Architecture decisions and their rationale are recorded in [docs/adr](docs/adr/README.md).

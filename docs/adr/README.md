@@ -8,6 +8,12 @@ This directory contains the project's relevant architecture decisions in [MADR](
 |---|---|---|---|
 | [0001](0001-backend-spring-boot-en-lambda.md) | Spring Boot backend on AWS Lambda | Accepted | 2026-10-08 |
 | [0002](0002-npm-sin-workspaces.md) | npm without workspaces | Accepted | 2026-10-08 |
+| [0003](0003-frontend-react.md) | React frontend | Accepted | 2026-10-09 |
+| [0004](0004-database-aurora-serverless-v2.md) | Aurora Serverless v2 database | Accepted | 2026-10-09 |
+| [0005](0005-compute-aws-lambda.md) | Backend compute on AWS Lambda | Accepted | 2026-10-09 |
+| [0006](0006-authentication-amazon-cognito.md) | Authentication with Amazon Cognito | Accepted | 2026-10-09 |
+| [0007](0007-infrastructure-as-code-terraform.md) | Infrastructure as code with Terraform | Accepted | 2026-10-09 |
+| [0008](0008-background-zip-generation.md) | Background ZIP generation | Accepted | 2026-10-09 |
 
 ## Conventions
 
