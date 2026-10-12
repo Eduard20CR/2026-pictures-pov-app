@@ -12,7 +12,7 @@ The project is in the documentation phase. `apps/` and `infra/` exist but are em
 
 The full picture (diagram, stack table, folder tree) is in `README.md`. Points that require reading several documents together:
 
-- **Two independent toolchains, no workspaces.** `apps/api` is Spring Boot 3 + Java 21 with Gradle; `apps/web` is React + Vite + TypeScript with npm. There is no `packages/shared` and no pnpm.
+- **Two independent toolchains, no workspaces.** `apps/api` is Spring Boot 3 + Java 21 with Maven (via the Maven Wrapper, `mvnw`); `apps/web` is React + Vite + TypeScript with npm. There is no `packages/shared` and no pnpm.
 - **The OpenAPI contract is the boundary between them.** The backend generates it from the code with springdoc-openapi (RNF-OPE-06) and the frontend generates its types with openapi-typescript in `apps/web/src/api/`. An API change means regenerating those types.
 - **Backend on AWS Lambda with SnapStart** behind API Gateway HTTP API (via `aws-serverless-java-container-springboot3`). PostgreSQL connections must be opened after the snapshot is restored, never during the captured initialization.
 - **Photos never go through the backend.** The browser uploads directly to S3 with presigned URLs; an S3-triggered Lambda generates WebP thumbnails. Photos and ZIPs are only exposed through temporary signed links (RNF-SEG-05).

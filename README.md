@@ -79,7 +79,7 @@ flowchart LR
 | Component | Technology |
 |---|---|
 | Frontend | Single-page application with React, Vite, TypeScript, React Router, TanStack Query and Tailwind, managed with npm and served from Amazon S3 and Amazon CloudFront. API client types are generated with openapi-typescript. See [ADR 0002](docs/adr/0002-npm-sin-workspaces.md) and [ADR 0003](docs/adr/0003-frontend-react.md). |
-| Backend | API with Spring Boot 3 and Java 21, built with Gradle and running on AWS Lambda with SnapStart behind Amazon API Gateway (HTTP API). OpenAPI contract generated with springdoc-openapi. See [ADR 0001](docs/adr/0001-backend-spring-boot-en-lambda.md) and [ADR 0005](docs/adr/0005-compute-aws-lambda.md). |
+| Backend | API with Spring Boot 3 and Java 21, built with Maven and running on AWS Lambda with SnapStart behind Amazon API Gateway (HTTP API). OpenAPI contract generated with springdoc-openapi. See [ADR 0001](docs/adr/0001-backend-spring-boot-en-lambda.md), [ADR 0005](docs/adr/0005-compute-aws-lambda.md) and [ADR 0009](docs/adr/0009-backend-build-tool-maven.md). |
 | Database | Amazon Aurora Serverless v2 (PostgreSQL), scaling to 0 ACU when idle. See [ADR 0004](docs/adr/0004-database-aurora-serverless-v2.md). |
 | Authentication | Amazon Cognito with managed sign-in (email/password, with Google planned) and an administrators group. Guests do not authenticate. See [ADR 0006](docs/adr/0006-authentication-amazon-cognito.md). |
 | Photo storage | Amazon S3. The browser uploads photos directly using presigned URLs, without the backend receiving the files. |
@@ -97,7 +97,7 @@ Architecture decisions and their rationale are recorded in [docs/adr](docs/adr/R
 ├── apps/
 │   ├── web/          # Frontend (React, npm)
 │   │   └── src/api/  # Client types generated from the OpenAPI contract
-│   └── api/          # Backend (Spring Boot, Gradle)
+│   └── api/          # Backend (Spring Boot, Maven)
 ├── infra/            # Infrastructure as code (Terraform)
 └── docs/             # Project documentation
 ```
