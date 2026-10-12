@@ -1,3 +1,5 @@
+https://mermaid.ai/live
+
 erDiagram
     
 USER |o..o{ EVENT : "owns"
