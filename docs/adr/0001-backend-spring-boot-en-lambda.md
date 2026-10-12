@@ -2,6 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-10-08
+- **Note:** The build tool defined in this decision is superseded by [0009](0009-backend-build-tool-maven.md).
 
 ## Context and problem statement
 

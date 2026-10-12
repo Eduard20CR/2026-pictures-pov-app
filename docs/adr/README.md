@@ -14,6 +14,7 @@ This directory contains the project's relevant architecture decisions in [MADR](
 | [0006](0006-authentication-amazon-cognito.md) | Authentication with Amazon Cognito | Accepted | 2026-10-09 |
 | [0007](0007-infrastructure-as-code-terraform.md) | Infrastructure as code with Terraform | Accepted | 2026-10-09 |
 | [0008](0008-background-zip-generation.md) | Background ZIP generation | Accepted | 2026-10-09 |
+| [0009](0009-backend-build-tool-maven.md) | Maven as the backend build tool | Accepted | 2026-10-12 |
 
 ## Conventions
 
