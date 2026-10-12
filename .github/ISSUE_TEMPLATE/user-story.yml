@@ -1,0 +1,29 @@
+name: User story
+description: Functionality that delivers value to a user (guest, organizer or administrator).
+labels: ["type: story"]
+body:
+  - type: textarea
+    id: story
+    attributes:
+      label: User story
+      description: "As a <role>, I want <capability>, so that <benefit>."
+      value: "As a **<role>**, I want <capability>, so that <benefit>."
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Verifiable conditions, preferably in Given / When / Then form.
+      value: "- [ ] **Given** <context>, **when** <action>, **then** <result>."
+    validations:
+      required: true
+  - type: input
+    id: references
+    attributes:
+      label: References
+      description: Requirement, business rule or ADR identifiers (e.g. RF-INV-03, RN-01, ADR 0005).
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
