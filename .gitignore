@@ -57,3 +57,9 @@ Backups.backupdb
 .MobileBackups.trash
 MobileBackups.trash
 tmbootpicker.efi
+
+
+*.tfstate
+*.tfstate.*
+**/.terraform/
+*tfplan
