@@ -57,3 +57,33 @@ Backups.backupdb
 .MobileBackups.trash
 MobileBackups.trash
 tmbootpicker.efi
+
+
+# Terraform: local directories
+.terraform/
+
+# Terraform: state files (may contain secrets)
+*.tfstate
+*.tfstate.*
+
+# Terraform: saved plans
+tfplan
+*.tfplan
+
+# Terraform: crash logs
+crash.log
+crash.*.log
+
+# Terraform: variable files (may contain secrets)
+*.tfvars
+*.tfvars.json
+
+# Terraform: local overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform: CLI config
+.terraformrc
+terraform.rc

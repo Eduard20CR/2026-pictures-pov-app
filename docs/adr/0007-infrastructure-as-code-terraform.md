@@ -1,5 +1,6 @@
 # 0007. Infrastructure as code with Terraform
 
+- **Status:** Accepted; the state decision is superseded by [0011](0011-terraform-state-amazon-s3.md)
 - **Status:** Accepted; the account layout is superseded by [0012](0012-single-aws-account.md)
 - **Date:** 2026-10-09
 
@@ -60,4 +61,6 @@ The main reason is that Terraform is the most widely used infrastructure as code
 ## Related decisions
 
 - [0005. Backend compute on AWS Lambda](0005-compute-aws-lambda.md)
+- [0011. Terraform state in Amazon S3](0011-terraform-state-amazon-s3.md)
 - [0012. Single AWS account for development and production](0012-single-aws-account.md)
+
