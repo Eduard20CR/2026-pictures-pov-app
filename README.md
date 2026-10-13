@@ -85,7 +85,7 @@ flowchart LR
 | Photo storage | Amazon S3. The browser uploads photos directly using presigned URLs, without the backend receiving the files. |
 | Image processing | Lambda function triggered by S3 that generates WebP thumbnails. |
 | ZIP generation | Lambda function triggered through Amazon SQS that generates the event's ZIP in the background and stores it in Amazon S3. See [ADR 0008](docs/adr/0008-background-zip-generation.md). |
-| Infrastructure | Terraform with reusable modules, development and production environments in separate AWS accounts and remote state in Amazon S3. See [ADR 0007](docs/adr/0007-infrastructure-as-code-terraform.md) and [ADR 0011](docs/adr/0011-terraform-state-amazon-s3.md). |
+| Infrastructure | Terraform with reusable modules, development and production environments in a single AWS account and remote state in Amazon S3. See [ADR 0007](docs/adr/0007-infrastructure-as-code-terraform.md), [ADR 0011](docs/adr/0011-terraform-state-amazon-s3.md) and [ADR 0012](docs/adr/0012-single-aws-account.md). |
 | CI/CD | GitHub Actions with OIDC authentication to AWS and independent deployment per component. |
 
 Architecture decisions and their rationale are recorded in [docs/adr](docs/adr/README.md).

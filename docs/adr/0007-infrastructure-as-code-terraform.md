@@ -1,18 +1,16 @@
 # 0007. Infrastructure as code with Terraform
 
-- **Status:** Accepted; the state decision is superseded by [0011](0011-terraform-state-amazon-s3.md)
-- **Status:** Accepted; the account layout is superseded by [0012](0012-single-aws-account.md)
+- **Status:** Accepted
 - **Date:** 2026-10-09
 
 ## Context and problem statement
 
-All infrastructure must be defined as code and deployed without manual changes (RNF-OPE-01). The project has development and production environments in separate AWS accounts and is deployed from GitHub Actions. An infrastructure as code tool must be chosen, together with the place where the infrastructure state is stored.
+All infrastructure must be defined as code and deployed without manual changes (RNF-OPE-01), from GitHub Actions, for a development and a production environment. Which tool should be used?
 
 ## Decision drivers
 
 - Job market demand for the tool.
-- Reuse of definitions across environments.
-- Reliable, shared storage of the infrastructure state on a managed platform.
+- Reuse of the same definitions in both environments.
 
 ## Considered options
 
@@ -22,45 +20,25 @@ All infrastructure must be defined as code and deployed without manual changes (
 
 ## Decision
 
-**Option 1 is chosen: Terraform**, with reusable modules and one configuration per environment in `infra/`.
+**Terraform**, with reusable modules and one configuration per environment in `infra/`. It is the most widely used tool in the job market, and its modules let both environments share the same definitions.
 
-The main reason is that Terraform is the most widely used infrastructure as code tool in the job market, and its modules allow the same definitions to be reused in the development and production environments.
-
-**State.** The state is stored in **HCP Terraform** (formerly Terraform Cloud), HashiCorp's managed platform for Terraform, with one workspace per environment. It keeps the state on a reliable platform with versioning, encryption and locking included, and is the option most closely aligned with industry practice for teams using Terraform.
+Where the state is stored is decided in [ADR 0011](0011-terraform-state-amazon-s3.md), and how the environments are laid out in AWS in [ADR 0012](0012-single-aws-account.md).
 
 ## Pros and cons of the options
 
-### Option 1: Terraform
-
-- Pro: highest job market demand; reusable modules; declarative language; the plan shows changes before they are applied.
-- Con: the state must be stored and protected outside the tool itself.
-
-### Option 2: AWS CloudFormation
-
-- Pro: native to AWS; AWS manages the state.
-- Con: verbose templates and lower job market value outside AWS.
-
-### Option 3: AWS CDK
-
-- Pro: infrastructure defined in a general-purpose programming language.
-- Con: generates CloudFormation underneath, adding a layer of abstraction that makes errors harder to diagnose.
+| Option | Pro | Con |
+|---|---|---|
+| Terraform | Highest market demand; reusable modules; `plan` shows changes before applying them | The state must be stored outside the tool |
+| CloudFormation | Native to AWS; AWS manages the state | Verbose templates; little value outside AWS |
+| CDK | Infrastructure in a general-purpose language | Generates CloudFormation underneath, which makes errors harder to diagnose |
 
 ## Consequences
 
-### Positive
-
-- The infrastructure is versioned, reviewable and reproducible across environments, in compliance with RNF-OPE-01.
-- The team gains experience with a tool in high job market demand.
-
-### Negative and risks
-
-- **External dependency.** The state depends on a platform outside AWS; access to HCP Terraform must be protected, since it grants control over the infrastructure.
-- **Access to AWS.** Each workspace must be configured to access its AWS account, preferably with dynamic credentials (OIDC) instead of long-lived keys.
-- **Plan limits.** The limits of the HCP Terraform free plan must be checked against the number of resources managed.
+- ✅ Infrastructure that is versioned, reviewable and reproducible (RNF-OPE-01).
+- ⚠️ The state needs its own storage and protection (see ADR 0011).
 
 ## Related decisions
 
 - [0005. Backend compute on AWS Lambda](0005-compute-aws-lambda.md)
 - [0011. Terraform state in Amazon S3](0011-terraform-state-amazon-s3.md)
 - [0012. Single AWS account for development and production](0012-single-aws-account.md)
-

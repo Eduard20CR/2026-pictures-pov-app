@@ -19,7 +19,6 @@ The full picture (diagram, stack table, folder tree) is in `README.md`. Points t
 - **Photos never go through the backend.** The browser uploads directly to S3 with presigned URLs; an S3-triggered Lambda generates WebP thumbnails. Photos and ZIPs are only exposed through temporary signed links (RNF-SEG-05).
 - **Dominant cost constraint:** each environment with no traffic must cost ≤ 25 USD/month (RNF-COS-01). This rules out services with a fixed idle cost (e.g. Fargate + ALB).
 - Infrastructure with Terraform; dev and prod share a single AWS account (ADR 0012) and are isolated by `<project>-<environment>-` resource names, the `Environment` tag, separate state keys and one IAM role per environment. CI/CD with GitHub Actions + OIDC.
-- Infrastructure with Terraform, dev/prod environments in separate AWS accounts; CI/CD with GitHub Actions + OIDC.
 - **Terraform state lives in S3** (ADR 0011), in a bucket created by `infra/bootstrap/`, whose own state is local and never committed. The environments use the `s3` backend with `use_lockfile`; there is no DynamoDB lock table and no HCP Terraform.
 
 ## Documentation

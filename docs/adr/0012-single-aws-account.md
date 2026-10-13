@@ -5,69 +5,47 @@
 
 ## Context and problem statement
 
-The system must have two isolated environments, development and production (RNF-OPE-02). [ADR 0007](0007-infrastructure-as-code-terraform.md) assumed that each environment would live in its own AWS account. Before the first infrastructure is provisioned, it must be decided whether both environments live in separate AWS accounts or in a single account, and, in the latter case, how they are kept isolated.
-
-This ADR revisits only the account layout. The choice of Terraform, its modules and the configuration per environment remain as decided in ADR 0007, and the state storage as decided in [ADR 0011](0011-terraform-state-amazon-s3.md).
+The system needs two isolated environments, development and production (RNF-OPE-02). Should they live in separate AWS accounts or in a single one? And if single, how are they kept apart?
 
 ## Decision drivers
 
-- Isolation between development and production, as required by RNF-OPE-02.
-- Operational simplicity for a small team: number of accounts, credentials, bootstraps and trust relationships to maintain.
-- Cost of each environment with no traffic, within the limit of RNF-COS-01.
-- Limiting the blast radius of an error or a compromised credential in development.
+- Isolation between environments (RNF-OPE-02).
+- Simplicity for a small team: fewer accounts, credentials and bootstraps.
+- Cost per environment measurable against RNF-COS-01.
 
 ## Considered options
 
-1. Separate AWS accounts for development and production, grouped in AWS Organizations.
-2. A single AWS account, with environments isolated by naming, tags, Terraform state and IAM roles.
+1. Separate accounts, grouped in AWS Organizations.
+2. A single account, with environments isolated by naming, tags, state and IAM roles.
 
 ## Decision
 
-**Option 2 is chosen: development and production run in a single AWS account.**
+**A single AWS account.** One bootstrap, one OIDC provider for GitHub Actions and one place to review costs. The stronger isolation of separate accounts does not justify duplicating that work at this project's size.
 
-The main reason is simplicity: a single account means one bootstrap of the state bucket, one OIDC identity provider for GitHub Actions, one set of account-level resources and one place to review costs and activity. For a project of this size, the stronger isolation of separate accounts does not justify duplicating that work, provided that the environments are separated inside the account as follows.
+The environments are kept apart with four rules:
 
-**Resource naming.** Every resource name includes the project and the environment, with the pattern `<project>-<environment>-<component>` (for example, `pictures-pov-dev-api`). Globally unique names, such as S3 buckets, also include the region and the account identifier. No resource is shared between environments, except the account-level resources listed below.
+| Rule | How |
+|---|---|
+| Naming | `<project>-<environment>-<component>`, e.g. `pictures-pov-dev-api`. Globally unique names (S3) also include region and account ID. |
+| Tags | `Project`, `Environment` (`dev`/`prod`) and `ManagedBy` via the provider's `default_tags`. `Environment` is a cost allocation tag, with one AWS Budgets budget per environment. |
+| State | One key per environment in the state bucket ([ADR 0011](0011-terraform-state-amazon-s3.md)). |
+| IAM | One OIDC role per environment. The `prod` role only accepts the `prod` GitHub environment, which requires approval. Each role, including the Lambda runtime roles, only reaches resources of its own environment. |
 
-**Tags.** Every resource carries the tags `Project`, `Environment` (`dev` or `prod`) and `ManagedBy`, applied through the `default_tags` of the AWS provider in each environment configuration. `Environment` is activated as a cost allocation tag so that the cost of each environment can be measured against RNF-COS-01, and an AWS Budgets budget is defined per environment filtered by that tag.
-
-**Terraform state.** Each environment keeps its state under its own key in the state bucket (`dev/terraform.tfstate` and `prod/terraform.tfstate`), so a `plan` or `apply` in one environment never reads or locks the state of the other.
-
-**IAM roles.** GitHub Actions assumes a different IAM role per environment through OIDC:
-
-- The trust policy of the production role only accepts tokens issued for the `prod` GitHub environment of this repository, which requires approval before deploying. The development role only accepts tokens from this repository.
-- The permissions of each role are limited, where the service allows it, to resources whose name starts with the prefix of its environment or that carry its `Environment` tag. The development role cannot modify production resources, nor the state key of production.
-- The runtime roles of the application (Lambda functions) are also defined per environment and only grant access to the resources of their environment.
-
-**Account-level resources.** The Terraform state bucket, the GitHub OIDC identity provider and the account-wide settings (such as the S3 public access block and the cost allocation tags) are shared. They are managed by `infra/bootstrap/` and are not modified by the environment configurations.
-
-This decision supersedes the account layout assumed in ADR 0007.
+Only account-level resources are shared (state bucket, OIDC provider, account settings). They are managed by `infra/bootstrap/`.
 
 ## Pros and cons of the options
 
-### Option 1: Separate AWS accounts
-
-- Pro: the strongest isolation AWS offers; an error or a compromised credential in development cannot affect production; service quotas and costs are separated per account without additional configuration.
-- Con: requires AWS Organizations and an administration account or IAM Identity Center; the bootstrap, the OIDC identity provider and the account-level resources must be created and maintained in each account; more credentials and roles to manage.
-
-### Option 2: Single AWS account
-
-- Pro: a single account to administer, secure and monitor; one bootstrap and one OIDC identity provider; no duplicated account-level resources; switching between environments does not require changing account.
-- Con: the isolation depends on IAM policies, naming and tags being correct; service quotas are shared between environments; the cost per environment must be obtained from tags.
+| Option | Pro | Con |
+|---|---|---|
+| Separate accounts | Strongest isolation; quotas and costs separated automatically | AWS Organizations; bootstrap, OIDC and roles duplicated per account |
+| Single account | One account to administer and secure; no duplicated resources | Isolation depends on correct IAM, naming and tags; shared quotas; cost per environment comes from tags |
 
 ## Consequences
 
-### Positive
-
-- The infrastructure set-up is simpler: one bootstrap, one OIDC identity provider and one account to secure.
-- Costs and activity of both environments are reviewed in a single place, and the cost of each environment remains measurable through the `Environment` tag.
-
-### Negative and risks
-
-- **Blast radius.** An overly broad IAM policy, or a credential with access to the whole account, may allow a change in development to affect production. The permissions of each role must be reviewed so that they are scoped to their environment, and the use of administrator credentials must be limited to the bootstrap.
-- **Shared quotas.** Service quotas, such as the concurrent executions of AWS Lambda, are shared by both environments. A load test or an error in development may consume capacity needed by production; if necessary, reserved concurrency must be configured for the production functions.
-- **Tag discipline.** A resource without the `Environment` tag is not attributed to any environment in the cost reports. The tags must be applied by default from the provider configuration, not resource by resource.
-- **Reversibility.** If the project grows and requires stronger isolation, moving production to its own account implies recreating its resources and migrating its data; this would be recorded in a new ADR.
+- ✅ Simpler set-up, with cost per environment still measurable through the `Environment` tag.
+- ⚠️ A too-broad IAM policy could let development affect production: review role scopes and use admin credentials only for the bootstrap.
+- ⚠️ Quotas (e.g. Lambda concurrency) are shared: reserve concurrency for production if needed.
+- ⚠️ Moving production to its own account later means recreating resources and migrating data (a new ADR).
 
 ## Related decisions
 
