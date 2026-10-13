@@ -100,7 +100,7 @@ Architecture decisions and their rationale are recorded in [docs/adr](docs/adr/R
 │   └── api/          # Backend (Spring Boot, Maven)
 ├── infra/            # Infrastructure as code (Terraform)
 │   ├── bootstrap/    # S3 bucket for the Terraform state
-│   └── enviroments/  # One configuration per environment
+│   └── environments/  # One configuration per environment
 └── docs/             # Project documentation
 ```
 
