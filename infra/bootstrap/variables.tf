@@ -1,11 +1,11 @@
-variable "aws_region" {
-  description = "AWS region where the bootstrap resources are created."
-  type        = string
-  default     = "us-east-1"
-}
-
 variable "project" {
-  description = "Project name, used for naming and tagging resources."
+  description = "Project name, used as a prefix for resource names."
   type        = string
   default     = "pictures-pov"
+}
+
+variable "aws_region" {
+  description = "AWS region where the state bucket is created."
+  type        = string
+  default     = "us-east-1"
 }
