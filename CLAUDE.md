@@ -1,33 +1,31 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code in this repository.
 
-## Repository status
+## Status
 
-Pictures POV App: web application where event guests upload photos to a shared gallery by scanning a QR code, without creating an account; organizers moderate them and download them as a ZIP.
+Pictures POV App: guests upload event photos to a shared gallery via QR code, no account; organizers moderate and download them as a ZIP.
 
-The project is in the documentation phase. `apps/` and `infra/` exist but are empty: there is no code, build, lint or tests yet. Do not invent commands; once code is added, document the real ones here.
+Documentation phase: no build, lint or tests yet. Do not invent commands; document the real ones once code exists.
 
-## Planned architecture
+## Architecture rules
 
-The full picture (diagram, stack table, folder tree) is in `README.md`. Points that require reading several documents together:
+Full picture in `README.md`. Rules that span several documents:
 
-- **Two independent toolchains, no workspaces.** `apps/api` is Spring Boot 3 + Java 21 with Maven (via the Maven Wrapper, `mvnw`); `apps/web` is React + Vite + TypeScript with npm. There is no `packages/shared` and no pnpm.
-- **The OpenAPI contract is the boundary between them.** The backend generates it from the code with springdoc-openapi (RNF-OPE-06) and the frontend generates its types with openapi-typescript in `apps/web/src/api/`. An API change means regenerating those types.
-- **Backend on AWS Lambda with SnapStart** behind API Gateway HTTP API (via `aws-serverless-java-container-springboot3`). PostgreSQL connections must be opened after the snapshot is restored, never during the captured initialization.
-- **Database migrations run in CI/CD, never at startup.** Liquibase changelogs live in `apps/api`, but `spring.liquibase.enabled=false`; the pipeline applies them before deploying the backend, so migrations must stay backward compatible with the running version.
-- **Photos never go through the backend.** The browser uploads directly to S3 with presigned URLs; an S3-triggered Lambda generates WebP thumbnails. Photos and ZIPs are only exposed through temporary signed links (RNF-SEG-05).
-- **Dominant cost constraint:** each environment with no traffic must cost ≤ 25 USD/month (RNF-COS-01). This rules out services with a fixed idle cost (e.g. Fargate + ALB).
-- Infrastructure with Terraform; dev and prod share a single AWS account (ADR 0012) and are isolated by `<project>-<environment>-` resource names, the `Environment` tag, separate state keys and one IAM role per environment. CI/CD with GitHub Actions + OIDC.
-- **Terraform state lives in S3** (ADR 0011), in a bucket created by `infra/bootstrap/`, whose own state is local and never committed. The environments use the `s3` backend with `use_lockfile`; there is no DynamoDB lock table and no HCP Terraform.
+- **Two toolchains, no workspaces:** `apps/api` is Spring Boot 3 + Java 21 with Maven (`mvnw`); `apps/web` is React + Vite + TypeScript with npm. No `packages/shared`, no pnpm.
+- **OpenAPI is the boundary:** springdoc generates it from the backend (RNF-OPE-06); openapi-typescript generates the frontend types in `apps/web/src/api/`. An API change means regenerating them.
+- **Lambda with SnapStart:** open PostgreSQL connections after the snapshot restore, never during the captured init.
+- **Migrations in CI/CD, not at startup:** Liquibase changelogs live in `apps/api` with `spring.liquibase.enabled=false`; they must stay backward compatible with the running version.
+- **Photos never go through the backend:** direct S3 uploads with presigned URLs; an S3-triggered Lambda makes WebP thumbnails; photos and ZIPs only via temporary signed links (RNF-SEG-05).
+- **Cost:** each idle environment ≤ 25 USD/month (RNF-COS-01). No services with fixed idle cost (e.g. Fargate + ALB).
+- **Infrastructure:** Terraform; dev and prod in one AWS account, isolated by `<project>-<environment>-` names, the `Environment` tag, separate state keys and one IAM role each (ADR 0012). CI/CD with GitHub Actions + OIDC.
+- **Terraform state in S3** (ADR 0011), bucket created by `infra/bootstrap/` (local state, never committed). Environments use the `s3` backend with `use_lockfile`; no DynamoDB, no HCP Terraform.
 
 ## Documentation
 
-All documentation is written in English, in a formal tone.
-
-- `docs/01_requisitos_funcionales.md` (`RF-<AREA>-<NN>`) and `docs/02_requisitos_no_funcionales.md` (`RNF-<CATEGORY>-<NN>`). Identifiers are stable and keep their original Spanish codes (RF, RNF, RN, P, and areas such as `INV`, `SIS`, `SEG`): they are never reused or renamed, and removed ones are marked *Retired*. MoSCoW priority (M/S/C/W).
-- Each requirements document has a metadata table (version, status, date) and a change history: when modifying it, bump the version and add a row to the history.
-- `docs/adr/` uses MADR with `NNNN-title.md` numbering; the index, conventions and template are in `docs/adr/README.md`. When creating an ADR, update that index.
-- **The rationale for a decision lives only in its ADR**; the README and other documents link to it instead of repeating it. An accepted ADR is not rewritten: a new one is created to supersede it.
-- `docs/c4_model.excalidraw` is the C4 diagram and is maintained only by the user: never read or modify it by any means, including Bash or scripts. If the stack changes, update the Mermaid diagram in the README and tell the user the C4 diagram needs updating. `docs/plan_maestro.pdf` cannot be edited from the repo.
-
+- English, formal tone, short and clear: little text, prefer tables and bullets.
+- Requirements: `docs/01_requisitos_funcionales.md` (`RF-<AREA>-<NN>`) and `docs/02_requisitos_no_funcionales.md` (`RNF-<CATEGORY>-<NN>`). IDs keep their Spanish codes, are never reused or renamed; removed ones are marked *Retired*. MoSCoW priority.
+- When editing a requirements document, bump its version and add a row to its change history.
+- ADRs in `docs/adr/`: follow the rules and template in `docs/adr/README.md` and update its index.
+- A decision's rationale lives only in its ADR; other docs link to it.
+- `docs/c4_model.excalidraw` belongs to the user: never read or modify it, by any means. If the stack changes, update the README's Mermaid diagram and tell the user to update the C4. `docs/plan_maestro.pdf` cannot be edited.
