@@ -19,7 +19,7 @@ Full picture in `README.md`. Rules that span several documents:
 - **Photos never go through the backend:** direct S3 uploads with presigned URLs; an S3-triggered Lambda makes WebP thumbnails; photos and ZIPs only via temporary signed links (RNF-SEG-05).
 - **Cost:** each idle environment ≤ 25 USD/month (RNF-COS-01). No services with fixed idle cost (e.g. Fargate + ALB).
 - **Infrastructure:** Terraform; dev and prod in one AWS account, isolated by `<project>-<environment>-` names, the `Environment` tag, separate state keys and one IAM role each (ADR 0012). CI/CD with GitHub Actions + OIDC.
-- **Terraform state in S3** (ADR 0011), bucket created by `infra/bootstrap/` (local state, never committed). Environments use the `s3` backend with `use_lockfile`; no DynamoDB, no HCP Terraform.
+- **Terraform state in S3** (ADR 0011), bucket created by `infra/bootstrap/`. Every configuration, the bootstrap included, uses the `s3` backend with `use_lockfile` and its own key; only the bootstrap's first run uses local state, then migrated. No state file is committed; no DynamoDB, no HCP Terraform.
 
 ## Documentation
 

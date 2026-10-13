@@ -1,50 +1,84 @@
 # Bootstrap
 
-This configuration creates the Amazon S3 bucket that stores the Terraform state of the environments in `infra/environments/`. It is applied once, before any environment, and rarely changes afterwards. The decision is recorded in [ADR 0011](../../docs/adr/0011-terraform-state-amazon-s3.md).
-
-## Why a separate configuration
-
-An environment cannot create the bucket that holds its own state: the backend must exist before `terraform init` runs. The bootstrap breaks this dependency by creating the bucket first, with a configuration whose own state is kept locally.
+Creates the S3 bucket that stores the Terraform state of all the infrastructure. Decision: [ADR 0011](../../docs/adr/0011-terraform-state-amazon-s3.md).
 
 ## What it creates
 
-- An S3 bucket for the Terraform state, with:
-  - **Versioning** enabled, so every previous version of the state can be recovered after an erroneous apply or a corrupted file.
-  - **Server-side encryption**, since the state may contain sensitive values.
-  - **Public access blocked** on all four settings.
+| Resource | Setting |
+| --- | --- |
+| S3 bucket `<project>-tfstate-<region>-<account-id>` | `prevent_destroy` |
+| Versioning | Enabled: previous states can be recovered |
+| Encryption | SSE (AES256) |
+| Public access block | All four settings on |
 
-State locking uses the S3 native lock file (`use_lockfile`, Terraform 1.10 or later), so no DynamoDB table is required.
+Locking uses the S3 native lock file (`use_lockfile`); no DynamoDB table.
 
-## Usage
+## Why it is run manually the first time
 
-Run it with credentials for the target AWS account (development or production). Each account has its own bucket.
+The `s3` backend needs the bucket to exist before `terraform init`. The bucket does not exist yet, so the first run must keep the state locally. Once the bucket exists, the bootstrap state is moved into it.
+
+## Steps
+
+Prerequisites: Terraform ≥ 1.14 and AWS credentials for the target account.
+
+### 1. First run, with local state
+
+Comment out the `backend "s3"` block in `main.tf`, then:
 
 ```sh
 cd infra/bootstrap
 terraform init
-terraform plan -var="aws_region=<region>"
-terraform apply -var="aws_region=<region>"
+terraform plan
+terraform apply
 ```
 
-The bucket name is printed in the outputs and is then referenced from the backend of each environment:
+Note the `state_bucket_name` output.
+
+### 2. Move the bootstrap state to S3
+
+Uncomment the `backend "s3"` block and set `bucket` to the output of step 1:
 
 ```hcl
-terraform {
-  backend "s3" {
-    bucket       = "<state-bucket-name>"
-    key          = "<environment>/terraform.tfstate"
-    region       = "<region>"
-    encrypt      = true
-    use_lockfile = true
-  }
+backend "s3" {
+  bucket       = "<state_bucket_name>"
+  key          = "bootstrap/terraform.tfstate"
+  region       = "us-east-1"
+  encrypt      = true
+  use_lockfile = true
 }
 ```
 
-## State of the bootstrap itself
+Migrate the state and answer `yes` when asked to copy it:
 
-The bootstrap state is stored locally in `terraform.tfstate`. It must not be committed to the repository; keep it in a safe place, since it is needed to modify or destroy the bucket later. If it is lost, the bucket can be brought back under management with `terraform import`.
+```sh
+terraform init -migrate-state
+```
+
+Delete the local `terraform.tfstate` and `terraform.tfstate.backup` only after checking that `bootstrap/terraform.tfstate` exists in the bucket. Never commit them.
+
+### 3. Use the same bucket in every other configuration
+
+Each environment (`infra/environments/<environment>/`) declares the same backend with its own `key`:
+
+| Configuration | `key` |
+| --- | --- |
+| Bootstrap | `bootstrap/terraform.tfstate` |
+| dev | `dev/terraform.tfstate` |
+| prod | `prod/terraform.tfstate` |
+
+Then run, from the environment folder:
+
+```sh
+terraform init
+terraform plan
+terraform apply
+```
+
+## Later changes
+
+From step 2 onwards the bootstrap behaves like any other configuration: `terraform init`, `plan` and `apply`, with the state in S3.
 
 ## Precautions
 
-- Do not destroy this configuration while any environment still uses the bucket: their state would be lost.
-- The bucket should have `prevent_destroy` enabled to avoid accidental deletion.
+- Never destroy the bucket while any configuration still uses it: all states would be lost.
+- If the bucket is ever recreated, repeat steps 1 and 2.
