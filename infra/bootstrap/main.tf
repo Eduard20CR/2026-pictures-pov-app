@@ -7,6 +7,14 @@ terraform {
       version = "~> 6.0"
     }
   }
+
+  backend "s3" {
+    bucket       = "pictures-pov-tfstate-us-east-1-058264166152"
+    key          = "bootstrap/terraform.tfstate"
+    region       = "us-east-1"
+    encrypt      = true
+    use_lockfile = true
+  }
 }
 
 provider "aws" {
@@ -57,3 +65,4 @@ resource "aws_s3_bucket_public_access_block" "tfstate" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
