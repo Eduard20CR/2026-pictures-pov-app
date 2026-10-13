@@ -1,6 +1,6 @@
 # Bootstrap
 
-This configuration creates the Amazon S3 bucket that stores the Terraform state of the environments in `infra/enviroments/`. It is applied once per AWS account, before any environment, and rarely changes afterwards. The decision is recorded in [ADR 0011](../../docs/adr/0011-terraform-state-amazon-s3.md).
+This configuration creates the Amazon S3 bucket that stores the Terraform state of the environments in `infra/environments/`. It is applied once, before any environment, and rarely changes afterwards. The decision is recorded in [ADR 0011](../../docs/adr/0011-terraform-state-amazon-s3.md).
 
 ## Why a separate configuration
 

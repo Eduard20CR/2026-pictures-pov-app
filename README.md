@@ -1,63 +1,34 @@
 # Pictures POV App
 
-Web application that collects, in a shared gallery, the photos guests take during an event, through a QR code and without needing to create an account.
+Guests scan a QR code at an event and upload their photos to a shared gallery, with no account needed.
 
-## Description
+## How it works
 
-### Problem
+1. An administrator creates the event and assigns it to an organizer.
+2. The organizer places the event's QR code at the venue.
+3. Guests scan it and upload photos from their phone (10 per device by default).
+4. Everyone sees the photos in the event gallery.
+5. The organizer moderates the photos and downloads them as a ZIP.
 
-At weddings, birthdays and parties, attendees take a large number of photos with their phones that rarely reach the organizers. The usual alternatives, such as messaging groups or shared folders, require each guest to install an app, create an account or receive a link individually; they reduce image quality and scatter the photos across several channels.
+## Roles
 
-### How it works
-
-1. An administrator creates the event and assigns it to the email of the customer organizing it.
-2. The organizer gets the event's link and QR code and places them at the venue.
-3. Guests scan the code, open the event page without creating an account and upload photos from their phone's gallery or by taking them with the camera, up to a per-device limit (10 by default).
-4. All photos are shown in a shared event gallery.
-5. The organizer signs in to view, moderate and download the photos in a ZIP file.
-
-### Roles
-
-| Role | Description | Main capabilities |
+| Role | Who | Can |
 |---|---|---|
-| Guest | Event attendee. Has no account. | Access the event through the QR code or link, upload photos within their limit, view the gallery. |
-| Organizer | Customer to whom one or more events are assigned. | View their events, get the link and QR code, customize the event, moderate and download the photos. |
-| Administrator | Member of the platform team. | Create, assign and manage events and users across the whole platform. |
-
-### Principles
-
-- **Frictionless for guests.** No account, installation or personal data is required to participate.
-- **Control for the organizer.** The organizer decides which photos are shown and who can see the gallery.
-- **Per-device limit, not per network.** Attendees of an event usually share the same WiFi network, so the upload limit applies per device and not per IP address.
-- **Privacy by default.** Photos are kept for a limited period and download links are temporary.
+| Guest | Event attendee, no account | Upload photos, view the gallery |
+| Organizer | Customer with assigned events | Customize the event, moderate and download photos |
+| Administrator | Platform team | Manage all events and users |
 
 ## Scope
 
-### Included
+**Included:** QR access without registration · uploads with per-device and per-event limits · gallery that is public, PIN-protected or organizer-only · sign-in with Google or email · moderation · single and ZIP downloads · admin panel · thumbnails · automatic deletion after a retention period.
 
-- Guest access without registration through a QR code or link.
-- Photo uploads from the browser with a per-device limit and a total limit per event.
-- Event gallery with configurable visibility: public, PIN-protected or visible only to the organizer.
-- Sign-in for organizers and administrators with Google or with email and password.
-- Photo moderation: hide, show again and delete.
-- Download of individual photos and of the whole event in a ZIP file.
-- Administration panel for managing events and users.
-- Thumbnail generation and automatic photo deletion after a retention period.
+**Not in the first version:** videos · payments · self-service sign-up · comments and reactions · photo editing · facial recognition · native app.
 
-### Excluded from the first version
-
-- Video uploads.
-- Payments and subscription plans.
-- Self-service organizer registration.
-- Comments, reactions and photo editing.
-- Facial recognition.
-- Native mobile app.
-
-Details are specified in the [functional requirements](docs/requerimientos/01_requisitos_funcionales.md).
+Details: [functional requirements](docs/01_requisitos_funcionales.md).
 
 ## Architecture
 
-The application is deployed on AWS using managed services.
+Serverless on AWS: each environment with no traffic costs ≤ 25 USD/month.
 
 ```mermaid
 flowchart LR
@@ -76,42 +47,36 @@ flowchart LR
     U -->|Sign-in| COG[Cognito]
 ```
 
-| Component | Technology |
-|---|---|
-| Frontend | Single-page application with React, Vite, TypeScript, React Router, TanStack Query and Tailwind, managed with npm and served from Amazon S3 and Amazon CloudFront. API client types are generated with openapi-typescript. See [ADR 0002](docs/adr/0002-npm-sin-workspaces.md) and [ADR 0003](docs/adr/0003-frontend-react.md). |
-| Backend | API with Spring Boot 3 and Java 21, built with Maven and running on AWS Lambda with SnapStart behind Amazon API Gateway (HTTP API). OpenAPI contract generated with springdoc-openapi. See [ADR 0001](docs/adr/0001-backend-spring-boot-en-lambda.md), [ADR 0005](docs/adr/0005-compute-aws-lambda.md) and [ADR 0009](docs/adr/0009-backend-build-tool-maven.md). |
-| Database | Amazon Aurora Serverless v2 (PostgreSQL), scaling to 0 ACU when idle. Schema migrations with Liquibase, applied by the CI/CD pipeline rather than at application startup. See [ADR 0004](docs/adr/0004-database-aurora-serverless-v2.md) and [ADR 0010](docs/adr/0010-database-migrations-liquibase.md). |
-| Authentication | Amazon Cognito with managed sign-in (email/password, with Google planned) and an administrators group. Guests do not authenticate. See [ADR 0006](docs/adr/0006-authentication-amazon-cognito.md). |
-| Photo storage | Amazon S3. The browser uploads photos directly using presigned URLs, without the backend receiving the files. |
-| Image processing | Lambda function triggered by S3 that generates WebP thumbnails. |
-| ZIP generation | Lambda function triggered through Amazon SQS that generates the event's ZIP in the background and stores it in Amazon S3. See [ADR 0008](docs/adr/0008-background-zip-generation.md). |
-| Infrastructure | Terraform with reusable modules, development and production environments in separate AWS accounts and remote state in Amazon S3. See [ADR 0007](docs/adr/0007-infrastructure-as-code-terraform.md) and [ADR 0011](docs/adr/0011-terraform-state-amazon-s3.md). |
-| CI/CD | GitHub Actions with OIDC authentication to AWS and independent deployment per component. |
+| Part | Technology | ADR |
+|---|---|---|
+| Frontend | React + Vite + TypeScript, npm, on S3 + CloudFront | [0002](docs/adr/0002-npm-without-workspaces.md), [0003](docs/adr/0003-frontend-react.md) |
+| Backend | Spring Boot 3 + Java 21, Maven, on Lambda with SnapStart | [0001](docs/adr/0001-backend-spring-boot-en-lambda.md), [0005](docs/adr/0005-compute-aws-lambda.md), [0009](docs/adr/0009-backend-build-tool-maven.md) |
+| Database | Aurora Serverless v2 (PostgreSQL), Liquibase in CI/CD | [0004](docs/adr/0004-database-aurora-serverless-v2.md), [0010](docs/adr/0010-database-migrations-liquibase.md) |
+| Sign-in | Amazon Cognito | [0006](docs/adr/0006-authentication-amazon-cognito.md) |
+| Photos | S3 with direct uploads (presigned URLs) and WebP thumbnails | — |
+| ZIP | Background Lambda via SQS | [0008](docs/adr/0008-background-zip-generation.md) |
+| Infrastructure | Terraform, one AWS account, state in S3 | [0007](docs/adr/0007-infrastructure-as-code-terraform.md), [0011](docs/adr/0011-terraform-state-amazon-s3.md), [0012](docs/adr/0012-single-aws-account.md) |
+| CI/CD | GitHub Actions with OIDC | — |
 
-Architecture decisions and their rationale are recorded in [docs/adr](docs/adr/README.md).
-
-## Repository structure
+## Repository
 
 ```
-.
-├── apps/
-│   ├── web/          # Frontend (React, npm)
-│   │   └── src/api/  # Client types generated from the OpenAPI contract
-│   └── api/          # Backend (Spring Boot, Maven)
-├── infra/            # Infrastructure as code (Terraform)
-│   ├── bootstrap/    # S3 bucket for the Terraform state
-│   └── enviroments/  # One configuration per environment
-└── docs/             # Project documentation
+apps/
+  web/            Frontend (React)
+  api/            Backend (Spring Boot)
+infra/
+  bootstrap/      Bucket for the Terraform state
+  modules/        Reusable Terraform modules
+  environments/   dev and prod
+docs/             Requirements and ADRs
 ```
 
 ## Getting started
 
-Pending. Will be documented once phase 1 (foundations) is complete.
+Pending: documented after phase 1.
 
 ## Documentation
 
-| Document | Status |
-|---|---|
-| [Functional requirements](docs/01_requisitos_funcionales.md) | Ready |
-| [Non-functional requirements](docs/02_requisitos_no_funcionales.md) | Ready |
-| [Architecture Decision Records (ADR)](docs/adr/README.md) | In progress |
+- [Functional requirements](docs/01_requisitos_funcionales.md)
+- [Non-functional requirements](docs/02_requisitos_no_funcionales.md)
+- [Architecture decisions (ADR)](docs/adr/README.md)
