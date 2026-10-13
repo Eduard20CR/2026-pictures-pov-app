@@ -12,10 +12,11 @@ This directory contains the project's relevant architecture decisions in [MADR](
 | [0004](0004-database-aurora-serverless-v2.md) | Aurora Serverless v2 database | Accepted | 2026-10-09 |
 | [0005](0005-compute-aws-lambda.md) | Backend compute on AWS Lambda | Accepted | 2026-10-09 |
 | [0006](0006-authentication-amazon-cognito.md) | Authentication with Amazon Cognito | Accepted | 2026-10-09 |
-| [0007](0007-infrastructure-as-code-terraform.md) | Infrastructure as code with Terraform | Accepted | 2026-10-09 |
+| [0007](0007-infrastructure-as-code-terraform.md) | Infrastructure as code with Terraform | Accepted (account layout superseded by 0012) | 2026-10-09 |
 | [0008](0008-background-zip-generation.md) | Background ZIP generation | Accepted | 2026-10-09 |
 | [0009](0009-backend-build-tool-maven.md) | Maven as the backend build tool | Accepted | 2026-10-12 |
 | [0010](0010-database-migrations-liquibase.md) | Database migrations with Liquibase in CI/CD | Accepted | 2026-10-12 |
+| [0012](0012-single-aws-account.md) | Single AWS account for development and production | Accepted | 2026-10-13 |
 
 ## Conventions
 
