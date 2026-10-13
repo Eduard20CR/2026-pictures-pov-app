@@ -2,80 +2,28 @@
 
 - **Status:** Accepted
 - **Date:** 2026-10-08
-- **Note:** The build tool defined in this decision is superseded by [0009](0009-backend-build-tool-maven.md).
+- **Note:** The build tool (Gradle) is superseded by [0009](0009-backend-build-tool-maven.md).
 
-## Context and problem statement
+## Context
 
-The application's backend (`apps/api`) was planned with NestJS running on AWS Lambda behind Amazon API Gateway (HTTP API). The backend framework is being reconsidered, since one of the project's goals is for the experience gained to have the greatest possible value in the job market.
+The backend was planned with NestJS. We want a framework with more value in the job market, while keeping idle cost ≤ 25 USD/month (RNF-COS-01), latency targets (RNF-REN-04) and an OpenAPI contract generated from code (RNF-OPE-06).
 
-The new solution must respect the architecture's existing constraints:
+## Options
 
-- The infrastructure cost of each environment with no traffic must not exceed 25 USD per month (RNF-COS-01).
-- API operations must respond in under 500 ms (p95) and under 1.5 s (p99) (RNF-REN-04).
-- The API contract must be documented in OpenAPI format and generated from the code (RNF-OPE-06).
-
-## Decision drivers
-
-- Job market demand for the technology in Costa Rica and internationally.
-- Idle cost compatible with RNF-COS-01.
-- Cold start latency compatible with RNF-REN-04.
-- Complexity of the build and deployment process.
-- Generation of the OpenAPI contract from the code.
-
-## Considered options
-
-1. Keep NestJS on AWS Lambda.
-2. Spring Boot 3 on AWS Lambda with SnapStart.
-3. Spring Boot 3 on AWS Fargate behind an Application Load Balancer.
-4. Spring Boot 3 compiled as a GraalVM native image on AWS Lambda.
+| Option | Pro | Con |
+|---|---|---|
+| NestJS on Lambda | No changes; same language as the frontend | Lower job market demand |
+| Spring Boot 3 on Lambda + SnapStart | High demand; zero idle cost; springdoc covers RNF-OPE-06 | SnapStart lifecycle; more memory; second toolchain |
+| Spring Boot 3 on Fargate + ALB | No cold starts | ~25 USD/month just running: breaks RNF-COS-01 |
+| Spring Boot 3 as GraalVM native image | Fast startup, low memory | Complex, slow build; reflection config |
 
 ## Decision
 
-**Option 2 is chosen: Spring Boot 3 with Java 21 on AWS Lambda**, behind Amazon API Gateway (HTTP API).
-
-- Lambda and Spring are integrated with `aws-serverless-java-container-springboot3`.
-- Lambda SnapStart is enabled to reduce cold start time.
-- `apps/api` is built with Gradle.
-- The OpenAPI contract is generated from the code with springdoc-openapi.
-
-The main reason is that Spring Boot has considerably higher job market demand than NestJS, both in Costa Rica and internationally. Running on Lambda keeps the pay-per-use model and, therefore, compliance with RNF-COS-01.
-
-## Pros and cons of the options
-
-### Option 1: NestJS on AWS Lambda
-
-- Pro: requires no changes to the architecture and shares a language with the frontend.
-- Con: lower job market demand than Spring Boot, which is the deciding factor for this decision.
-
-### Option 2: Spring Boot 3 on AWS Lambda with SnapStart
-
-- Pro: high job market demand; zero idle cost; SnapStart mitigates the JVM cold start; springdoc-openapi covers RNF-OPE-06.
-- Con: requires managing the SnapStart lifecycle correctly, more memory per function and a second toolchain in CI.
-
-### Option 3: Spring Boot 3 on AWS Fargate with an Application Load Balancer
-
-- Pro: conventional execution model, without cold starts or Lambda-specific constraints.
-- Con: the environment costs approximately 25 USD per month just to stay running, so it violates RNF-COS-01.
-
-### Option 4: Spring Boot 3 as a GraalVM native image on AWS Lambda
-
-- Pro: very fast startup and lower memory usage.
-- Con: the build process is complex and slow, and requires additional configuration for reflection and dynamic proxies.
+**Spring Boot 3 + Java 21 on AWS Lambda with SnapStart**, behind API Gateway HTTP API, using `aws-serverless-java-container-springboot3` and springdoc-openapi. It has the highest job market demand and keeps pay-per-use cost.
 
 ## Consequences
 
-### Positive
-
-- The backend is developed with a technology in high job market demand.
-- The architecture remains serverless with zero idle cost, in compliance with RNF-COS-01.
-- The OpenAPI contract is generated from the code, in compliance with RNF-OPE-06.
-
-### Negative and risks
-
-- **Connections after SnapStart restore.** Connections to PostgreSQL must not be opened during the initialization captured in the snapshot, but after it is restored. Otherwise, restored instances would reuse invalid or shared connections.
-- **Function memory.** The API's Lambda function requires between 1 and 2 GB of memory, which increases the cost per invocation compared with a Node.js runtime.
-- **Two toolchains in CI.** The continuous integration pipeline must handle Java 21 with Gradle for `apps/api` and Node.js with npm for `apps/web`.
-
-## Related decisions
-
-- [0002. npm without workspaces](0002-npm-sin-workspaces.md)
+- ✅ High-demand technology, zero idle cost, OpenAPI from code.
+- ⚠️ PostgreSQL connections must open after the snapshot restore, never during the captured init.
+- ⚠️ The function needs 1–2 GB of memory, so each invocation costs more than Node.js.
+- ⚠️ CI handles two toolchains: Java for `apps/api`, Node.js for `apps/web`.
