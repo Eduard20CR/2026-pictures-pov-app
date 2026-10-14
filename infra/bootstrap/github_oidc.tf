@@ -1,3 +1,9 @@
+locals {
+  # GitHub OIDC immutable subject: <owner>@<owner_id>/<repo>@<repo_id>
+  github_repo = "Eduard20CR@41557299/2026-pictures-pov-app@1407560871"
+}
+
+
 resource "aws_iam_openid_connect_provider" "github" {
   url            = "https://token.actions.githubusercontent.com"
   client_id_list = ["sts.amazonaws.com"]
@@ -21,7 +27,7 @@ data "aws_iam_policy_document" "github_trust_dev" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:Eduard20CR/2026-pictures-pov-app:ref:refs/heads/main"]
+      values = ["repo:${local.github_repo}:ref:refs/heads/main"]
     }
   }
 }
@@ -53,7 +59,7 @@ data "aws_iam_policy_document" "github_trust_prod" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:Eduard20CR/2026-pictures-pov-app:environment:prod"]
+      values = ["repo:${local.github_repo}:environment:prod"]
     }
   }
 }
