@@ -1,9 +1,8 @@
-name: API CI Build
+name: API CI Tests
 
 on:
   pull_request:
     branches: [main]
-    paths: ["app/api/**", ".github/workflows/api-build-test.yml"]
 
 permissions:
   contents: read
