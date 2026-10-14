@@ -10,9 +10,4 @@ class ApiApplicationTests {
     void contextLoads() {
     }
 
-
-    @Test
-    void failsOnPurpose() {
-        org.junit.jupiter.api.Assertions.fail("Testing that CI blocks the merge");
-    }
 }
