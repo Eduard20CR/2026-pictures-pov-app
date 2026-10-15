@@ -4,13 +4,6 @@ variable "project" {
   default     = "pictures-pov"
 }
 
-variable "environment" {
-  type        = string
-  default     = "prod"
-  description = "Project environment."
-}
-
-
 variable "aws_region" {
   description = "AWS region where the state bucket is created."
   type        = string
