@@ -9,3 +9,8 @@ module "api_ecr" {
   name = "${local.name_prefix}-api"
 }
 
+module "api_lambda" {
+  source    = "../../../modules/lambda_container"
+  name      = "${local.name_prefix}-api"
+  image_uri = "${module.api_ecr.repository_url}:${var.api_image_tag}"
+}
