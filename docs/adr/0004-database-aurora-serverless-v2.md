@@ -23,4 +23,4 @@ Events, uploads and moderation data are relational. The database must keep idle 
 
 - ✅ No idle compute cost; experience with SQL and PostgreSQL.
 - ⚠️ Resuming takes seconds and can break RNF-REN-04: tune the pause timeout per environment.
-- ⚠️ Open connections after the SnapStart restore ([0001](0001-backend-spring-boot-en-lambda.md)) and keep the pool small.
+- ⚠️ Keep the connection pool small ([0013](0013-lambda-container-image-web-adapter.md)).
