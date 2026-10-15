@@ -24,9 +24,12 @@ resource "aws_lambda_function" "this" {
   package_type  = "Image"
   image_uri     = var.image_uri
   architectures = ["arm64"]
-  memory_size   = 2048
-  timeout       = 30
+  memory_size   = 3008
+  timeout       = 60
   environment {
-    variables = var.environment_variables
+    variables = merge(
+      { JAVA_TOOL_OPTIONS = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1" },
+      var.environment_variables
+    )
   }
 }
