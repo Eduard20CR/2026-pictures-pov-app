@@ -4,14 +4,7 @@ variable "project" {
   default     = "pictures-pov"
 }
 
-variable "aws_region" {
-  description = "AWS region where the state bucket is created."
+variable "api_s3_key" {
   type        = string
-  default     = "us-east-1"
-}
-
-variable "api_image_tag" {
-  type        = string
-  description = "Tag (commit SHA) of the API image in ECR used when the Lambda is first created. Later deploys update the image from the CD workflow."
-  default     = "latest"
+  description = "S3 key (api/<commit SHA>.zip) of the API zip used when the Lambda is first created. Later deploys update the code from the CD workflow."
 }

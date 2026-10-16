@@ -4,8 +4,3 @@ variable "project" {
   default     = "pictures-pov"
 }
 
-variable "aws_region" {
-  description = "AWS region where the state bucket is created."
-  type        = string
-  default     = "us-east-1"
-}
