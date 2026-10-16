@@ -3,12 +3,6 @@ locals {
   name_prefix = "${var.project}-${local.environment}"
 }
 
-module "api_ecr" {
-  source = "./../../../modules/ecr_repo"
-
-  name = "${local.name_prefix}-api"
-}
-
 module "s3_to_store_app_artifact" {
   source = "../../../modules/s3_to_store_app_artifact"
   name      = "${local.name_prefix}"
