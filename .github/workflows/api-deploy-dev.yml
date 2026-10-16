@@ -23,6 +23,7 @@ jobs:
       run:
         working-directory: apps/api
     steps:
+      # START BUILD
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Set up Java
@@ -38,3 +39,51 @@ jobs:
           cp target/api-0.0.1-SNAPSHOT.jar target/app.jar
           zip -j target/api.zip run.sh target/app.jar
           ls -lh target/api.zip
+
+      # AUTH WITH AWS
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+        with:
+          role-to-assume: ${{ vars.AWS_DEV_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Who am I
+        run: aws sts get-caller-identity
+
+      # UPLOAD CODE TO AWS S3
+      - name: Upload zip to S3
+        id: upload
+        run: |
+          KEY="api/${GITHUB_SHA::7}.zip"
+          aws s3 cp target/api.zip "s3://${{ vars.DEV_API_ARTIFACTS_BUCKET }}/$KEY"
+          echo "key=$KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Update code and publish version
+        id: publish
+        run: |
+          VERSION=$(aws lambda update-function-code \
+            --function-name "${{ vars.DEV_API_FUNCTION_NAME }}" \
+            --s3-bucket "${{ vars.DEV_API_ARTIFACTS_BUCKET }}" \
+            --s3-key "${{ steps.upload.outputs.key }}" \
+            --publish --query Version --output text)
+          echo "Published version $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for SnapStart snapshot
+        run: |
+          aws lambda wait published-version-active \
+            --function-name "${{ vars.DEV_API_FUNCTION_NAME }}" \
+            --qualifier "${{ steps.publish.outputs.version }}"
+
+      - name: Point alias live to the new version
+        run: |
+          aws lambda update-alias \
+            --function-name "${{ vars.DEV_API_FUNCTION_NAME }}" \
+            --name live \
+            --function-version "${{ steps.publish.outputs.version }}"
+
+      # TEST API
+      - name: Smoke test
+        run: |
+          curl --fail --silent --show-error \
+            --retry 3 --retry-delay 5 --max-time 30 \
+            "${{ vars.DEV_API_URL }}/actuator/health/liveness"
