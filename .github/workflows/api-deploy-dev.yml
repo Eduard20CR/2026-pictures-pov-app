@@ -1,0 +1,40 @@
+name: API Deploy Dev
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/api/**"
+      - ".github/workflows/api-deploy-dev.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: api-deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6
+        with:
+          distribution: corretto
+          java-version: "21"
+          cache: maven
+      - name: Build jar
+        run: ./mvnw -B -q clean package -DskipTests
+      - name: Package Lambda zip
+        run: |
+          cp target/api-0.0.1-SNAPSHOT.jar target/app.jar
+          zip -j target/api.zip run.sh target/app.jar
+          ls -lh target/api.zip
