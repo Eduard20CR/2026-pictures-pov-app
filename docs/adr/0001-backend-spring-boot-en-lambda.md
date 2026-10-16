@@ -1,6 +1,6 @@
 # 0001. Spring Boot backend on AWS Lambda
 
-- **Status:** Partially superseded by [0013](0013-lambda-container-image-web-adapter.md) (packaging, SnapStart, Spring Boot version)
+- **Status:** Partially superseded by [0013](0013-lambda-zip-snapstart-web-adapter.md) (adapter library, Spring Boot version)
 - **Date:** 2026-10-08
 - **Note:** The build tool (Gradle) is superseded by [0009](0009-backend-build-tool-maven.md).
 

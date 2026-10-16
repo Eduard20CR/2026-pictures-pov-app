@@ -14,7 +14,7 @@ Full picture in `README.md`. Rules that span several documents:
 
 - **Two toolchains, no workspaces:** `apps/api` is Spring Boot 4.1.1 + Java 21 with Maven (`mvnw`); `apps/web` is React + Vite + TypeScript with npm. No `packages/shared`, no pnpm.
 - **OpenAPI is the boundary:** springdoc generates it from the backend (RNF-OPE-06); openapi-typescript generates the frontend types in `apps/web/src/api/`. An API change means regenerating them.
-- **Lambda zip with SnapStart:** the API runs on Lambda as a zip (`run.sh` + jar) with AWS Lambda Web Adapter and SnapStart; API Gateway calls the `live` alias (ADR 0014). Open PostgreSQL connections after the snapshot restore, never during the captured init.
+- **Lambda zip with SnapStart:** the API runs on Lambda as a zip (`run.sh` + jar) with AWS Lambda Web Adapter and SnapStart; API Gateway calls the `live` alias (ADR 0013). Open PostgreSQL connections after the snapshot restore, never during the captured init.
 - **Migrations in CI/CD, not at startup:** Liquibase changelogs live in `apps/api` with `spring.liquibase.enabled=false`; they must stay backward compatible with the running version.
 - **Photos never go through the backend:** direct S3 uploads with presigned URLs; an S3-triggered Lambda makes WebP thumbnails; photos and ZIPs only via temporary signed links (RNF-SEG-05).
 - **Cost:** each idle environment ≤ 25 USD/month (RNF-COS-01). No services with fixed idle cost (e.g. Fargate + ALB).

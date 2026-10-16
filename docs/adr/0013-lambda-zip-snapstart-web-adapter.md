@@ -1,19 +1,19 @@
-# 0014. Lambda zip with SnapStart and AWS Lambda Web Adapter
+# 0013. Lambda zip with SnapStart and AWS Lambda Web Adapter
 
 - **Status:** Accepted
 - **Date:** 2026-10-16
 
 ## Context
 
-[0013](0013-lambda-container-image-web-adapter.md) chose a container image without SnapStart. Measured in dev at 3008 MB, the cold start was about 9 s, close to the 10 s Lambda init limit and above RNF-REN-04. Container images do not support SnapStart; zip packages do.
+[0001](0001-backend-spring-boot-en-lambda.md) chose a zip package with SnapStart and `aws-serverless-java-container`. We want a simpler package that runs Spring Boot unchanged, on Spring Boot 4.1.1. Measured in dev at 3008 MB, a container image without SnapStart had a cold start of about 9 s, close to the 10 s Lambda init limit and above RNF-REN-04.
 
 ## Options
 
 | Option | Pro | Con |
 |---|---|---|
-| Container image + Lambda Web Adapter | Simple build and deploy | Cold start of about 9 s |
+| Container image + Lambda Web Adapter | Simple build and deploy | No SnapStart: cold start of about 9 s |
 | Zip + SnapStart + Lambda Web Adapter | Cold start of about 1 s; plain Spring Boot app | Zip over 50 MB goes through S3; versions and an alias to manage |
-| Container image + provisioned concurrency | No cold starts for warm instances | Hourly cost even when idle |
+| ECS | No cold starts | Fixed idle cost: breaks RNF-COS-01 |
 
 ## Decision
 
@@ -25,7 +25,7 @@
 - ✅ Cold start of about 1 s; SnapStart has no extra cost for Java.
 - ⚠️ The snapshot is cloned: no database connections or unique state at startup.
 - ⚠️ SnapStart only applies to published versions: API Gateway calls the `live` alias, and each deploy publishes a version and moves the alias.
-- ⚠️ CI uploads the zip to an S3 artifacts bucket instead of pushing to Amazon ECR.
+- ⚠️ CI uploads the zip to an S3 artifacts bucket.
 
 ## References
 
