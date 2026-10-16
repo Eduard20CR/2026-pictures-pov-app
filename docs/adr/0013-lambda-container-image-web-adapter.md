@@ -1,6 +1,6 @@
 # 0013. Lambda container image with AWS Lambda Web Adapter
 
-- **Status:** Accepted
+- **Status:** Superseded by [0014](0014-lambda-zip-snapstart-web-adapter.md)
 - **Date:** 2026-10-15
 
 ## Context

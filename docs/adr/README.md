@@ -6,7 +6,7 @@ Key architecture decisions, one per file, in a short [MADR](https://adr.github.i
 
 | ADR | Decision | Status |
 |---|---|---|
-| [0001](0001-backend-spring-boot-en-lambda.md) | Spring Boot backend on AWS Lambda | Partially superseded by 0013 |
+| [0001](0001-backend-spring-boot-en-lambda.md) | Spring Boot backend on AWS Lambda | Partially superseded by 0013, 0014 |
 | [0002](0002-npm-without-workspaces.md) | npm without workspaces | Accepted |
 | [0003](0003-frontend-react.md) | React frontend | Accepted |
 | [0004](0004-database-aurora-serverless-v2.md) | Aurora Serverless v2 database | Accepted |
@@ -18,7 +18,8 @@ Key architecture decisions, one per file, in a short [MADR](https://adr.github.i
 | [0010](0010-database-migrations-liquibase.md) | Database migrations with Liquibase in CI/CD | Accepted |
 | [0011](0011-terraform-state-amazon-s3.md) | Terraform state in Amazon S3 | Accepted |
 | [0012](0012-single-aws-account.md) | Single AWS account for development and production | Accepted |
-| [0013](0013-lambda-container-image-web-adapter.md) | Lambda container image with AWS Lambda Web Adapter | Accepted |
+| [0013](0013-lambda-container-image-web-adapter.md) | Lambda container image with AWS Lambda Web Adapter | Superseded by 0014 |
+| [0014](0014-lambda-zip-snapstart-web-adapter.md) | Lambda zip with SnapStart and AWS Lambda Web Adapter | Accepted |
 
 ## Rules
 
