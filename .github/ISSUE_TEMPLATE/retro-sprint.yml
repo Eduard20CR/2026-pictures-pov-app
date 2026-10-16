@@ -1,0 +1,33 @@
+name: Sprint retrospective
+description: Inspect the last sprint and agree on improvements for the next one.
+title: "Sprint N Retrospective"
+labels: ["type: retro"]
+body:
+  - type: textarea
+    id: went-well
+    attributes:
+      label: What went well
+      value: "- "
+    validations:
+      required: true
+  - type: textarea
+    id: to-improve
+    attributes:
+      label: What did not go well
+      value: "- "
+    validations:
+      required: true
+  - type: textarea
+    id: actions
+    attributes:
+      label: Actions for the next sprint
+      description: One or two concrete actions. Each one becomes an issue in the next sprint.
+      value: "- [ ] "
+    validations:
+      required: true
+  - type: input
+    id: velocity
+    attributes:
+      label: Velocity
+      description: Points committed vs. points completed.
+      placeholder: "20 committed / 20 completed"
