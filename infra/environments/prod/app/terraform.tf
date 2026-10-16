@@ -10,7 +10,7 @@ terraform {
 
   backend "s3" {
     bucket       = "pictures-pov-tfstate-us-east-1-058264166152"
-    key          = "prod/terraform.tfstate"
+    key          = "prod/app/terraform.tfstate"
     region       = "us-east-1"
     encrypt      = true
     use_lockfile = true
@@ -18,7 +18,7 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region       = "us-east-1"
 
   default_tags {
     tags = {

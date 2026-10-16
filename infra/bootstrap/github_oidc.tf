@@ -72,3 +72,13 @@ resource "aws_iam_role" "github_actions_prod" {
     Environment = "prod"
   }
 }
+
+resource "aws_iam_role_policy_attachment" "github_actions_dev_admin" {
+  role       = aws_iam_role.github_actions_dev.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_prod_admin" {
+  role       = aws_iam_role.github_actions_prod.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
