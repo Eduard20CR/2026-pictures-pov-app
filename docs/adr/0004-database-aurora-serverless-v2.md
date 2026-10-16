@@ -23,4 +23,4 @@ Events, uploads and moderation data are relational. The database must keep idle 
 
 - ✅ No idle compute cost; experience with SQL and PostgreSQL.
 - ⚠️ Resuming takes seconds and can break RNF-REN-04: tune the pause timeout per environment.
-- ⚠️ Keep the connection pool small ([0013](0013-lambda-container-image-web-adapter.md)).
+- ⚠️ Keep the connection pool small ([0013](0013-lambda-zip-snapstart-web-adapter.md)).
