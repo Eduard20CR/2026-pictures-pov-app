@@ -9,6 +9,7 @@ data "aws_iam_policy_document" "assume" {
 }
 
 data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "this" {
   name               = "${var.name}-lambda"
