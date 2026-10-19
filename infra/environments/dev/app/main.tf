@@ -1,18 +1,22 @@
 locals {
-  name_prefix = "${var.project}-${var.environment}"
+  name_prefix        = "${var.project}-${var.environment}"
+  ssm_parameter_path = "/${var.project}/${var.environment}/db"
 }
 
 module "s3_to_store_app_artifact" {
   source = "../../../modules/s3_to_store_app_artifact"
-  name      = "${local.name_prefix}"
+  name   = local.name_prefix
 }
 
 module "api_lambda" {
-  source    = "../../../modules/lambda_api"
-  name      = "${local.name_prefix}-api"
-  s3_bucket = module.s3_to_store_app_artifact.artifacts_bucket
-  s3_key    = var.api_s3_key
-  ssm_parameter_path = "/${var.project}/${var.environment}/db"
+  source             = "../../../modules/lambda_api"
+  name               = "${local.name_prefix}-api"
+  s3_bucket          = module.s3_to_store_app_artifact.artifacts_bucket
+  s3_key             = var.api_s3_key
+  ssm_parameter_path = local.ssm_parameter_path
+  environment_variables = {
+    SSM_DB_PATH = local.ssm_parameter_path
+  }
 }
 
 module "api_http" {
