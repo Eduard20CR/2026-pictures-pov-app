@@ -12,6 +12,7 @@ module "api_lambda" {
   name      = "${local.name_prefix}-api"
   s3_bucket = module.s3_to_store_app_artifact.artifacts_bucket
   s3_key    = var.api_s3_key
+  ssm_parameter_path = "/${var.project}/${var.environment}/db"
 }
 
 module "api_http" {

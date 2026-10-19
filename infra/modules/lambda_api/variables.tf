@@ -18,3 +18,8 @@ variable "environment_variables" {
   description = "Extra environment variables for the function."
   default     = {}
 }
+
+variable "ssm_parameter_path" {
+  type        = string
+  description = "SSM Parameter Store path (no trailing slash) the function may read, e.g. /pictures-pov/dev/db."
+}
