@@ -20,6 +20,22 @@ resource "aws_iam_role_policy_attachment" "logs" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+data "aws_iam_policy_document" "ssm_read" {
+  statement {
+    actions = ["ssm:GetParametersByPath", "ssm:GetParameters", "ssm:GetParameter"]
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_parameter_path}",
+      "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_parameter_path}/*",
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "ssm_read" {
+  name   = "${var.name}-read-ssm-parameters"
+  role   = aws_iam_role.this.id
+  policy = data.aws_iam_policy_document.ssm_read.json
+}
+
 resource "aws_lambda_function" "this" {
   function_name = var.name
   role          = aws_iam_role.this.arn
