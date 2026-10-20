@@ -1,0 +1,39 @@
+name: DB Deploy Dev
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "db/**"
+      - ".github/workflows/db-migrate-dev.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-migrate-dev
+  cancel-in-progress: false
+
+jobs:
+  db:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: db
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Liquibase
+        uses: liquibase/setup-liquibase@9bd28bc8b31bd5a1651b34c7856569d5392ee869 # v3.0.0
+        with:
+          version: "5.0.3"
+          edition: community
+      - name: Install Postgres driver
+        run: liquibase lpm add postgresql --global
+      - name: Liquibase update
+        env:
+          LIQUIBASE_COMMAND_URL: ${{ secrets.DB_URL }}
+          LIQUIBASE_COMMAND_USERNAME: ${{ secrets.DB_USERNAME }}
+          LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: liquibase update
