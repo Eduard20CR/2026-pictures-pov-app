@@ -87,3 +87,6 @@ override.tf.json
 # Terraform: CLI config
 .terraformrc
 terraform.rc
+
+# env
+*.env
