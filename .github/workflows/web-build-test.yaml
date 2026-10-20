@@ -3,9 +3,6 @@ name: Web CI Tests
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "apps/web/**"
-      - ".github/workflows/web-build-test.yml"
 
 permissions:
   contents: read
