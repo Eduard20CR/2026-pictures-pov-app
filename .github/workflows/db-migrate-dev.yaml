@@ -1,11 +1,11 @@
-name: DB Deploy Dev
+name: DB Migrate Dev
 
 on:
   push:
     branches: [main]
     paths:
       - "db/**"
-      - ".github/workflows/db-migrate-dev.yml"
+      - ".github/workflows/db-migrate-dev.yaml"
   workflow_dispatch:
 
 permissions:
@@ -23,7 +23,7 @@ jobs:
         working-directory: db
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Set up Liquibase
         uses: liquibase/setup-liquibase@9bd28bc8b31bd5a1651b34c7856569d5392ee869 # v3.0.0
         with:

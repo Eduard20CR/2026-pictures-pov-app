@@ -5,8 +5,7 @@ on:
     branches: [main]
     paths:
       - "apps/api/**"
-      - "infra/**"
-      - ".github/workflows/api-deploy-dev.yml"
+      - ".github/workflows/api-deploy-dev.yaml"
   workflow_dispatch:
 
 permissions:
@@ -27,7 +26,7 @@ jobs:
         working-directory: apps/api
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Set up Java
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6
         with:
@@ -51,55 +50,11 @@ jobs:
         run: |
           KEY="api/${GITHUB_SHA::7}.zip"
           aws s3 cp target/api.zip "s3://${{ vars.DEV_API_ARTIFACTS_BUCKET }}/$KEY"
+          aws s3 cp target/api.zip "s3://${{ vars.DEV_API_ARTIFACTS_BUCKET }}/api/latest.zip"
           echo "key=$KEY" >> "$GITHUB_OUTPUT"
 
-  infra:
-    needs: build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: infra/environments/dev/app
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
-        with:
-          role-to-assume: ${{ vars.AWS_DEV_ROLE_ARN }}
-          aws-region: us-east-1
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "~1.14.0"
-      - name: Terraform init
-        run: terraform init -input=false
-      - name: Terraform apply
-        run: terraform apply -input=false -auto-approve -var "api_s3_key=${{ needs.build.outputs.key }}"
-
-  db:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: db
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Set up Liquibase
-        uses: liquibase/setup-liquibase@9bd28bc8b31bd5a1651b34c7856569d5392ee869 # v3.0.0
-        with:
-          version: "5.0.3"
-          edition: community
-      - name: Install Postgres driver
-        run: liquibase lpm add postgresql --global
-      - name: Liquibase update
-        env:
-          LIQUIBASE_COMMAND_URL: ${{ secrets.DB_URL }}
-          LIQUIBASE_COMMAND_USERNAME: ${{ secrets.DB_USERNAME }}
-          LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: liquibase update
-
   deploy:
-    needs: [build, infra]
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
