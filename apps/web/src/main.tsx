@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import HealthCheck from './components/HealthCheck.tsx'
+import NotFound from './features/general/NotFound.tsx'
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
   {
     path: "/health",
     element: <HealthCheck />,
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);
 
