@@ -12,7 +12,7 @@ module "api_lambda" {
   source             = "../../../modules/lambda_api"
   name               = "${local.name_prefix}-api"
   s3_bucket          = module.s3_artifacts_bucket.artifacts_bucket
-  s3_key             = var.api_s3_key
+  s3_key             = "api/latest.zip"
   ssm_parameter_path = local.ssm_parameter_path
   environment_variables = {
     SSM_DB_PATH = local.ssm_parameter_path
@@ -27,8 +27,7 @@ module "api_http" {
   lambda_alias_name    = module.api_lambda.alias_name
 }
 
-module "s3_static_site" {
-  source = "../../../modules/s3_static_site"
-  name   = local.name_prefix 
+module "static_site" {
+  source = "../../../modules/static_site"
+  name   = local.name_prefix
 }
-

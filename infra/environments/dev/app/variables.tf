@@ -9,8 +9,3 @@ variable "environment" {
   type        = string
   default     = "dev"
 }
-
-variable "api_s3_key" {
-  type        = string
-  description = "The whole S3 key 'api/<commit SHA>.zip' of the API zip used when the Lambda is first created. Later deploys update the code from the CD workflow."
-}
