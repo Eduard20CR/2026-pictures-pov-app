@@ -3,11 +3,14 @@ locals {
   github_repo = "Eduard20CR@41557299/2026-pictures-pov-app@1407560871"
 }
 
+# GITHUB PROVIDES
 
 resource "aws_iam_openid_connect_provider" "github" {
   url            = "https://token.actions.githubusercontent.com"
   client_id_list = ["sts.amazonaws.com"]
 }
+
+# DEV
 
 data "aws_iam_policy_document" "github_trust_dev" {
   statement {
@@ -32,15 +35,6 @@ data "aws_iam_policy_document" "github_trust_dev" {
   }
 }
 
-resource "aws_iam_role" "github_actions_dev" {
-  name               = "${var.project}-dev-github-actions"
-  assume_role_policy = data.aws_iam_policy_document.github_trust_dev.json
-
-  tags = {
-    Environment = "dev"
-  }
-}
-
 data "aws_iam_policy_document" "github_trust_prod" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -62,23 +56,4 @@ data "aws_iam_policy_document" "github_trust_prod" {
       values = ["repo:${local.github_repo}:environment:prod"]
     }
   }
-}
-
-resource "aws_iam_role" "github_actions_prod" {
-  name               = "${var.project}-prod-github-actions"
-  assume_role_policy = data.aws_iam_policy_document.github_trust_prod.json
-
-  tags = {
-    Environment = "prod"
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "github_actions_dev_admin" {
-  role       = aws_iam_role.github_actions_dev.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "github_actions_prod_admin" {
-  role       = aws_iam_role.github_actions_prod.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }

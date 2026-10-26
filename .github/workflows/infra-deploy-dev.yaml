@@ -28,7 +28,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
         with:
-          role-to-assume: ${{ vars.AWS_DEV_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_DEV_GHA_ROLE_ARN_INFRA }}
           aws-region: us-east-1
       - uses: hashicorp/setup-terraform@v3
         with:
