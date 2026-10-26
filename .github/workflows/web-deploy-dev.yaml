@@ -34,7 +34,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
         with:
-          role-to-assume: ${{ vars.AWS_DEV_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_DEV_GHA_ROLE_ARN_WEB }}
           aws-region: us-east-1
       - name: Upload to S3
         run: aws s3 sync dist/ "s3://${{ vars.DEV_WEB_BUCKET }}" --delete
