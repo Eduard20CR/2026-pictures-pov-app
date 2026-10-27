@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 7
+      author: "Oscar Vasquez"
+      comment: "public_code holds 16 random bytes in base64url (128 bits, RNF-SEG-04)"
+      changes:
+        - modifyDataType:
+            tableName: events
+            columnName: public_code
+            newDataType: varchar(22)
+      rollback:
+        - modifyDataType:
+            tableName: events
+            columnName: public_code
+            newDataType: varchar(16)
