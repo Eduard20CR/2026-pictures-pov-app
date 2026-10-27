@@ -19,7 +19,9 @@ Key architecture decisions, one per file, in a short [MADR](https://adr.github.i
 | [0011](0011-terraform-state-amazon-s3.md) | Terraform state in Amazon S3 | Accepted |
 | [0012](0012-single-aws-account.md) | Single AWS account for development and production | Accepted |
 | [0013](0013-lambda-zip-snapstart-web-adapter.md) | Lambda zip with SnapStart and AWS Lambda Web Adapter | Accepted |
-
+| [0014](0014-public-aurora-lambda-outside-vpc.md) | Lambda runs outside my vpc makes my db less safe | Accepted |
+| [0015](0015-dev-database-neon-credentials-ssm.md) | We are using Neon as our Dev DB | Accepted |
+| [0016](0016-rest-api-conventions.md) | REST API conventions | Accepted |
 ## Rules
 
 - File name: `NNNN-title-with-hyphens.md`. Numbers are never reused.
