@@ -22,7 +22,6 @@ The schema ([0004](0004-database-aurora-serverless-v2.md)) must evolve in a vers
 - Liquibase CLI (Community edition); changelogs in YAML.
 - Credentials only from environment variables (`LIQUIBASE_COMMAND_*`): GitHub secrets in CI, local defaults for Docker.
 - Liquibase always runs from `db/`; the changelog path is part of each changeset's identity.
-- `apps/api` has no Liquibase dependency and never migrates at startup.
 
 ## Consequences
 
