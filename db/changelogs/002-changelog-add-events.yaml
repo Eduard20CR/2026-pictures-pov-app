@@ -1,0 +1,60 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: "Oscar Vasquez"
+      changes:
+        - createTable:
+            tableName: events
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: color
+                  type: varchar(7)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: public_code
+                  type: varchar(16)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: event_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: images_per_user
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expected_guests
+                  type: int
+              - column:
+                  name: status
+                  type: varchar(20)
+                  defaultValue: DRAFT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: >
+              ALTER TABLE events
+              ADD CONSTRAINT ck_events_status
+              CHECK (status IN ('DRAFT', 'ACTIVE', 'CLOSED', 'ARCHIVED', 'DELETED'))

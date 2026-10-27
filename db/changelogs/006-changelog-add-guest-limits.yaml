@@ -1,0 +1,53 @@
+databaseChangeLog:
+  - changeSet:
+      id: 6
+      author: "Oscar Vasquez"
+      changes:
+        - createTable:
+            tableName: guest_limits
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: event_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_guest_limits_event
+                    references: events(id)
+              - column:
+                  name: guest_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: upload_count
+                  type: int
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: guest_limits
+            constraintName: uq_guest_limits_event_guest
+            columnNames: event_id, guest_id
+        - sql:
+            sql: >
+              ALTER TABLE guest_limits
+              ADD CONSTRAINT ck_guest_limits_upload_count
+              CHECK (upload_count >= 0)

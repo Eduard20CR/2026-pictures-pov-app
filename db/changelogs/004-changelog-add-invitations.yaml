@@ -1,0 +1,69 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4
+      author: "Oscar Vasquez"
+      changes:
+        - createTable:
+            tableName: invitations
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: event_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_invitations_event
+                    references: events(id)
+              - column:
+                  name: email
+                  type: varchar(320)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: fk_invitations_user
+                    references: users(id)
+              - column:
+                  name: role
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(20)
+                  defaultValue: PENDING
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: invitations
+            constraintName: uq_invitations_event_email
+            columnNames: event_id, email
+        - sql:
+            sql: >
+              ALTER TABLE invitations
+              ADD CONSTRAINT ck_invitations_role
+              CHECK (role IN ('OWNER', 'MODERATOR'));
+              ALTER TABLE invitations
+              ADD CONSTRAINT ck_invitations_status
+              CHECK (status IN ('PENDING', 'ACCEPTED'));
+              CREATE UNIQUE INDEX ux_invitations_one_owner
+              ON invitations (event_id) WHERE role = 'OWNER';
+        - createIndex:
+            tableName: invitations
+            indexName: ix_invitations_user_id
+            columns:
+              - column:
+                  name: user_id
