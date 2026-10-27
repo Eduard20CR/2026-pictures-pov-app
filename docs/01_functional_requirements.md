@@ -4,9 +4,9 @@
 |---|---|
 | Project | Pictures POV App |
 | Document | Functional requirements |
-| Version | 0.3 |
+| Version | 0.4 |
 | Status | Ready |
-| Date | 2026-10-08 |
+| Date | 2026-10-27 |
 | Owner | Oscar |
 
 ## Change history
@@ -16,17 +16,18 @@
 | 0.1 | 2026-10-06 | Initial version. |
 | 0.2 | 2026-10-06 | The ZIP download is generated in the background, stored in Amazon S3 and offered through a temporary link on the event page; the ZIP email notification is removed (RF-ORG-14, RF-SIS-06). |
 | 0.3 | 2026-10-08 | Document translated into English. Requirement identifiers are unchanged. |
+| 0.4 | 2026-10-27 | New Moderator role and event invitations (OWNER, MODERATOR). Added RF-AUT-05, RF-ORG-22, RF-ORG-23 and RF-MOD-01 to RF-MOD-07. Event assignment uses an OWNER invitation (RF-ADM-02, RF-ADM-03). Updated RF-AUT-01 to RF-AUT-03, RF-ADM-09 to RF-ADM-11, RF-ADM-13, RF-ORG-01, RF-ORG-21, RF-INV-07 and RF-SIS-06. Sections 7 to 9 renumbered to 8 to 10. |
 ---
 
 ## 1. Introduction
 
 ### 1.1 Purpose
 
-This document defines the functional capabilities of Pictures POV App, a web application that allows the guests of an event to upload photos through a QR code, without creating an account, and allows organizers to view, moderate and download those photos.
+This document defines the functional capabilities of Pictures POV App, a web application that allows the guests of an event to upload photos through a QR code, without creating an account, and allows organizers and moderators to view, moderate and download those photos.
 
 ### 1.2 Scope
 
-The document covers the functional requirements of the system's three roles (administrator, organizer and guest) and the system's automatic behavior. Non-functional requirements and business rules are specified in separate documents.
+The document covers the functional requirements of the system's four roles (administrator, organizer, moderator and guest) and the system's automatic behavior. Non-functional requirements and business rules are specified in separate documents.
 
 ### 1.3 Related documents
 
@@ -39,7 +40,7 @@ The document covers the functional requirements of the system's three roles (adm
 ## 2. Conventions
 
 - **Identifier.** Each requirement has a stable identifier in the format `RF-<AREA>-<NN>`. An identifier is never reused; removed requirements are marked as *Retired*.
-- **Areas.** `AUT` authentication, `ADM` administrator, `ORG` organizer, `INV` guest, `SIS` system.
+- **Areas.** `AUT` authentication, `ADM` administrator, `ORG` organizer, `MOD` moderator, `INV` guest, `SIS` system.
 - **Wording.** Each requirement describes a single verifiable capability, in the form "The system must allow the [role] to …" or "The system must …".
 - **Priority (MoSCoW).** **M** (Must): mandatory for the first version. **S** (Should): important, not blocking. **C** (Could): desirable. **W** (Won't): out of scope for this version.
 - **Acceptance criteria (AC).** Included for requirements that need additional precision to be verifiable.
@@ -50,7 +51,9 @@ The document covers the functional requirements of the system's three roles (adm
 | Term | Definition |
 |---|---|
 | Administrator | Member of the platform team with permissions over all events and users. |
-| Organizer | Customer to whom one or more events are assigned. Also called the event owner. |
+| Organizer | Customer who holds an accepted OWNER invitation for an event. Also called the event owner. Each event has exactly one owner. |
+| Moderator | User who holds an accepted MODERATOR invitation for an event, with the limited permissions of section 7. |
+| Invitation | Grant of a role (OWNER or MODERATOR) on one event to an email. Status *Pending* until accepted (RF-AUT-05), then *Accepted*. One invitation per event and email; emails are stored in lowercase. |
 | Guest | Attendee of an event. Has no account in the system. |
 | Device | Browser identified by a unique identifier stored in a cookie, issued per event. It is not a verified identity (RN-02). |
 | Event | Celebration for which photos are collected. It has a public link, a QR code and a lifecycle (RN-06). |
@@ -63,14 +66,22 @@ The document covers the functional requirements of the system's three roles (adm
 
 ## 4. Authentication
 
-Applies to administrators and organizers. Guests do not authenticate.
+Applies to administrators, organizers and moderators. Guests do not authenticate.
 
 | ID | Requirement | Priority |
 |---|---|---|
-| RF-AUT-01 | The system must allow administrators and organizers to **sign in** with a Google account or with email and password. | M |
-| RF-AUT-02 | The system must allow administrators and organizers to **sign out**. | M |
+| RF-AUT-01 | The system must allow administrators, organizers and moderators to **sign in** with a Google account or with email and password. | M |
+| RF-AUT-02 | The system must allow administrators, organizers and moderators to **sign out**. | M |
 | RF-AUT-03 | The system must allow a user with email and password to **recover their password**. | M |
 | RF-AUT-04 | The system must require **multi-factor authentication** for administrators. | S |
+| RF-AUT-05 | The system must allow an invitee to **accept an invitation** to an event after creating an account and verifying their email. | M |
+
+**AC RF-AUT-05**
+1. The invitee can create the account after the invitation was sent.
+2. The system accepts the invitation only if the token has `email_verified = true` and its email matches the invitation email; otherwise it responds 403 and the invitation remains *Pending*.
+3. Emails are compared in lowercase.
+4. On acceptance, the invitation becomes *Accepted*, is linked to the user, and the event appears in the user's list of events with the invitation's role.
+5. A removed invitation cannot be accepted.
 
 ---
 
@@ -81,8 +92,8 @@ Applies to administrators and organizers. Guests do not authenticate.
 | ID | Requirement | Priority |
 |---|---|---|
 | RF-ADM-01 | The system must allow the administrator to **create an event** by providing a name, the event date and the organizer's email. | M |
-| RF-ADM-02 | The system must allow the administrator to **assign an event to an email**, even if the organizer does not yet have an account. | M |
-| RF-ADM-03 | The system must allow the administrator to **edit** an event's data and **reassign it** to another email. | S |
+| RF-ADM-02 | The system must allow the administrator to **assign an event to an organizer** by creating an OWNER invitation for their email, even if the organizer does not yet have an account. | M |
+| RF-ADM-03 | The system must allow the administrator to **edit** an event's data and **reassign it** to another email by replacing its OWNER invitation. | S |
 | RF-ADM-04 | The system must allow the administrator to **delete an event**. | M |
 | RF-ADM-05 | The system must allow the administrator to **view all events**, paginated and sorted by date. | M |
 | RF-ADM-06 | The system must allow the administrator to **search events by organizer email**. | M |
@@ -90,9 +101,14 @@ Applies to administrators and organizers. Guests do not authenticate.
 | RF-ADM-08 | The system must show the administrator, per event, the **number of photos and the storage used**. | S |
 
 **AC RF-ADM-02**
-1. A user who signs in with a verified email matching the assigned email sees the event in their list of events.
-2. A user whose email is not verified does not see the event (RN-04).
-3. When the event is assigned, the system notifies the organizer by email (RF-SIS-06).
+1. Each event has exactly one OWNER invitation; the event has no other owner reference.
+2. One invitation per event and email; the email is stored in lowercase.
+3. The organizer gets access only after accepting the invitation (RF-AUT-05); a user whose email is not verified does not see the event (RN-04).
+4. When the invitation is created, the system notifies the organizer by email (RF-SIS-06).
+
+**AC RF-ADM-03**
+1. On reassignment, the previous OWNER invitation is removed and the previous owner loses access to the event.
+2. The new OWNER invitation is *Pending* until accepted (RF-AUT-05).
 
 **AC RF-ADM-04**
 1. The system asks for confirmation by having the user type the event name.
@@ -106,9 +122,9 @@ Applies to administrators and organizers. Guests do not authenticate.
 
 | ID | Requirement | Priority |
 |---|---|---|
-| RF-ADM-09 | The system must allow the administrator to **search organizers** by email. | M |
-| RF-ADM-10 | The system must allow the administrator to **block and unblock** an organizer. | M |
-| RF-ADM-11 | The system must allow the administrator to **delete** an organizer. | S |
+| RF-ADM-09 | The system must allow the administrator to **search organizers and moderators** by email. | M |
+| RF-ADM-10 | The system must allow the administrator to **block and unblock** an organizer or moderator. | M |
+| RF-ADM-11 | The system must allow the administrator to **delete** an organizer or moderator. | S |
 | RF-ADM-12 | The system must allow the administrator to **grant and revoke the administrator role** for another user. | S |
 
 **AC RF-ADM-10**
@@ -117,8 +133,9 @@ Applies to administrators and organizers. Guests do not authenticate.
 3. The events of a blocked organizer remain accessible to guests (RN-09).
 
 **AC RF-ADM-11**
-1. Before deleting, the system shows the events assigned to the organizer.
-2. The system does not allow deleting an organizer with assigned events until those events are reassigned or deleted.
+1. Before deleting, the system shows the events where the user is owner or moderator.
+2. The system does not allow deleting a user who owns events until those events are reassigned or deleted.
+3. Deleting a user removes their MODERATOR invitations.
 
 **AC RF-ADM-12**
 1. The system does not allow revoking the role from the last administrator.
@@ -128,7 +145,7 @@ Applies to administrators and organizers. Guests do not authenticate.
 
 | ID | Requirement | Priority |
 |---|---|---|
-| RF-ADM-13 | The system must **record** the author and date of the creation, deletion and reassignment of events, the blocking and deletion of users and role changes, and allow the administrator to view that record. | C |
+| RF-ADM-13 | The system must **record** the author and date of the creation, deletion and reassignment of events, the blocking and deletion of users, role changes and the creation, acceptance and removal of invitations, and allow the administrator to view that record. | C |
 
 ---
 
@@ -144,7 +161,7 @@ Applies to administrators and organizers. Guests do not authenticate.
 | RF-ORG-04 | The system must allow the organizer to **open or close uploads** manually, regardless of the upload window. | S |
 | RF-ORG-05 | The system must show the organizer **event statistics**: uploaded photos, participating devices and hidden photos. | C |
 
-**AC RF-ORG-01:** the list contains only the events assigned to the organizer's verified email (RN-04).
+**AC RF-ORG-01:** the list contains only the events for which the organizer holds an accepted OWNER invitation (RF-AUT-05, RN-04).
 
 ### 6.2 Customization
 
@@ -154,7 +171,7 @@ Applies to administrators and organizers. Guests do not authenticate.
 | RF-ORG-07 | The system must allow the organizer to **upload or change the event's cover photo**. | S |
 | RF-ORG-08 | The system must allow the organizer to **choose the event's main color**. | S |
 | RF-ORG-09 | The system must allow the organizer to **set a welcome message** for guests. | C |
-| RF-ORG-21 | The system must allow the organizer to **configure the gallery visibility**: public through the link, PIN-protected or visible only to the organizer. | S |
+| RF-ORG-21 | The system must allow the organizer to **configure the gallery visibility**: public through the link, PIN-protected or visible only to the organizer and moderators. | S |
 
 **AC RF-ORG-08:** the color is selected from a predefined palette whose colors meet a minimum contrast of 4.5:1 with the text (WCAG 2.1 level AA).
 
@@ -209,9 +226,52 @@ Applies to administrators and organizers. Guests do not authenticate.
 
 **AC RF-ORG-20:** the default mode is post-moderation.
 
+### 6.5 Moderators
+
+| ID | Requirement | Priority |
+|---|---|---|
+| RF-ORG-22 | The system must allow the organizer to **invite a moderator** by email, even if the invitee does not yet have an account. | M |
+| RF-ORG-23 | The system must allow the organizer to **remove a moderator** or a pending moderator invitation. | M |
+
+**AC RF-ORG-22**
+1. The system creates a *Pending* MODERATOR invitation; the email is stored in lowercase.
+2. The system rejects the invitation if the email already has one for the event.
+3. The system notifies the invitee by email (RF-SIS-06).
+4. The invitee gets access only after accepting the invitation (RF-AUT-05).
+5. Only the organizer can invite moderators.
+
+**AC RF-ORG-23**
+1. The organizer sees the event's moderators and pending invitations with their status.
+2. Removing deletes the invitation; the moderator loses access to the event immediately.
+3. The removed email can be invited again.
+4. The OWNER invitation cannot be removed with this action (RF-ADM-03).
+
 ---
 
-## 7. Guest
+## 7. Moderator
+
+A moderator acts only on the events for which they hold an accepted MODERATOR invitation.
+
+| ID | Requirement | Priority |
+|---|---|---|
+| RF-MOD-01 | The system must allow the moderator to **view the list of the events they moderate**. | M |
+| RF-MOD-02 | The system must allow the moderator to **view all photos** of the event, including hidden ones, at full size (as in RF-ORG-10 and RF-ORG-11). | M |
+| RF-MOD-03 | The system must allow the moderator to **filter and group photos by uploader** (as in RF-ORG-12). | S |
+| RF-MOD-04 | The system must show the moderator **event statistics** (as in RF-ORG-05). | C |
+| RF-MOD-05 | The system must allow the moderator to **get the event link and download its QR code** (as in RF-ORG-02 and RF-ORG-03). | M |
+| RF-MOD-06 | The system must allow the moderator to **hide** a photo and **show again** a hidden photo (as in RF-ORG-16 and RF-ORG-17). | M |
+| RF-MOD-07 | The system must allow the moderator to **configure the gallery visibility and PIN** (as in RF-ORG-21). | S |
+
+**AC RF-MOD-01:** each event in the list shows that the user's role is moderator.
+
+**AC RF-MOD-06**
+1. The moderator cannot delete photos, download photos or ZIP files, open or close uploads, edit the event's customization, change the moderation mode, or invite or remove moderators.
+2. The server enforces these restrictions and responds 403.
+3. Guest reports (RF-INV-10) and system notifications (RF-SIS-06) go only to the organizer.
+
+---
+
+## 8. Guest
 
 | ID | Requirement | Priority |
 |---|---|---|
@@ -243,13 +303,13 @@ Applies to administrators and organizers. Guests do not authenticate.
 1. The gallery shows only visible photos, neither hidden nor deleted.
 2. The gallery shows thumbnails and loads photos progressively.
 3. If the gallery is PIN-protected (RF-ORG-21), the system asks for the PIN before showing the photos and limits failed attempts in accordance with P-11.
-4. If the gallery is visible only to the organizer, the guest cannot view it.
+4. If the gallery is visible only to the organizer and moderators, the guest cannot view it.
 
 **AC RF-INV-11:** when the upload window has ended and the event is in the Closed state, the gallery remains available according to its visibility setting.
 
 ---
 
-## 8. System
+## 9. System
 
 Behavior the system performs without direct user intervention.
 
@@ -260,7 +320,7 @@ Behavior the system performs without direct user intervention.
 | RF-SIS-03 | The system must **correct the orientation** of images according to their EXIF metadata and **remove location metadata** from images shown to third parties. | S |
 | RF-SIS-04 | The system must generate each event's link with a **non-sequential, unpredictable identifier**. | M |
 | RF-SIS-05 | The system must **automatically delete the photos** of an event once the retention period P-05 has elapsed since the event date. | S |
-| RF-SIS-06 | The system must **notify the organizer by email** when an event is assigned to them and before the automatic deletion of their photos. | S |
+| RF-SIS-06 | The system must **notify by email** the invitee when an invitation is created for them, and the organizer before the automatic deletion of their event's photos. | S |
 | RF-SIS-07 | The system must **show new photos** in the gallery without the guest manually reloading the page. | C |
 
 **AC RF-SIS-01**
@@ -273,7 +333,7 @@ Behavior the system performs without direct user intervention.
 
 ---
 
-## 9. Out of scope
+## 10. Out of scope
 
 The following capabilities are not part of this version (priority W):
 
@@ -281,7 +341,7 @@ The following capabilities are not part of this version (priority W):
 |---|---|
 | Video uploads | — |
 | Payments and subscription plans | — |
-| Self-service organizer registration | Events are assigned only by an administrator. |
+| Self-service organizer registration | Events are assigned only by an administrator, through an OWNER invitation. |
 | Comments and reactions on photos | — |
 | Photo editing | Includes filters and cropping. |
 | Facial recognition and automatic grouping by person | — |
