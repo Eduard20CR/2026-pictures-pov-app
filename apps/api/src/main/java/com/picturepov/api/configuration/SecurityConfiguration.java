@@ -20,7 +20,7 @@ class SecurityConfiguration {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/db-check", "/actuator/health/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/db-check", "/actuator/health/**", "/v3/api-docs/**", "/v3/api-docs.yaml" , "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/events/*").permitAll()
                         .anyRequest().denyAll());
         return http.build();
