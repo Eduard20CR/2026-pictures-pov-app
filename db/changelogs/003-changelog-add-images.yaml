@@ -1,0 +1,67 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: "Oscar Vasquez"
+      changes:
+        - createTable:
+            tableName: images
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: event_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_images_event
+                    references: events(id)
+              - column:
+                  name: s3_key
+                  type: varchar(1024)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: thumb_key
+                  type: varchar(1024)
+              - column:
+                  name: content_type
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: size_bytes
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: guest_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(20)
+                  defaultValue: PENDING
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: >
+              ALTER TABLE images
+              ADD CONSTRAINT ck_images_status
+              CHECK (status IN ('PENDING', 'READY', 'HIDDEN'))
+        - createIndex:
+            tableName: images
+            indexName: ix_images_event_id
+            columns:
+              - column:
+                  name: event_id
