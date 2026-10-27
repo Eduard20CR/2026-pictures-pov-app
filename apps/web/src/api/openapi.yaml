@@ -1,0 +1,55 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8081
+  description: Generated server url
+paths:
+  /events/{publicCode}:
+    get:
+      tags:
+      - event-controller
+      operationId: getByPublicCode
+      parameters:
+      - name: publicCode
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PublicEventResponse"
+  /db-check:
+    get:
+      tags:
+      - test-controller
+      operationId: dbCheck
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+components:
+  schemas:
+    PublicEventResponse:
+      type: object
+      properties:
+        publicCode:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+        eventDate:
+          type: string
+          format: date
+        imagesPerUser:
+          type: integer
+          format: int32
