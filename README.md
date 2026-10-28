@@ -1,28 +1,28 @@
 # Pictures POV App
 
-Guests scan a QR code at an event and upload their photos to a shared gallery, with no account needed.
+Guests scan a QR code at an event and upload their photos, with no account needed; the organizer collects them all in one gallery.
 
 ## How it works
 
 1. An administrator creates the event and assigns it to an organizer.
 2. The organizer places the event's QR code at the venue.
 3. Guests scan it and upload photos from their phone (10 per device by default).
-4. Everyone sees the photos in the event gallery.
+4. Each guest sees and can delete only the photos they uploaded, while the event is active.
 5. The organizer moderates the photos and downloads them as a ZIP.
 
 ## Roles
 
 | Role | Who | Can |
 |---|---|---|
-| Guest | Event attendee, no account | Upload photos, view the gallery |
+| Guest | Event attendee, no account | Upload photos and delete their own |
 | Organizer | Customer with assigned events | Customize the event, moderate and download photos |
 | Administrator | Platform team | Manage all events and users |
 
 ## Scope
 
-**Included:** QR access without registration · uploads with per-device and per-event limits · gallery that is public, PIN-protected or organizer-only · sign-in with Google or email · moderation · single and ZIP downloads · admin panel · thumbnails · automatic deletion after a retention period.
+**Included:** QR access without registration · uploads with per-device and per-event limits · event gallery for the organizer and moderators · sign-in with Google or email · moderation · single and ZIP downloads · admin panel · thumbnails · automatic deletion after a retention period.
 
-**Not in the first version:** videos · payments · self-service sign-up · comments and reactions · photo editing · facial recognition · native app.
+**Not in the first version:** videos · payments · self-service sign-up · comments and reactions · gallery for guests · photo editing · facial recognition · native app.
 
 Details: [functional requirements](docs/01_requisitos_funcionales.md).
 
