@@ -14,8 +14,10 @@ module "api_lambda" {
   s3_bucket          = module.s3_artifacts_bucket.artifacts_bucket
   s3_key             = "api/latest.zip"
   ssm_parameter_path = local.ssm_parameter_path
+  photos_bucket_arn  = module.s3_photos_bucket.bucket_arn 
   environment_variables = {
     SSM_DB_PATH = local.ssm_parameter_path
+    PHOTOS_BUCKET = module.s3_photos_bucket.bucket_name 
   }
 }
 

@@ -23,3 +23,8 @@ variable "ssm_parameter_path" {
   type        = string
   description = "SSM Parameter Store path (no trailing slash) the function may read, e.g. /pictures-pov/dev/db."
 }
+
+variable "photos_bucket_arn" {
+  type        = string
+  description = "ARN of the photos bucket. The function may sign uploads under originals/."
+}

@@ -11,6 +11,8 @@ data "aws_iam_policy_document" "assume" {
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
+# ROL
+
 resource "aws_iam_role" "this" {
   name               = "${var.name}-lambda"
   assume_role_policy = data.aws_iam_policy_document.assume.json
@@ -20,6 +22,8 @@ resource "aws_iam_role_policy_attachment" "logs" {
   role       = aws_iam_role.this.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
+
+# POLICY
 
 data "aws_iam_policy_document" "ssm_read" {
   statement {
@@ -36,6 +40,23 @@ resource "aws_iam_role_policy" "ssm_read" {
   role   = aws_iam_role.this.id
   policy = data.aws_iam_policy_document.ssm_read.json
 }
+
+# POLICY
+
+data "aws_iam_policy_document" "photos_upload" {
+  statement {
+    actions   = ["s3:PutObject"]
+    resources = ["${var.photos_bucket_arn}/originals/*"]
+  }
+}
+
+resource "aws_iam_role_policy" "photos_upload" {
+  name   = "${var.name}-photos-upload"
+  role   = aws_iam_role.this.id
+  policy = data.aws_iam_policy_document.photos_upload.json
+}
+
+# LAMBDA
 
 resource "aws_lambda_function" "this" {
   function_name = var.name
