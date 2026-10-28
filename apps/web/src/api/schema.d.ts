@@ -40,14 +40,27 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        PublicEventResponse: {
-            publicCode?: string;
-            name?: string;
-            color?: string;
-            /** Format: date */
-            eventDate?: string;
+        ProblemDetail: {
+            /** Format: uri */
+            type?: string;
+            title?: string;
             /** Format: int32 */
-            imagesPerUser?: number;
+            status?: number;
+            detail?: string;
+            /** Format: uri */
+            instance?: string;
+            properties?: {
+                [key: string]: unknown;
+            };
+        };
+        PublicEventResponse: {
+            publicCode: string;
+            name: string;
+            color: string;
+            /** Format: date */
+            eventDate: string;
+            /** Format: int32 */
+            imagesPerUser: number;
         };
     };
     responses: never;
@@ -69,13 +82,22 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description OK */
+            /** @description Active event */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "*/*": components["schemas"]["PublicEventResponse"];
+                };
+            };
+            /** @description Event does not exist or is not active */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
         };
