@@ -19,11 +19,17 @@ paths:
           type: string
       responses:
         "200":
-          description: OK
+          description: Active event
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PublicEventResponse"
+        "404":
+          description: Event does not exist or is not active
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
   /db-check:
     get:
       tags:
@@ -38,6 +44,25 @@ paths:
                 type: string
 components:
   schemas:
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+        properties:
+          type: object
+          additionalProperties: {}
     PublicEventResponse:
       type: object
       properties:
@@ -53,3 +78,9 @@ components:
         imagesPerUser:
           type: integer
           format: int32
+      required:
+      - color
+      - eventDate
+      - imagesPerUser
+      - name
+      - publicCode
