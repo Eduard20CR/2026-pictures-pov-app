@@ -4,9 +4,9 @@
 |---|---|
 | Proyecto | Pictures POV App |
 | Documento | Requerimientos no funcionales |
-| Versión | 0.2 |
+| Versión | 0.3 |
 | Estado | Borrador |
-| Fecha | 2026-10-06 |
+| Fecha | 2026-10-28 |
 | Responsable | Oscar |
 
 ## Historial de cambios
@@ -15,6 +15,7 @@
 |---|---|---|
 | 0.1 | 2026-10-06 | Versión inicial. |
 | 0.2 | 2026-10-06 | Los archivos ZIP se incluyen en RNF-SEG-05 y RNF-REN-06 pasa a medir la generación en segundo plano. |
+| 0.3 | 2026-10-28 | Los invitados ya no ven la galería del evento: RNF-REN-01 pasa a medir la galería del organizador y se retira RNF-REN-05. |
 
 ---
 
@@ -63,11 +64,11 @@ Este documento define los atributos de calidad y las restricciones que Pictures 
 
 | ID | Requerimiento | Prioridad |
 |---|---|---|
-| RNF-REN-01 | La página del evento debe mostrar las primeras 30 miniaturas de la galería en menos de 3 segundos (p95) en una conexión móvil 4G. | M |
+| RNF-REN-01 | La galería del evento, vista por el organizador o un moderador, debe mostrar las primeras 30 miniaturas en menos de 3 segundos (p95) en una conexión móvil 4G. | M |
 | RNF-REN-02 | Cada miniatura debe ocupar como máximo 100 KB. | S |
 | RNF-REN-03 | Una foto subida debe estar disponible en la galería en menos de 10 segundos (p95) desde que finaliza la subida. | S |
 | RNF-REN-04 | Las operaciones de la API, excluida la transferencia de archivos, deben responder en menos de 500 ms (p95) y en menos de 1,5 s (p99). | S |
-| RNF-REN-05 | La galería abierta debe reflejar las fotos nuevas en un plazo máximo de 30 segundos (RF-SIS-07). | C |
+| RNF-REN-05 | *Retirado.* | — |
 | RNF-REN-06 | La generación en segundo plano del archivo ZIP de un evento de 2.000 fotos, desde la solicitud hasta que el enlace de descarga está disponible en la página del evento, debe completarse en menos de 15 minutos (RF-ORG-14). | S |
 
 ## 6. Capacidad
@@ -81,7 +82,7 @@ Este documento define los atributos de calidad y las restricciones que Pictures 
 
 | ID | Requerimiento | Prioridad |
 |---|---|---|
-| RNF-DIS-01 | La disponibilidad mensual de la subida de fotos y de la galería debe ser igual o superior al 99,5 %. | S |
+| RNF-DIS-01 | La disponibilidad mensual de la subida de fotos y de la galería del organizador debe ser igual o superior al 99,5 %. | S |
 | RNF-DIS-02 | Reintentar una subida interrumpida no debe consumir cupo adicional ni duplicar la foto (RF-INV-05). | M |
 | RNF-DIS-03 | Ante la pérdida de la base de datos, el punto de recuperación (RPO) no debe superar las 24 horas y el tiempo de recuperación (RTO) no debe superar las 4 horas. | S |
 | RNF-DIS-04 | Las fotos deben almacenarse en un servicio con redundancia en al menos tres zonas de disponibilidad. | M |

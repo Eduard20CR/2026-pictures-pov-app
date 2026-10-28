@@ -4,9 +4,9 @@
 |---|---|
 | Project | Pictures POV App |
 | Document | Functional requirements |
-| Version | 0.4 |
+| Version | 0.5 |
 | Status | Ready |
-| Date | 2026-10-27 |
+| Date | 2026-10-28 |
 | Owner | Oscar |
 
 ## Change history
@@ -17,13 +17,14 @@
 | 0.2 | 2026-10-06 | The ZIP download is generated in the background, stored in Amazon S3 and offered through a temporary link on the event page; the ZIP email notification is removed (RF-ORG-14, RF-SIS-06). |
 | 0.3 | 2026-10-08 | Document translated into English. Requirement identifiers are unchanged. |
 | 0.4 | 2026-10-27 | New Moderator role and event invitations (OWNER, MODERATOR). Added RF-AUT-05, RF-ORG-22, RF-ORG-23 and RF-MOD-01 to RF-MOD-07. Event assignment uses an OWNER invitation (RF-ADM-02, RF-ADM-03). Updated RF-AUT-01 to RF-AUT-03, RF-ADM-09 to RF-ADM-11, RF-ADM-13, RF-ORG-01, RF-ORG-21, RF-INV-07 and RF-SIS-06. Sections 7 to 9 renumbered to 8 to 10. |
+| 0.5 | 2026-10-28 | Guests only upload photos and delete their own; they no longer view the event gallery, and they can do nothing once the event is not Active. Added RF-INV-13. Retired RF-ORG-21, RF-MOD-07, RF-INV-07, RF-INV-10 and RF-SIS-07. Updated the Gallery glossary entry, RF-INV-08, RF-INV-11, AC RF-MOD-06 and section 10. |
 ---
 
 ## 1. Introduction
 
 ### 1.1 Purpose
 
-This document defines the functional capabilities of Pictures POV App, a web application that allows the guests of an event to upload photos through a QR code, without creating an account, and allows organizers and moderators to view, moderate and download those photos.
+This document defines the functional capabilities of Pictures POV App, a web application that allows the guests of an event to upload photos through a QR code, without creating an account and without seeing other guests' photos, and allows organizers and moderators to view, moderate and download those photos.
 
 ### 1.2 Scope
 
@@ -57,7 +58,7 @@ The document covers the functional requirements of the system's four roles (admi
 | Guest | Attendee of an event. Has no account in the system. |
 | Device | Browser identified by a unique identifier stored in a cookie, issued per event. It is not a verified identity (RN-02). |
 | Event | Celebration for which photos are collected. It has a public link, a QR code and a lifecycle (RN-06). |
-| Gallery | Set of visible photos of an event. |
+| Gallery | Set of visible photos of an event. Only the organizer and moderators can view it. |
 | Hidden photo | Photo that is not shown in the gallery but is kept and can be shown again. |
 | Deleted photo | Photo permanently removed for users (RN-07). |
 | Upload window | Date and time interval during which guests can upload photos to an event. |
@@ -171,14 +172,9 @@ Applies to administrators, organizers and moderators. Guests do not authenticate
 | RF-ORG-07 | The system must allow the organizer to **upload or change the event's cover photo**. | S |
 | RF-ORG-08 | The system must allow the organizer to **choose the event's main color**. | S |
 | RF-ORG-09 | The system must allow the organizer to **set a welcome message** for guests. | C |
-| RF-ORG-21 | The system must allow the organizer to **configure the gallery visibility**: public through the link, PIN-protected or visible only to the organizer and moderators. | S |
+| RF-ORG-21 | *Retired.* | — |
 
 **AC RF-ORG-08:** the color is selected from a predefined palette whose colors meet a minimum contrast of 4.5:1 with the text (WCAG 2.1 level AA).
-
-**AC RF-ORG-21**
-1. The default visibility is public through the link.
-2. The visibility setting does not affect photo uploads.
-3. The organizer can change the PIN at any time.
 
 ### 6.3 Viewing and downloading photos
 
@@ -260,18 +256,20 @@ A moderator acts only on the events for which they hold an accepted MODERATOR in
 | RF-MOD-04 | The system must show the moderator **event statistics** (as in RF-ORG-05). | C |
 | RF-MOD-05 | The system must allow the moderator to **get the event link and download its QR code** (as in RF-ORG-02 and RF-ORG-03). | M |
 | RF-MOD-06 | The system must allow the moderator to **hide** a photo and **show again** a hidden photo (as in RF-ORG-16 and RF-ORG-17). | M |
-| RF-MOD-07 | The system must allow the moderator to **configure the gallery visibility and PIN** (as in RF-ORG-21). | S |
+| RF-MOD-07 | *Retired.* | — |
 
 **AC RF-MOD-01:** each event in the list shows that the user's role is moderator.
 
 **AC RF-MOD-06**
 1. The moderator cannot delete photos, download photos or ZIP files, open or close uploads, edit the event's customization, change the moderation mode, or invite or remove moderators.
 2. The server enforces these restrictions and responds 403.
-3. Guest reports (RF-INV-10) and system notifications (RF-SIS-06) go only to the organizer.
+3. System notifications (RF-SIS-06) go only to the organizer.
 
 ---
 
 ## 8. Guest
+
+A guest can only upload photos and delete the photos they uploaded, and only while the event is in the Active state (RN-06). A guest never sees photos uploaded by other devices.
 
 | ID | Requirement | Priority |
 |---|---|---|
@@ -281,12 +279,13 @@ A moderator acts only on the events for which they hold an accepted MODERATOR in
 | RF-INV-04 | The system must show the guest **the number of photos they have left** to upload. | M |
 | RF-INV-05 | The system must allow the guest to **select several photos at once**, must show the **progress** of each upload and must allow **retrying** a failed upload. | M |
 | RF-INV-06 | The system must allow the guest to **provide their name** to identify their photos. | S |
-| RF-INV-07 | The system must allow the guest to **view the event gallery**. | M |
-| RF-INV-08 | The system must allow the guest to **view the photos they uploaded** from their device. | S |
+| RF-INV-07 | *Retired.* | — |
+| RF-INV-08 | The system must allow the guest to **view the photos they uploaded** from their device. | M |
 | RF-INV-09 | *Retired.* | — |
-| RF-INV-10 | The system must allow the guest to **report a photo** as inappropriate to the organizer. | C |
-| RF-INV-11 | The system must inform the guest when the event **does not exist**, **is closed** or **the upload window has ended**. | M |
+| RF-INV-10 | *Retired.* | — |
+| RF-INV-11 | The system must inform the guest when the event **is not available**. | M |
 | RF-INV-12 | The system must ask the guest to **accept the terms of use** before their first upload. | S |
+| RF-INV-13 | The system must allow the guest to **delete a photo they uploaded**. | M |
 
 **AC RF-INV-03**
 1. The limit is validated on the server; the system does not authorize new uploads for a device that has reached the limit.
@@ -299,13 +298,21 @@ A moderator acts only on the events for which they hold an accepted MODERATOR in
 1. The name is optional and accepts up to 40 characters.
 2. The name is remembered on the device for the same event and can be changed.
 
-**AC RF-INV-07**
-1. The gallery shows only visible photos, neither hidden nor deleted.
-2. The gallery shows thumbnails and loads photos progressively.
-3. If the gallery is PIN-protected (RF-ORG-21), the system asks for the PIN before showing the photos and limits failed attempts in accordance with P-11.
-4. If the gallery is visible only to the organizer and moderators, the guest cannot view it.
+**AC RF-INV-08**
+1. The guest sees only the photos uploaded from their device for that event, as thumbnails.
+2. Photos uploaded by other devices are never shown to the guest.
 
-**AC RF-INV-11:** when the upload window has ended and the event is in the Closed state, the gallery remains available according to its visibility setting.
+**AC RF-INV-11**
+1. An event is available to guests only in the Active state (RN-06).
+2. A code that does not exist and an event in any other state produce the same 'event not found' message, so the system does not reveal whether a code exists.
+3. When the event is not available, the guest cannot view, upload or delete photos.
+
+**AC RF-INV-13**
+1. The guest can delete only photos uploaded from their device, and only while the event is Active.
+2. The server validates the device identifier on every deletion.
+3. The system asks for confirmation before deleting.
+4. The photo stops being visible immediately and is deleted in accordance with RN-07.
+5. Deletion does not restore the guest's quota (RN-03).
 
 ---
 
@@ -321,15 +328,13 @@ Behavior the system performs without direct user intervention.
 | RF-SIS-04 | The system must generate each event's link with a **non-sequential, unpredictable identifier**. | M |
 | RF-SIS-05 | The system must **automatically delete the photos** of an event once the retention period P-05 has elapsed since the event date. | S |
 | RF-SIS-06 | The system must **notify by email** the invitee when an invitation is created for them, and the organizer before the automatic deletion of their event's photos. | S |
-| RF-SIS-07 | The system must **show new photos** in the gallery without the guest manually reloading the page. | C |
+| RF-SIS-07 | *Retired.* | — |
 
 **AC RF-SIS-01**
 1. The system validates the actual content type, not just the extension or the type declared by the client.
 2. Files that fail validation are discarded and not shown in the gallery.
 
 **AC RF-SIS-05:** the advance notice to the organizer is sent with the lead time P-06.
-
-**AC RF-SIS-07:** the gallery refreshes at least every 30 seconds while it is open.
 
 ---
 
@@ -346,4 +351,4 @@ The following capabilities are not part of this version (priority W):
 | Photo editing | Includes filters and cropping. |
 | Facial recognition and automatic grouping by person | — |
 | Native mobile app | The application is web-based and responsive on mobile devices. |
-| Photo deletion by the guest | Requirement RF-INV-09 retired. |
+| Event gallery for guests | Guests do not view other guests' photos. Requirements RF-INV-07, RF-INV-10, RF-ORG-21, RF-MOD-07 and RF-SIS-07 retired. |

@@ -4,7 +4,7 @@ Guidance for Claude Code in this repository.
 
 ## Status
 
-Pictures POV App: guests upload event photos to a shared gallery via QR code, no account; organizers moderate and download them as a ZIP.
+Pictures POV App: guests upload event photos via QR code, no account, and see or delete only their own; organizers moderate and download them as a ZIP.
 
 Documentation phase: no build, lint or tests yet. Do not invent commands; document the real ones once code exists.
 
