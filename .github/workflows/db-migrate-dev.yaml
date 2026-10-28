@@ -36,4 +36,4 @@ jobs:
           LIQUIBASE_COMMAND_URL: ${{ secrets.DB_URL }}
           LIQUIBASE_COMMAND_USERNAME: ${{ secrets.DB_USERNAME }}
           LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: liquibase update
+        run: liquibase update --context-filter=dev
