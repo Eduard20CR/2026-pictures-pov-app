@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 8
+      author: "Oscar Vasquez"
+      context: dev
+      comment: "Dev-only test event (issue #28)"
+      changes:
+        - insert:
+            tableName: events
+            columns:
+              - column:
+                  { name: id, value: "d198245f-dcba-4693-94ae-624b21a9dba3" }
+              - column: { name: name, value: "Boda de prueba" }
+              - column: { name: color, value: "#E11D48" }
+              - column: { name: public_code, value: "n7o3KnlYQn3zovbx0hVaOA" }
+              - column: { name: event_date, valueDate: "2026-12-12" }
+              - column: { name: images_per_user, valueNumeric: 10 }
+              - column: { name: status, value: "ACTIVE" }
+      rollback:
+        - delete:
+            tableName: events
+            where: id = 'd198245f-dcba-4693-94ae-624b21a9dba3'

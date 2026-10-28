@@ -53,7 +53,7 @@ jobs:
           LIQUIBASE_COMMAND_URL: ${{ env.DB_URL }}
           LIQUIBASE_COMMAND_USERNAME: ${{ env.DB_USER }}
           LIQUIBASE_COMMAND_PASSWORD: ${{ env.DB_PASSWORD }}
-        run: liquibase update
+        run: liquibase update --context-filter=dev
 
       - name: Build and test API
         working-directory: apps/api
