@@ -31,3 +31,13 @@ module "static_site" {
   source = "../../../modules/static_site"
   name   = local.name_prefix
 }
+
+
+module "s3_photos_bucket" {
+  source = "../../../modules/s3_photos_bucket"
+  name   = local.name_prefix
+  allowed_origins = [
+    "https://${module.static_site.distribution_domain_name}",
+    "http://localhost:5173",
+  ]
+}
