@@ -29,10 +29,18 @@ module "api_http" {
   lambda_alias_name    = module.api_lambda.alias_name
 }
 
-module "static_site" {
-  source          = "../../../modules/static_site"
-  name            = local.name_prefix
-  api_domain_name = trimprefix(module.api_http.api_endpoint, "https://")  
+module "web_bucket" {
+  source = "../../../modules/web_bucket"
+  name   = local.name_prefix
+}
+
+module "cdn" {
+  source                          = "../../../modules/cdn"
+  name                            = local.name_prefix
+  web_bucket_name                 = module.web_bucket.bucket_name
+  web_bucket_arn                  = module.web_bucket.bucket_arn
+  web_bucket_regional_domain_name = module.web_bucket.bucket_regional_domain_name
+  api_domain_name                 = trimprefix(module.api_http.api_endpoint, "https://")
 }
 
 
@@ -40,7 +48,7 @@ module "s3_photos_bucket" {
   source = "../../../modules/s3_photos_bucket"
   name   = local.name_prefix
   allowed_origins = [
-    "https://${module.static_site.distribution_domain_name}",
+    "https://${module.cdn.distribution_domain_name}",
     "http://localhost:5173",
   ]
 }

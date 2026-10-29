@@ -15,13 +15,13 @@ output "api_endpoint" {
 }
 
 output "web_bucket_name" {
-  value = module.static_site.bucket_name
+  value = module.web_bucket.bucket_name
 }
 
 output "web_url" {
-  value = "https://${module.static_site.distribution_domain_name}"
+  value = "https://${module.cdn.distribution_domain_name}"
 }
 
 output "web_distribution_id" {
-  value = module.static_site.distribution_id
+  value = module.cdn.distribution_id
 }
