@@ -30,8 +30,9 @@ module "api_http" {
 }
 
 module "static_site" {
-  source = "../../../modules/static_site"
-  name   = local.name_prefix
+  source          = "../../../modules/static_site"
+  name            = local.name_prefix
+  api_domain_name = trimprefix(module.api_http.api_endpoint, "https://")  
 }
 
 

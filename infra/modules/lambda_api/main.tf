@@ -78,7 +78,7 @@ resource "aws_lambda_function" "this" {
   environment {
     variables = merge({
       AWS_LAMBDA_EXEC_WRAPPER      = "/opt/bootstrap"
-      AWS_LWA_READINESS_CHECK_PATH = "/actuator/health/liveness"
+      AWS_LWA_READINESS_CHECK_PATH = "/api/actuator/health/liveness"
       JAVA_TOOL_OPTIONS            = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
     }, var.environment_variables)
   }

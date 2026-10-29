@@ -1,5 +1,7 @@
 data "aws_caller_identity" "current" {}
 
+# BUCKET
+
 resource "aws_s3_bucket" "site" {
   bucket = "${var.name}-web-${data.aws_caller_identity.current.account_id}"
     force_destroy = true
@@ -13,6 +15,8 @@ resource "aws_s3_bucket_public_access_block" "site" {
   restrict_public_buckets = true
 }
 
+# CLOUDFRONT CONFIG
+
 resource "aws_cloudfront_origin_access_control" "site" {
   name                              = "${var.name}-web-oac"
   origin_access_control_origin_type = "s3"
@@ -24,6 +28,16 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
 
+data "aws_cloudfront_cache_policy" "caching_disabled" {
+  name = "Managed-CachingDisabled"
+}
+
+data "aws_cloudfront_origin_request_policy" "all_viewer_except_host" {
+  name = "Managed-AllViewerExceptHostHeader"
+}
+
+# CLOUDFRONT
+
 resource "aws_cloudfront_distribution" "site" {
   enabled             = true
   comment             = "${var.name} web"
@@ -34,6 +48,18 @@ resource "aws_cloudfront_distribution" "site" {
     origin_id                = "s3-site"
     domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
     origin_access_control_id = aws_cloudfront_origin_access_control.site.id
+  }
+
+  origin {
+    origin_id   = "api"
+    domain_name = var.api_domain_name
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "https-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
   }
 
   default_cache_behavior {
@@ -68,6 +94,7 @@ resource "aws_cloudfront_distribution" "site" {
   }
 }
 
+# POLICIES
 
 data "aws_iam_policy_document" "site" {
   statement {
