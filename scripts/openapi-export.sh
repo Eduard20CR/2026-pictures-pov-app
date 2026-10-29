@@ -18,13 +18,13 @@ trap 'kill "$API_PID" 2>/dev/null' EXIT
 
 # 3. Wait until the contract is served (max 60 s)
 for _ in $(seq 60); do
-  curl -fsS "http://localhost:$PORT/v3/api-docs.yaml" -o /dev/null 2>/dev/null && break
+  curl -fsS "http://localhost:$PORT/api/v3/api-docs.yaml" -o /dev/null 2>/dev/null && break
   sleep 1
 done
 
 # 4. Save the contract
 mkdir -p "$(dirname "$OUT")"
-curl -fsS "http://localhost:$PORT/v3/api-docs.yaml" -o "$OUT"
+curl -fsS "http://localhost:$PORT/api/v3/api-docs.yaml" -o "$OUT"
 
 echo "Saved $OUT"
 

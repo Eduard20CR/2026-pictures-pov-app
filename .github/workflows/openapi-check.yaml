@@ -41,7 +41,7 @@ jobs:
       - name: Download contract
         run: >
           curl -fsS --retry 30 --retry-delay 2 --retry-connrefused
-          http://localhost:8081/v3/api-docs.yaml
+          http://localhost:8081/api/v3/api-docs.yaml
           -o apps/web/src/api/openapi.yaml
 
       - name: Generate types
