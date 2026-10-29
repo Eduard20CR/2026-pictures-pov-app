@@ -19,6 +19,13 @@ data "aws_cloudfront_origin_request_policy" "all_viewer_except_host" {
   name = "Managed-AllViewerExceptHostHeader"
 }
 
+resource "aws_cloudfront_function" "spa_rewrite" {
+  name    = "${var.name}-spa-rewrite"
+  runtime = "cloudfront-js-2.0"
+  publish = true
+  code    = file("${path.module}/spa-rewrite.js")
+}
+
 # CLOUDFRONT
 
 resource "aws_cloudfront_distribution" "this" {
@@ -52,6 +59,11 @@ resource "aws_cloudfront_distribution" "this" {
     cached_methods         = ["GET", "HEAD"]
     cache_policy_id        = data.aws_cloudfront_cache_policy.caching_optimized.id
     compress               = true
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.spa_rewrite.arn
+    }
   }
 
   ordered_cache_behavior {
@@ -75,17 +87,6 @@ resource "aws_cloudfront_distribution" "this" {
     cloudfront_default_certificate = true
   }
 
-  custom_error_response {
-    error_code         = 403
-    response_code      = 200
-    response_page_path = "/index.html"
-  }
-
-  custom_error_response {
-    error_code         = 404
-    response_code      = 200
-    response_page_path = "/index.html"
-  }
 }
 
 # WEB BUCKET POLICY
