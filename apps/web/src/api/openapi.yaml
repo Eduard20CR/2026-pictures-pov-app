@@ -6,6 +6,48 @@ servers:
 - url: http://localhost:8081/api
   description: Generated server url
 paths:
+  /{publicCode}/uploads:
+    post:
+      tags:
+      - image-controller
+      operationId: createUpload
+      parameters:
+      - name: publicCode
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadRequest"
+        required: true
+      responses:
+        "201":
+          description: Upload reserved; PUT the photo to uploadUrl
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UploadResponse"
+        "400":
+          description: Unsupported type or invalid size
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Event does not exist or is not active
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "409":
+          description: Upload limit reached
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
   /events/{publicCode}:
     get:
       tags:
@@ -30,6 +72,30 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+  /events/{publicCode}/quota:
+    get:
+      tags:
+      - guest-controller
+      operationId: getQuota
+      parameters:
+      - name: publicCode
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Upload quota of the current device
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuotaResponse"
+        "404":
+          description: Event does not exist or is not active
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
   /db-check:
     get:
       tags:
@@ -44,6 +110,19 @@ paths:
                 type: string
 components:
   schemas:
+    UploadRequest:
+      type: object
+      properties:
+        contentType:
+          type: string
+          example: image/jpeg
+        sizeBytes:
+          type: integer
+          format: int64
+          example: 3145728
+      required:
+      - contentType
+      - sizeBytes
     ProblemDetail:
       type: object
       properties:
@@ -63,6 +142,21 @@ components:
         properties:
           type: object
           additionalProperties: {}
+    UploadResponse:
+      type: object
+      properties:
+        imageId:
+          type: string
+          format: uuid
+        uploadUrl:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+      required:
+      - expiresAt
+      - imageId
+      - uploadUrl
     PublicEventResponse:
       type: object
       properties:
@@ -84,3 +178,19 @@ components:
       - imagesPerUser
       - name
       - publicCode
+    QuotaResponse:
+      type: object
+      properties:
+        limit:
+          type: integer
+          format: int32
+        used:
+          type: integer
+          format: int32
+        remaining:
+          type: integer
+          format: int32
+      required:
+      - limit
+      - remaining
+      - used

@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/{publicCode}/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{publicCode}": {
         parameters: {
             query?: never;
@@ -12,6 +28,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getByPublicCode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/{publicCode}/quota": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getQuota"];
         put?: never;
         post?: never;
         delete?: never;
@@ -40,6 +72,15 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        UploadRequest: {
+            /** @example image/jpeg */
+            contentType: string;
+            /**
+             * Format: int64
+             * @example 3145728
+             */
+            sizeBytes: number;
+        };
         ProblemDetail: {
             /** Format: uri */
             type?: string;
@@ -53,6 +94,13 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        UploadResponse: {
+            /** Format: uuid */
+            imageId: string;
+            uploadUrl: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
         PublicEventResponse: {
             publicCode: string;
             name: string;
@@ -61,6 +109,14 @@ export interface components {
             eventDate: string;
             /** Format: int32 */
             imagesPerUser: number;
+        };
+        QuotaResponse: {
+            /** Format: int32 */
+            limit: number;
+            /** Format: int32 */
+            used: number;
+            /** Format: int32 */
+            remaining: number;
         };
     };
     responses: never;
@@ -71,6 +127,59 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    createUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                publicCode: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadRequest"];
+            };
+        };
+        responses: {
+            /** @description Upload reserved; PUT the photo to uploadUrl */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UploadResponse"];
+                };
+            };
+            /** @description Unsupported type or invalid size */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Event does not exist or is not active */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Upload limit reached */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
     getByPublicCode: {
         parameters: {
             query?: never;
@@ -89,6 +198,37 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PublicEventResponse"];
+                };
+            };
+            /** @description Event does not exist or is not active */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    getQuota: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                publicCode: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Upload quota of the current device */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["QuotaResponse"];
                 };
             };
             /** @description Event does not exist or is not active */

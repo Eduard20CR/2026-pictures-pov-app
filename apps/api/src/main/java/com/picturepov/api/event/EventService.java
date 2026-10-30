@@ -1,12 +1,13 @@
 package com.picturepov.api.event;
 
+import com.picturepov.api.common.error.ErrorCode;
 import com.picturepov.api.common.error.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
-class EventService {
+public class EventService {
 
     private final EventRepository eventRepository;
 
@@ -15,10 +16,14 @@ class EventService {
     }
 
     @Transactional(readOnly = true)
-    PublicEventResponse getPublicEvent(String publicCode) {
+    public Event getActiveEvent(String publicCode) {
         return eventRepository.findByPublicCode(publicCode)
                 .filter(event -> event.getStatus() == EventStatus.ACTIVE)
-                .map(PublicEventResponse::from)
-                .orElseThrow(() -> new NotFoundException("EVENT_NOT_FOUND", "Event not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.EVENT_NOT_FOUND, "Event not found"));
+    }
+
+    @Transactional(readOnly = true)
+    PublicEventResponse getPublicEvent(String publicCode) {
+        return PublicEventResponse.from(getActiveEvent(publicCode));
     }
 }
