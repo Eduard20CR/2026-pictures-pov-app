@@ -6,7 +6,7 @@ servers:
 - url: http://localhost:8081/api
   description: Generated server url
 paths:
-  /{publicCode}/uploads:
+  /events/{publicCode}/uploads:
     post:
       tags:
       - image-controller

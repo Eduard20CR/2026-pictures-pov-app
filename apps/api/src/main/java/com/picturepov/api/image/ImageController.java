@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/events")
 class ImageController {
 
     private final ImageUploadService imageUploadService;

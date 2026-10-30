@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/{publicCode}/uploads": {
+    "/events/{publicCode}/uploads": {
         parameters: {
             query?: never;
             header?: never;
