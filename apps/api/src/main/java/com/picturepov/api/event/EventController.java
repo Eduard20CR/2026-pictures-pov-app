@@ -25,6 +25,8 @@ class EventController {
     @ApiResponse(responseCode = "200", description = "Active event")
     @ApiResponse(responseCode = "404", description = "Event does not exist or is not active",
             content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "409", description = "Event is closed and no longer accepts photos",
+            content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     PublicEventResponse getByPublicCode(@PathVariable String publicCode) {
         return eventService.getPublicEvent(publicCode);
     }

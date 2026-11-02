@@ -72,6 +72,12 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "409":
+          description: Event is closed and no longer accepts photos
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
   /events/{publicCode}/quota:
     get:
       tags:
