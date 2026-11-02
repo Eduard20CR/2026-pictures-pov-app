@@ -76,3 +76,16 @@ resource "aws_s3_bucket_notification" "photos_to_image_processor" {
 
   depends_on = [module.image_processor_lambda]
 }
+
+module "upload_cleanup_lambda" {
+  source             = "../../../modules/lambda_upload_cleanup"
+  name               = "${local.name_prefix}-upload-cleanup"
+  s3_bucket          = module.s3_artifacts_bucket.artifacts_bucket
+  s3_key             = "upload-cleanup/latest.zip"
+  ssm_parameter_path = local.ssm_parameter_path
+  photos_bucket_arn  = module.s3_photos_bucket.bucket_arn
+  environment_variables = {
+    SSM_DB_PATH   = local.ssm_parameter_path
+    PHOTOS_BUCKET = module.s3_photos_bucket.bucket_name
+  }
+}
