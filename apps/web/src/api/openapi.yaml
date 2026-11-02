@@ -102,18 +102,6 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-  /db-check:
-    get:
-      tags:
-      - test-controller
-      operationId: dbCheck
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: string
 components:
   schemas:
     UploadRequest:
