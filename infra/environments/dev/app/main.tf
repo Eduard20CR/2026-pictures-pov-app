@@ -21,6 +21,18 @@ module "api_lambda" {
   }
 }
 
+module "image_processor_lambda" {
+  source             = "../../../modules/lambda_image_processor"
+  name               = "${local.name_prefix}-image-processor"
+  s3_bucket          = module.s3_artifacts_bucket.artifacts_bucket
+  s3_key             = "image-processor/latest.zip"
+  ssm_parameter_path = local.ssm_parameter_path
+  photos_bucket_arn  = module.s3_photos_bucket.bucket_arn
+  environment_variables = {
+    SSM_DB_PATH = local.ssm_parameter_path
+  }
+}
+
 module "api_http" {
   source               = "../../../modules/api_gateway_for_lambda"
   name                 = "${local.name_prefix}-api"
@@ -51,4 +63,16 @@ module "s3_photos_bucket" {
     "https://${module.cdn.distribution_domain_name}",
     "http://localhost:5173",
   ]
+}
+
+resource "aws_s3_bucket_notification" "photos_to_image_processor" {
+  bucket = module.s3_photos_bucket.bucket_name
+
+  lambda_function {
+    lambda_function_arn = module.image_processor_lambda.function_arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = "originals/"
+  }
+
+  depends_on = [module.image_processor_lambda]
 }
