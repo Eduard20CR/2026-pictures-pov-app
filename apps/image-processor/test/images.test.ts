@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const query = vi.fn();
 
-vi.mock("../src/db", () => ({ pool: { query } }));
+vi.mock("../src/db", () => ({ getPool: async () => ({ query }) }));
 
 const { markReady } = await import("../src/images");
 
