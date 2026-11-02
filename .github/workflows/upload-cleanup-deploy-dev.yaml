@@ -1,0 +1,50 @@
+name: Upload Cleanup Deploy Dev
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/upload-cleanup/**"
+      - ".github/workflows/upload-cleanup-deploy-dev.yaml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: upload-cleanup-deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/upload-cleanup
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/upload-cleanup/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm run zip
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+        with:
+          role-to-assume: ${{ vars.AWS_DEV_GHA_ROLE_ARN_UPLOAD_CLEANUP }}
+          aws-region: us-east-1
+      - name: Upload zip and update function
+        run: |
+          KEY="upload-cleanup/${GITHUB_SHA::7}.zip"
+          aws s3 cp dist/function.zip "s3://${{ vars.DEV_API_ARTIFACTS_BUCKET }}/$KEY"
+          aws s3 cp dist/function.zip "s3://${{ vars.DEV_API_ARTIFACTS_BUCKET }}/upload-cleanup/latest.zip"
+          aws lambda update-function-code \
+            --function-name "${{ vars.DEV_UPLOAD_CLEANUP_FUNCTION_NAME }}" \
+            --s3-bucket "${{ vars.DEV_API_ARTIFACTS_BUCKET }}" \
+            --s3-key "$KEY"
+          aws lambda wait function-updated \
+            --function-name "${{ vars.DEV_UPLOAD_CLEANUP_FUNCTION_NAME }}"
