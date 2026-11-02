@@ -112,7 +112,7 @@ resource "aws_iam_role_policy" "scheduler_invoke" {
 resource "aws_scheduler_schedule" "this" {
   name                = var.name
   schedule_expression = "rate(30 minutes)"
-  state = "ENABLED"
+  state = "DISABLED"
 
   flexible_time_window {
     mode = "OFF"
