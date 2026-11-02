@@ -1,12 +1,12 @@
 package com.picturepov.api.common.error;
 
 public class NotFoundException extends RuntimeException {
-    private final String code;
+    private final ErrorCode code;
 
-    public NotFoundException(String code, String message) {
+    public NotFoundException(ErrorCode code, String message) {
         super(message);
         this.code = code;
     }
 
-    public String getCode() { return code; }
+    public ErrorCode getCode() { return code; }
 }
