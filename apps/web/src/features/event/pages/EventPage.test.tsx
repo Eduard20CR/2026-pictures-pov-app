@@ -57,6 +57,16 @@ test('muestra "Evento no encontrado" cuando el evento no existe', () => {
     expect(screen.getByText('Evento no encontrado')).toBeDefined()
 })
 
+test('muestra "Este evento ya cerró" cuando el evento ya cerro', () => {
+    vi.mocked(usePublicEvent).mockReturnValue(
+        { data: "closed", isPending: false, error: null } as unknown as ReturnType<typeof usePublicEvent>,
+    )
+
+    renderPage()
+
+    expect(screen.getByText('Este evento ya cerró')).toBeDefined()
+})
+
 test('muestra el evento y el cupo cuando existe', () => {
     mockActiveEvent()
 

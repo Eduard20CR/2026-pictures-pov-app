@@ -10,7 +10,8 @@ const ERROR_MESSAGES: Record<string, string> = {
     UPLOAD_LIMIT_REACHED: 'Ya subiste todas las fotos permitidas.',
     UNSUPPORTED_CONTENT_TYPE: 'Solo se aceptan fotos JPEG, PNG, WebP o HEIC.',
     FILE_TOO_LARGE: 'La foto pesa más de 20 MB.',
-    EVENT_NOT_FOUND: 'Este evento ya no recibe fotos.',
+    EVENT_NOT_FOUND: 'Este evento ya no está disponible.',
+    EVENT_CLOSED: 'Este evento ya no recibe fotos.',
 }
 
 function errorMessage(reason: unknown): string {
@@ -57,6 +58,15 @@ function EventPage() {
             <main className="flex min-h-screen flex-col items-center justify-center gap-2 p-4 text-center">
                 <h1 className="text-2xl font-bold">Evento no encontrado</h1>
                 <p>Revisa el enlace o vuelve a escanear el código QR.</p>
+            </main>
+        )
+    }
+
+    if (event === 'closed') {
+        return (
+            <main className="flex min-h-screen flex-col items-center justify-center gap-2 p-4 text-center">
+                <h1 className="text-2xl font-bold">Este evento ya cerró</h1>
+                <p>Ya no se reciben fotos. ¡Gracias por participar!</p>
             </main>
         )
     }

@@ -1,5 +1,6 @@
 package com.picturepov.api.event;
 
+import com.picturepov.api.common.error.ConflictException;
 import com.picturepov.api.common.error.ErrorCode;
 import com.picturepov.api.common.error.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,16 @@ public class EventService {
 
     @Transactional(readOnly = true)
     public Event getActiveEvent(String publicCode) {
-        return eventRepository.findByPublicCode(publicCode)
-                .filter(event -> event.getStatus() == EventStatus.ACTIVE)
+        Event event = eventRepository.findByPublicCode(publicCode)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.EVENT_NOT_FOUND, "Event not found"));
+
+        if (event.getStatus() == EventStatus.CLOSED) {
+            throw new ConflictException(ErrorCode.EVENT_CLOSED, "Event no longer accepts photos");
+        }
+        if (event.getStatus() != EventStatus.ACTIVE) {
+            throw new NotFoundException(ErrorCode.EVENT_NOT_FOUND, "Event not found");
+        }
+        return event;
     }
 
     @Transactional(readOnly = true)
