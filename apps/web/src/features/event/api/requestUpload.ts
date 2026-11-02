@@ -1,5 +1,5 @@
 import { api } from '../../../api/client'
-import type { UploadTicket } from '../../upload/types'
+import type { UploadTicket } from '../types'
 import { UploadError } from './UploadError'
 
 export async function requestUpload(publicCode: string, file: File): Promise<UploadTicket> {

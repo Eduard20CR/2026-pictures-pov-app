@@ -1,5 +1,5 @@
 import { api } from '../../../api/client'
-import type { Quota } from '../../upload/types'
+import type { Quota } from '../types'
 
 export async function getQuota(publicCode: string): Promise<Quota> {
     const { data, response } = await api.GET('/events/{publicCode}/quota', {

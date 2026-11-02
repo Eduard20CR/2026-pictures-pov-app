@@ -1,4 +1,4 @@
-import type { UploadTicket } from '../../upload/types'
+import type { UploadTicket } from '../types'
 import { UploadError } from './UploadError'
 
 export async function uploadToS3(ticket: UploadTicket, file: File): Promise<void> {
