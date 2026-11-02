@@ -10,7 +10,7 @@ resource "aws_iam_role" "github_actions_dev_infra" {
 data "aws_iam_policy_document" "github_actions_dev_infra" {
   statement {
     sid       = "AppServices"
-    actions   = ["lambda:*", "apigateway:*", "cloudfront:*", "logs:*", "ssm:GetParameter*"]
+    actions   = ["lambda:*", "apigateway:*", "cloudfront:*", "logs:*", "ssm:GetParameter*", "scheduler:*"]
     resources = ["*"]
   }
 
