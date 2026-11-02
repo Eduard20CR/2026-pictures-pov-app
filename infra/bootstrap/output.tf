@@ -10,6 +10,7 @@ output "github_actions_dev_role_arns" {
     api   = aws_iam_role.github_actions_dev_api.arn
     web   = aws_iam_role.github_actions_dev_web.arn
     image_processor = aws_iam_role.github_actions_dev_image_processor.arn
+    upload_cleanup  = aws_iam_role.github_actions_dev_upload_cleanup.arn
   }
 }
 
