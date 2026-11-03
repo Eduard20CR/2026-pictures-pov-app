@@ -28,10 +28,15 @@ export function useUploadQueue(publicCode: string) {
     }
 
     async function uploadItem(item: UploadItem) {
-        updateItem(item.id, { status: 'uploading' })
+        updateItem(item.id, { status: 'uploading', error: undefined })
+
         try {
-            const ticket = await requestUpload(publicCode, item.file)
-            updateItem(item.id, { ticket })
+            let ticket = item.ticket
+            if (!ticket || new Date(ticket.expiresAt).getTime() <= Date.now()) {
+                ticket = await requestUpload(publicCode, item.file)
+                updateItem(item.id, { ticket })
+            }
+
             await uploadToS3(ticket, item.file)
             updateItem(item.id, { status: 'done', progress: 100 })
         } catch (reason) {
@@ -42,5 +47,13 @@ export function useUploadQueue(publicCode: string) {
         }
     }
 
-    return { uploadItems, addFiles };
+    function retryItem(item: UploadItem) {
+        uploadItem(item)
+    }
+
+    function removeItem(id: string) {
+        setUploadItems((prev) => prev.filter((item) => item.id !== id))
+    }
+
+    return { uploadItems, addFiles, retryItem, removeItem };
 }

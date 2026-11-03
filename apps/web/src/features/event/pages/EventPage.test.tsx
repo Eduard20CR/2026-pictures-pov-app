@@ -16,6 +16,8 @@ vi.mock('../api/requestUpload')
 vi.mock('../api/uploadToS3')
 
 beforeEach(() => {
+    vi.clearAllMocks()
+
     // Default: the guest has quota left and every upload succeeds
     vi.mocked(useQuota).mockReturnValue(
         { data: { limit: 10, used: 3, remaining: 7 } } as unknown as ReturnType<typeof useQuota>,
@@ -146,4 +148,39 @@ test('disables the buttons when the guest has no photos left', () => {
     // Assert: the guest cannot pick photos from the camera or the gallery
     expect((screen.getByLabelText('Tomar foto') as HTMLInputElement).disabled).toBe(true)
     expect((screen.getByLabelText('Elegir de galería') as HTMLInputElement).disabled).toBe(true)
+})
+
+
+test('retries a failed upload reusing the same ticket', async () => {
+    // Arrange: an active event; the first upload to S3 fails, the second succeeds
+    mockActiveEvent()
+    vi.mocked(uploadToS3).mockRejectedValueOnce(new UploadError('S3_UPLOAD_FAILED'))
+
+    // Act: the guest picks a photo, waits for the retry button and taps it
+    renderPage()
+    const gallery = screen.getByLabelText('Elegir de galería')
+    fireEvent.change(gallery, { target: { files: [photo('a.jpg')] } })
+    fireEvent.click(await screen.findByText('Reintentar'))
+
+    // Assert: the photo is done, with one ticket (one quota slot) and two uploads
+    expect(await screen.findByText('Lista ✓')).toBeDefined()
+    expect(requestUpload).toHaveBeenCalledTimes(1)
+    expect(uploadToS3).toHaveBeenCalledTimes(2)
+})
+
+test('shows the status of each photo when several are uploaded', async () => {
+    // Arrange: an active event; the first upload to S3 fails, the second succeeds
+    mockActiveEvent()
+    vi.mocked(uploadToS3).mockRejectedValueOnce(new UploadError('S3_UPLOAD_FAILED'))
+
+    // Act: the guest picks two photos at once
+    renderPage()
+    const gallery = screen.getByLabelText('Elegir de galería')
+    fireEvent.change(gallery, { target: { files: [photo('a.jpg'), photo('b.jpg')] } })
+
+    // Assert: each photo shows its own status
+    expect(await screen.findByText('Falló')).toBeDefined()
+    expect(await screen.findByText('Lista ✓')).toBeDefined()
+    expect(requestUpload).toHaveBeenCalledTimes(2)
+    expect(uploadToS3).toHaveBeenCalledTimes(2)
 })

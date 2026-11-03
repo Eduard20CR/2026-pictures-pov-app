@@ -1,6 +1,8 @@
 import type { UploadTicket } from '../types'
 import { UploadError } from './UploadError'
 
+
+
 export async function uploadToS3(ticket: UploadTicket, file: File): Promise<void> {
     const response = await fetch(ticket.uploadUrl, {
         method: 'PUT',

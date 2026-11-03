@@ -3,32 +3,15 @@ import { PhotoPicker } from '../components/PhotoPicker'
 import { usePublicEvent } from '../hooks/usePublicEvent'
 import { useQuota } from '../hooks/useQuota'
 import { useUploadQueue } from '../hooks/useUploadQueue'
-import type { UploadItem } from '../types'
+import { UploadList } from '../components/UploadList'
 
-const ERROR_MESSAGES: Record<string, string> = {
-    UPLOAD_LIMIT_REACHED: 'Ya subiste todas las fotos permitidas.',
-    UNSUPPORTED_CONTENT_TYPE: 'Solo se aceptan fotos JPEG, PNG, WebP o HEIC.',
-    FILE_TOO_LARGE: 'La foto pesa más de 20 MB.',
-    EVENT_NOT_FOUND: 'Este evento ya no está disponible.',
-    EVENT_CLOSED: 'Este evento ya no recibe fotos.',
-}
 
-const STATUS_LABELS: Record<UploadItem['status'], string> = {
-    waiting: 'En espera',
-    uploading: 'Subiendo...',
-    done: 'Lista ✓',
-    error: 'Falló',
-}
-
-function errorMessage(code: string): string {
-    return ERROR_MESSAGES[code] ?? 'No pudimos subir la foto. Intenta de nuevo.'
-}
 
 function EventPage() {
     const { publicCode = '' } = useParams()
     const { data: event, isPending, error } = usePublicEvent(publicCode)
     const { data: quota } = useQuota(publicCode)
-    const { uploadItems, addFiles } = useUploadQueue(publicCode)
+    const { uploadItems, addFiles, retryItem, removeItem } = useUploadQueue(publicCode)
 
     if (isPending) {
         return <p className="p-4 text-center">Cargando...</p>
@@ -72,23 +55,8 @@ function EventPage() {
                     Te quedan {quota.remaining} de {quota.limit} fotos.
                 </p>
             )}
-            {isUploading && <p>Subiendo...</p>}
 
-            <ul className="flex flex-col gap-2">
-                {uploadItems.map((item) => (
-                    <li key={item.id} className="flex flex-col">
-                        <div className="flex justify-between">
-                            <span className="truncate">{item.file.name}</span>
-                            <span>{STATUS_LABELS[item.status]}</span>
-                        </div>
-                        {item.error && (
-                            <p role="alert" className="text-sm text-red-600">
-                                {errorMessage(item.error)}
-                            </p>
-                        )}
-                    </li>
-                ))}
-            </ul>
+            <UploadList items={uploadItems} onRetry={retryItem} onRemove={removeItem} />
 
             <PhotoPicker
                 color={event.color}
