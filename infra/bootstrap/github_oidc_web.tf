@@ -10,13 +10,13 @@ resource "aws_iam_role" "github_actions_dev_web" {
 data "aws_iam_policy_document" "github_actions_dev_web" {
   statement {
     sid       = "ListSite"
-    actions   = ["s3:ListBucket"] 
+    actions   = ["s3:ListBucket"]
     resources = ["arn:aws:s3:::${var.project}-dev-web-${data.aws_caller_identity.current.account_id}"]
   }
 
   statement {
     sid       = "SyncSite"
-    actions   = ["s3:PutObject", "s3:DeleteObject"] 
+    actions   = ["s3:PutObject", "s3:DeleteObject"]
     resources = ["arn:aws:s3:::${var.project}-dev-web-${data.aws_caller_identity.current.account_id}/*"]
   }
 

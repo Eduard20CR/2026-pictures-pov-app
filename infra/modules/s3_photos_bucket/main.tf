@@ -5,7 +5,7 @@ resource "aws_s3_bucket" "photos" {
 }
 
 resource "aws_s3_bucket_public_access_block" "photos" {
-  bucket = aws_s3_bucket.photos.id   
+  bucket                  = aws_s3_bucket.photos.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true

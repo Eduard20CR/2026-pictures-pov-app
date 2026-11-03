@@ -30,7 +30,7 @@ data "aws_iam_policy_document" "github_trust_dev" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values = ["repo:${local.github_repo}:ref:refs/heads/main"]
+      values   = ["repo:${local.github_repo}:ref:refs/heads/main"]
     }
   }
 }
@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "github_trust_prod" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values = ["repo:${local.github_repo}:environment:prod"]
+      values   = ["repo:${local.github_repo}:environment:prod"]
     }
   }
 }
