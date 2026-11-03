@@ -14,7 +14,6 @@ export function useUploadQueue(publicCode: string) {
         const newItems: UploadItem[] = files.map((file) => ({
             id: crypto.randomUUID(),
             file,
-            progress: 0,
             status: 'waiting',
         }))
         setUploadItems((prev) => [...prev, ...newItems])
@@ -38,7 +37,7 @@ export function useUploadQueue(publicCode: string) {
             }
 
             await uploadToS3(ticket, item.file)
-            updateItem(item.id, { status: 'done', progress: 100 })
+            updateItem(item.id, { status: 'done' })
         } catch (reason) {
             const code = reason instanceof UploadError ? reason.code : 'UNKNOWN'
             updateItem(item.id, { status: 'error', error: code })

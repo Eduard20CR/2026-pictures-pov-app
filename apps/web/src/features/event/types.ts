@@ -10,6 +10,5 @@ export type UploadItem = {
     file: File
     ticket?: UploadTicket
     status: 'waiting' | 'uploading' | 'done' | 'error'
-    progress: number
     error?: string
 }
