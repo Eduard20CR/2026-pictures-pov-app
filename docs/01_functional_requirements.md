@@ -4,9 +4,9 @@
 |---|---|
 | Project | Pictures POV App |
 | Document | Functional requirements |
-| Version | 0.5 |
+| Version | 0.6 |
 | Status | Ready |
-| Date | 2026-10-28 |
+| Date | 2026-11-03 |
 | Owner | Oscar |
 
 ## Change history
@@ -18,6 +18,7 @@
 | 0.3 | 2026-10-08 | Document translated into English. Requirement identifiers are unchanged. |
 | 0.4 | 2026-10-27 | New Moderator role and event invitations (OWNER, MODERATOR). Added RF-AUT-05, RF-ORG-22, RF-ORG-23 and RF-MOD-01 to RF-MOD-07. Event assignment uses an OWNER invitation (RF-ADM-02, RF-ADM-03). Updated RF-AUT-01 to RF-AUT-03, RF-ADM-09 to RF-ADM-11, RF-ADM-13, RF-ORG-01, RF-ORG-21, RF-INV-07 and RF-SIS-06. Sections 7 to 9 renumbered to 8 to 10. |
 | 0.5 | 2026-10-28 | Guests only upload photos and delete their own; they no longer view the event gallery, and they can do nothing once the event is not Active. Added RF-INV-13. Retired RF-ORG-21, RF-MOD-07, RF-INV-07, RF-INV-10 and RF-SIS-07. Updated the Gallery glossary entry, RF-INV-08, RF-INV-11, AC RF-MOD-06 and section 10. |
+| 0.6 | 2026-11-03 | RF-INV-05 shows the status of each upload instead of its progress; added AC RF-INV-05. A percentage progress bar is out of scope (section 10). |
 ---
 
 ## 1. Introduction
@@ -277,7 +278,7 @@ A guest can only upload photos and delete the photos they uploaded, and only whi
 | RF-INV-02 | The system must allow the guest to **upload photos from their device's gallery or by taking them with the camera**. | M |
 | RF-INV-03 | The system must **limit the number of photos** a device can upload to an event (RN-01). | M |
 | RF-INV-04 | The system must show the guest **the number of photos they have left** to upload. | M |
-| RF-INV-05 | The system must allow the guest to **select several photos at once**, must show the **progress** of each upload and must allow **retrying** a failed upload. | M |
+| RF-INV-05 | The system must allow the guest to **select several photos at once**, must show the **status** of each upload and must allow **retrying** a failed upload. | M |
 | RF-INV-06 | The system must allow the guest to **provide their name** to identify their photos. | S |
 | RF-INV-07 | *Retired.* | — |
 | RF-INV-08 | The system must allow the guest to **view the photos they uploaded** from their device. | M |
@@ -293,6 +294,11 @@ A guest can only upload photos and delete the photos they uploaded, and only whi
 3. Quota is reserved when each upload is authorized. If the upload is not completed within period P-10, the reserved quota is released.
 
 **AC RF-INV-04:** the number is shown before photos are selected and is updated after each completed upload.
+
+**AC RF-INV-05**
+1. Each selected photo shows its own status: waiting, uploading, done or failed.
+2. A failed upload shows the reason.
+3. Retrying a failed upload does not consume additional quota or duplicate the photo (RNF-DIS-02).
 
 **AC RF-INV-06**
 1. The name is optional and accepts up to 40 characters.
@@ -351,4 +357,5 @@ The following capabilities are not part of this version (priority W):
 | Photo editing | Includes filters and cropping. |
 | Facial recognition and automatic grouping by person | — |
 | Native mobile app | The application is web-based and responsive on mobile devices. |
+| Percentage progress bar per upload | Photos upload in a few seconds; the status of each upload is shown instead (RF-INV-05). |
 | Event gallery for guests | Guests do not view other guests' photos. Requirements RF-INV-07, RF-INV-10, RF-ORG-21, RF-MOD-07 and RF-SIS-07 retired. |
