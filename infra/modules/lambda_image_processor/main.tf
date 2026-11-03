@@ -40,6 +40,19 @@ resource "aws_iam_role_policy" "ssm_read" {
   policy = data.aws_iam_policy_document.ssm_read.json
 }
 
+data "aws_iam_policy_document" "photos_read_delete" {
+  statement {
+    actions   = ["s3:GetObject", "s3:DeleteObject"]
+    resources = ["${var.photos_bucket_arn}/originals/*"]
+  }
+}
+
+resource "aws_iam_role_policy" "photos_read_delete" {
+  name   = "${var.name}-read-delete-photos"
+  role   = aws_iam_role.this.id
+  policy = data.aws_iam_policy_document.photos_read_delete.json
+}
+
 # LAMBDA
 
 resource "aws_lambda_function" "this" {

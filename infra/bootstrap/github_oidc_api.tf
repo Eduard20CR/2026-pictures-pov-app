@@ -20,9 +20,9 @@ data "aws_iam_policy_document" "github_actions_dev_api" {
   statement {
     sid = "DeployLambda"
     actions = [
-      "lambda:UpdateFunctionCode",       
+      "lambda:UpdateFunctionCode",
       "lambda:GetFunctionConfiguration",
-      "lambda:UpdateAlias",             
+      "lambda:UpdateAlias",
     ]
     resources = [
       "arn:aws:lambda:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:function:${var.project}-dev-api",

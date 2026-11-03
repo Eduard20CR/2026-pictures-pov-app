@@ -1,8 +1,8 @@
 data "aws_caller_identity" "current" {}
 
 resource "aws_s3_bucket" "artifacts" {
-  bucket = "${var.name}-artifacts-${data.aws_caller_identity.current.account_id}"
-    force_destroy = true
+  bucket        = "${var.name}-artifacts-${data.aws_caller_identity.current.account_id}"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_public_access_block" "artifacts" {
