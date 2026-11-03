@@ -1,10 +1,9 @@
-import { useState } from 'react'
 import { useParams } from 'react-router'
-import { UploadError } from '../api/UploadError'
 import { PhotoPicker } from '../components/PhotoPicker'
 import { usePublicEvent } from '../hooks/usePublicEvent'
 import { useQuota } from '../hooks/useQuota'
-import { useUploadPhoto } from '../hooks/useUploadPhoto'
+import { useUploadQueue } from '../hooks/useUploadQueue'
+import type { UploadItem } from '../types'
 
 const ERROR_MESSAGES: Record<string, string> = {
     UPLOAD_LIMIT_REACHED: 'Ya subiste todas las fotos permitidas.',
@@ -14,36 +13,22 @@ const ERROR_MESSAGES: Record<string, string> = {
     EVENT_CLOSED: 'Este evento ya no recibe fotos.',
 }
 
-function errorMessage(reason: unknown): string {
-    if (reason instanceof UploadError && ERROR_MESSAGES[reason.code]) {
-        return ERROR_MESSAGES[reason.code]
-    }
-    return 'No pudimos subir la foto. Intenta de nuevo.'
+const STATUS_LABELS: Record<UploadItem['status'], string> = {
+    waiting: 'En espera',
+    uploading: 'Subiendo...',
+    done: 'Lista ✓',
+    error: 'Falló',
+}
+
+function errorMessage(code: string): string {
+    return ERROR_MESSAGES[code] ?? 'No pudimos subir la foto. Intenta de nuevo.'
 }
 
 function EventPage() {
     const { publicCode = '' } = useParams()
     const { data: event, isPending, error } = usePublicEvent(publicCode)
     const { data: quota } = useQuota(publicCode)
-    const uploadPhoto = useUploadPhoto(publicCode)
-    const [uploading, setUploading] = useState(false)
-    const [message, setMessage] = useState<string | null>(null)
-
-    async function handleSelect(files: File[]) {
-        setUploading(true)
-        setMessage(null)
-        const results = await Promise.allSettled(files.map((file) => uploadPhoto.mutateAsync(file)))
-        setUploading(false)
-
-        const failed = results.filter((result) => result.status === 'rejected')
-        if (failed.length === 0) {
-            setMessage(files.length === 1 ? 'Foto subida.' : `${files.length} fotos subidas.`)
-            return
-        }
-        const uploaded = files.length - failed.length
-        const prefix = uploaded > 0 ? `Se subieron ${uploaded} de ${files.length}. ` : ''
-        setMessage(prefix + errorMessage((failed[0] as PromiseRejectedResult).reason))
-    }
+    const { uploadItems, addFiles } = useUploadQueue(publicCode)
 
     if (isPending) {
         return <p className="p-4 text-center">Cargando...</p>
@@ -72,9 +57,12 @@ function EventPage() {
     }
 
     const remaining = quota?.remaining ?? 0
+    const isUploading = uploadItems.some(
+        (item) => item.status === 'waiting' || item.status === 'uploading',
+    )
 
     return (
-        <main className="mx-auto flex min-h-screen max-w-md flex-col gap-4 p-4">
+        <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-4 p-4">
             <h1 className="text-3xl font-bold" style={{ color: event.color }}>
                 {event.name}
             </h1>
@@ -84,13 +72,29 @@ function EventPage() {
                     Te quedan {quota.remaining} de {quota.limit} fotos.
                 </p>
             )}
-            {uploading && <p>Subiendo...</p>}
-            {message && <p role="status">{message}</p>}
+            {isUploading && <p>Subiendo...</p>}
+
+            <ul className="flex flex-col gap-2">
+                {uploadItems.map((item) => (
+                    <li key={item.id} className="flex flex-col">
+                        <div className="flex justify-between">
+                            <span className="truncate">{item.file.name}</span>
+                            <span>{STATUS_LABELS[item.status]}</span>
+                        </div>
+                        {item.error && (
+                            <p role="alert" className="text-sm text-red-600">
+                                {errorMessage(item.error)}
+                            </p>
+                        )}
+                    </li>
+                ))}
+            </ul>
+
             <PhotoPicker
                 color={event.color}
-                disabled={uploading || remaining === 0}
+                disabled={isUploading || remaining === 0}
                 maxFiles={remaining}
-                onSelect={handleSelect}
+                onSelect={addFiles}
             />
         </main>
     )

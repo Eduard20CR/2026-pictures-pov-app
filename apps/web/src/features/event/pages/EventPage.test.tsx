@@ -1,35 +1,45 @@
 // @vitest-environment jsdom
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import EventPage from './EventPage'
+import { requestUpload } from '../api/requestUpload'
 import { UploadError } from '../api/UploadError'
+import { uploadToS3 } from '../api/uploadToS3'
 import { usePublicEvent } from '../hooks/usePublicEvent'
 import { useQuota } from '../hooks/useQuota'
-import { useUploadPhoto } from '../hooks/useUploadPhoto'
 
 vi.mock('../hooks/usePublicEvent')
 vi.mock('../hooks/useQuota')
-vi.mock('../hooks/useUploadPhoto')
+vi.mock('../api/requestUpload')
+vi.mock('../api/uploadToS3')
 
 beforeEach(() => {
+    // Default: the guest has quota left and every upload succeeds
     vi.mocked(useQuota).mockReturnValue(
         { data: { limit: 10, used: 3, remaining: 7 } } as unknown as ReturnType<typeof useQuota>,
     )
-    vi.mocked(useUploadPhoto).mockReturnValue(
-        { mutateAsync: vi.fn() } as unknown as ReturnType<typeof useUploadPhoto>,
-    )
+    vi.mocked(requestUpload).mockResolvedValue({
+        imageId: 'img-1',
+        uploadUrl: 'https://s3.example/upload',
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+    })
+    vi.mocked(uploadToS3).mockResolvedValue(undefined)
 })
 
 afterEach(cleanup)
 
 function renderPage() {
+    const queryClient = new QueryClient()
     render(
-        <MemoryRouter initialEntries={['/events/abc']}>
-            <Routes>
-                <Route path="/events/:publicCode" element={<EventPage />} />
-            </Routes>
-        </MemoryRouter>,
+        <QueryClientProvider client={queryClient}>
+            <MemoryRouter initialEntries={['/events/abc']}>
+                <Routes>
+                    <Route path="/events/:publicCode" element={<EventPage />} />
+                </Routes>
+            </MemoryRouter>
+        </QueryClientProvider>,
     )
 }
 
@@ -44,10 +54,10 @@ function mockActiveEvent() {
 }
 
 function photo(name: string) {
-    return new File(['contenido'], name, { type: 'image/jpeg' })
+    return new File(['content'], name, { type: 'image/jpeg' })
 }
 
-test('muestra "Evento no encontrado" cuando el evento no existe', () => {
+test('shows "Evento no encontrado" when the event does not exist', () => {
     vi.mocked(usePublicEvent).mockReturnValue(
         { data: null, isPending: false, error: null } as unknown as ReturnType<typeof usePublicEvent>,
     )
@@ -57,9 +67,9 @@ test('muestra "Evento no encontrado" cuando el evento no existe', () => {
     expect(screen.getByText('Evento no encontrado')).toBeDefined()
 })
 
-test('muestra "Este evento ya cerró" cuando el evento ya cerro', () => {
+test('shows "Este evento ya cerró" when the event is closed', () => {
     vi.mocked(usePublicEvent).mockReturnValue(
-        { data: "closed", isPending: false, error: null } as unknown as ReturnType<typeof usePublicEvent>,
+        { data: 'closed', isPending: false, error: null } as unknown as ReturnType<typeof usePublicEvent>,
     )
 
     renderPage()
@@ -67,7 +77,7 @@ test('muestra "Este evento ya cerró" cuando el evento ya cerro', () => {
     expect(screen.getByText('Este evento ya cerró')).toBeDefined()
 })
 
-test('muestra el evento y el cupo cuando existe', () => {
+test('shows the event and the quota when the event exists', () => {
     mockActiveEvent()
 
     renderPage()
@@ -76,7 +86,7 @@ test('muestra el evento y el cupo cuando existe', () => {
     expect(screen.getByText('Te quedan 7 de 10 fotos.')).toBeDefined()
 })
 
-test('muestra "Cargando..." mientras carga', () => {
+test('shows "Cargando..." while loading', () => {
     vi.mocked(usePublicEvent).mockReturnValue(
         { data: undefined, isPending: true, error: null } as unknown as ReturnType<typeof usePublicEvent>,
     )
@@ -86,7 +96,7 @@ test('muestra "Cargando..." mientras carga', () => {
     expect(screen.getByText('Cargando...')).toBeDefined()
 })
 
-test('muestra un mensaje de error cuando falla la carga', () => {
+test('shows an error message when loading fails', () => {
     vi.mocked(usePublicEvent).mockReturnValue(
         { data: undefined, isPending: false, error: new Error('HTTP 500') } as unknown as ReturnType<typeof usePublicEvent>,
     )
@@ -96,40 +106,35 @@ test('muestra un mensaje de error cuando falla la carga', () => {
     expect(screen.getByText(/No pudimos cargar el evento/)).toBeDefined()
 })
 
-test('muestra error cuando la foto pesa más de 20 MB', async () => {
-    // Arrange: hay un evento activo y la subida falla por tamaño
+test('shows an error when the photo is larger than 20 MB', async () => {
+    // Arrange: an active event, and the backend rejects the upload because of its size
     mockActiveEvent()
-    vi.mocked(useUploadPhoto).mockReturnValue(
-        { mutateAsync: vi.fn().mockRejectedValue(new UploadError('FILE_TOO_LARGE')) } as unknown as ReturnType<typeof useUploadPhoto>,
-    )
+    vi.mocked(requestUpload).mockRejectedValue(new UploadError('FILE_TOO_LARGE'))
 
-    // Act: el invitado elige una foto de la galería
+    // Act: the guest picks a photo from the gallery
     renderPage()
     const gallery = screen.getByLabelText('Elegir de galería')
     fireEvent.change(gallery, { target: { files: [photo('a.jpg')] } })
 
-    // Assert: ve el mensaje de error
+    // Assert: the guest sees the error message under the photo
     expect(await screen.findByText('La foto pesa más de 20 MB.')).toBeDefined()
 })
 
-test('muestra “Foto subida.” cuando la subida de un file sale bien.', async () => {
-    // Arrange: hay un evento activo y la subida falla por tamaño
+test('shows "Lista ✓" when the photo uploads successfully', async () => {
+    // Arrange: an active event; beforeEach already makes every upload succeed
     mockActiveEvent()
-    vi.mocked(useUploadPhoto).mockReturnValue(
-        { mutateAsync: vi.fn().mockResolvedValue(undefined) } as unknown as ReturnType<typeof useUploadPhoto>,
-    )
 
-    // Act: el invitado elige una foto de la galería
+    // Act: the guest picks a photo from the gallery
     renderPage()
     const gallery = screen.getByLabelText('Elegir de galería')
     fireEvent.change(gallery, { target: { files: [photo('a.jpg')] } })
 
-    // Assert: ve el mensaje de error
-    expect(await screen.findByText('Foto subida.')).toBeDefined()
+    // Assert: the photo's row says it is done
+    expect(await screen.findByText('Lista ✓')).toBeDefined()
 })
 
-test('desactiva los botones cuando ya no le quedan fotos', () => {
-    // Arrange: hay un evento activo y el invitado ya usó todo su cupo
+test('disables the buttons when the guest has no photos left', () => {
+    // Arrange: an active event, and the guest has used the whole quota
     mockActiveEvent()
     vi.mocked(useQuota).mockReturnValue(
         { data: { limit: 10, used: 10, remaining: 0 } } as unknown as ReturnType<typeof useQuota>,
@@ -138,7 +143,7 @@ test('desactiva los botones cuando ya no le quedan fotos', () => {
     // Act
     renderPage()
 
-    // Assert: no puede elegir fotos ni de la cámara ni de la galería
+    // Assert: the guest cannot pick photos from the camera or the gallery
     expect((screen.getByLabelText('Tomar foto') as HTMLInputElement).disabled).toBe(true)
     expect((screen.getByLabelText('Elegir de galería') as HTMLInputElement).disabled).toBe(true)
 })
