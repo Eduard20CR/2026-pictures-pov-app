@@ -12,6 +12,7 @@
     "zip": "cd dist && zip -j function.zip index.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1161.0",
     "@aws-sdk/client-ssm": "^3.1161.0",
     "pg": "^8.23.1"
   },
