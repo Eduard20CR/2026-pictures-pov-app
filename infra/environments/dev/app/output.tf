@@ -25,3 +25,15 @@ output "web_url" {
 output "web_distribution_id" {
   value = module.cdn.distribution_id
 }
+
+output "cognito_user_pool_id" {
+  value = module.cognito.user_pool_id
+}
+
+output "cognito_client_id" {
+  value = module.cognito.client_id
+}
+
+output "cognito_login_domain" {
+  value = module.cognito.login_domain
+}
