@@ -15,6 +15,7 @@ module "api_lambda" {
     PHOTOS_BUCKET         = module.s3_photos_bucket.bucket_name
     COGNITO_ISSUER_URI    = "https://${module.cognito.user_pool_endpoint}"
     COGNITO_USER_INFO_URI = "https://${module.cognito.login_domain}/oauth2/userInfo"
+    COGNITO_CLIENT_ID     = module.cognito.client_id
   }
 }
 
