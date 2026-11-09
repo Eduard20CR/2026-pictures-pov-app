@@ -76,6 +76,14 @@ docs/             Requirements and ADRs
 
 Pending: documented after phase 1.
 
+### First administrator
+
+After the first `terraform apply` of an environment, create its first admin:
+
+```bash
+./scripts/create-first-admin.sh <user-pool-id> <email>
+```
+
 ## Documentation
 
 - [Functional requirements](docs/01_requisitos_funcionales.md)
