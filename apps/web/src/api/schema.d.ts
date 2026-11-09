@@ -103,8 +103,8 @@ export interface components {
         };
         MeResponse: {
             /** Format: uuid */
-            id?: string;
-            email?: string;
+            id: string;
+            email: string;
         };
         PublicEventResponse: {
             publicCode: string;
@@ -194,8 +194,17 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description OK */
+            /** @description Signed-in user; created on the first call */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MeResponse"];
+                };
+            };
+            /** @description Missing or invalid access token */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
