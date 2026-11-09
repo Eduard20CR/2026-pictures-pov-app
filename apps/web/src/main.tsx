@@ -10,6 +10,7 @@ import EventPage from './features/event/pages/EventPage.tsx'
 import { AuthProvider } from 'react-oidc-context'
 import { oidcConfig } from './features/auth/authConfig.ts'
 import AuthCallbackPage from './features/auth/pages/AuthCallbackPage.tsx'
+import MyEventsPage from './features/my-events/pages/MyEventsPage.tsx'
 
 const queryClient = new QueryClient()
 
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
   {
     path: "/auth/callback",
     element: <AuthCallbackPage />,
+  },
+  {
+    path: "/my-events",
+    element: <MyEventsPage />,
   },
   {
     path: "*",
