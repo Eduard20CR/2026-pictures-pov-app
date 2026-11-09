@@ -11,9 +11,10 @@ module "api_lambda" {
   ssm_parameter_path = local.ssm_parameter_path
   photos_bucket_arn  = module.s3_photos_bucket.bucket_arn
   environment_variables = {
-    SSM_DB_PATH   = local.ssm_parameter_path
-    PHOTOS_BUCKET = module.s3_photos_bucket.bucket_name
-    COGNITO_ISSUER_URI = "https://${module.cognito.user_pool_endpoint}"
+    SSM_DB_PATH           = local.ssm_parameter_path
+    PHOTOS_BUCKET         = module.s3_photos_bucket.bucket_name
+    COGNITO_ISSUER_URI    = "https://${module.cognito.user_pool_endpoint}"
+    COGNITO_USER_INFO_URI = "https://${module.cognito.login_domain}/oauth2/userInfo"
   }
 }
 
