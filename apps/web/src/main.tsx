@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import EventPage from './features/event/pages/EventPage.tsx'
 import { AuthProvider } from 'react-oidc-context'
 import { oidcConfig } from './features/auth/authConfig.ts'
+import AuthCallbackPage from './features/auth/pages/AuthCallbackPage.tsx'
 
 const queryClient = new QueryClient()
 
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
   {
     path: "/events/:publicCode",
     element: <EventPage />,
+  },
+  {
+    path: "/auth/callback",
+    element: <AuthCallbackPage />,
   },
   {
     path: "*",
