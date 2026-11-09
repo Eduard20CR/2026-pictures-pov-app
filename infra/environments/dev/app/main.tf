@@ -1,8 +1,3 @@
-locals {
-  name_prefix        = "${var.project}-${var.environment}"
-  ssm_parameter_path = "/${var.project}/${var.environment}/db"
-}
-
 module "s3_artifacts_bucket" {
   source = "../../../modules/s3_artifacts_bucket"
   name   = local.name_prefix
@@ -88,4 +83,18 @@ module "upload_cleanup_lambda" {
     SSM_DB_PATH   = local.ssm_parameter_path
     PHOTOS_BUCKET = module.s3_photos_bucket.bucket_name
   }
+}
+
+module "cognito" {
+  source = "../../../modules/cognito_user_pool"
+  name   = local.name_prefix
+
+  callback_urls = [
+    "https://${module.cdn.distribution_domain_name}/auth/callback",
+    "http://localhost:5173/auth/callback",
+  ]
+  logout_urls = [
+    "https://${module.cdn.distribution_domain_name}/",
+    "http://localhost:5173/",
+  ]
 }
