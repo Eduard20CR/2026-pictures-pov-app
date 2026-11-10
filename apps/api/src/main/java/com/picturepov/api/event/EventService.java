@@ -5,6 +5,8 @@ import com.picturepov.api.common.error.ErrorCode;
 import com.picturepov.api.common.error.NotFoundException;
 import com.picturepov.api.invitation.Invitation;
 import com.picturepov.api.invitation.InvitationService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,13 @@ public class EventService {
         return AdminEventResponse.from(event, owner);
     }
 
+    private static final Sort NEWEST_FIRST =
+            Sort.by(Sort.Order.desc("eventDate"), Sort.Order.desc("id"));
+
+    @Transactional(readOnly = true)
+    AdminEventPage list(int page, int size) {
+        return AdminEventPage.from(eventRepository.findAdminEvents(PageRequest.of(page, size, NEWEST_FIRST)));
+    }
 
     @Transactional(readOnly = true)
     public Event getActiveEvent(String publicCode) {

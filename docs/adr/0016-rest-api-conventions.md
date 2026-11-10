@@ -15,7 +15,7 @@ Every endpoint must look and behave the same so the frontend, the OpenAPI contra
 | Code-first with springdoc | One source of truth; contract always matches the code | Contract exists only after the code |
 | Version in the URL (`/v1`) | Old clients keep working | Unneeded with a single client deployed together |
 | No version, backward-compatible changes | Simple URLs | Breaking changes need expand/contract |
-| Offset pagination | Simple; jump to any page | Slow on large tables; duplicates when rows are added |
+| Offset pagination | Simple; jump to any page; built into Spring Data (`Pageable`) | Slow on large tables; duplicates when rows are added |
 | Cursor pagination | Stable and fast on growing galleries | No jump to page N |
 
 ## Decision
@@ -32,7 +32,8 @@ Every endpoint must look and behave the same so the frontend, the OpenAPI contra
 | JSON | camelCase fields; ids as UUID strings |
 | Dates | Instants in ISO-8601 UTC with `Z` (`2026-12-05T18:30:00Z`); calendar dates as `YYYY-MM-DD` |
 | Errors | RFC 9457 Problem Details (formerly RFC 7807), `application/problem+json`, plus a `code` field in `UPPER_SNAKE_CASE` |
-| Pagination | `?limit=&cursor=`; response `{ "items": [...], "nextCursor": "..." }`, `nextCursor` is `null` on the last page |
+| Pagination (guest and gallery lists) | `?limit=&cursor=`; response `{ "items": [...], "nextCursor": "..." }`, `nextCursor` is `null` on the last page |
+| Pagination (`/admin` lists) | `?page=&size=` (page from 0, size 1 to 100, default 20); response `{ "items": [...], "page", "size", "totalItems", "totalPages" }` |
 
 ### Example request
 
@@ -79,6 +80,8 @@ Content-Type: application/problem+json
 - ✅ One contract, always in sync with the code and the frontend types.
 - ✅ The client decides on `code`, not on the `detail` text.
 - ✅ Cursor pagination stays fast while guests keep uploading.
+- ✅ Admin lists are small, so offset pagination with Spring Data `Pageable` gives page numbers and totals with no custom code.
+- ⚠️ Two pagination styles; admin lists run one extra `COUNT(*)` per page.
 - ⚠️ A breaking change needs expand/contract across two deployments.
 - ⚠️ No jump to an arbitrary gallery page.
 - ⚠️ Authorization inside `/me` is checked per event against the invitations (RNF-SEG-02), not by the route alone.
@@ -86,6 +89,7 @@ Content-Type: application/problem+json
 ## References
 
 - [springdoc-openapi](https://springdoc.org/)
+- [Spring Data JPA: Paging and Sorting](https://docs.spring.io/spring-data/jpa/reference/repositories/query-methods-details.html#repositories.special-parameters)
 - [Spring Framework: Error Responses (ProblemDetail)](https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html)
 - [RFC 9457: Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457)
 - [openapi-typescript](https://openapi-ts.dev/)

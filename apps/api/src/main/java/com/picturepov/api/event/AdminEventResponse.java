@@ -11,7 +11,7 @@ public record AdminEventResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String name,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate eventDate,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) EventStatus status,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String ownerEmail
+        @Schema(description = "Null when the event has no owner invitation") String ownerEmail
 ) {
     static AdminEventResponse from(Event event, Invitation owner) {
         return new AdminEventResponse(

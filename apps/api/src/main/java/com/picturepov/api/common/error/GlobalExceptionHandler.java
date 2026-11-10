@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+
+import java.util.List;
 
 import java.util.Map;
 
@@ -53,10 +56,26 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                         "message", String.valueOf(error.getDefaultMessage())))
                 .toList();
 
+        return handleExceptionInternal(ex, validationProblem(errors), headers, status, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHandlerMethodValidationException(HandlerMethodValidationException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        var errors = ex.getParameterValidationResults().stream()
+                .flatMap(result -> result.getResolvableErrors().stream()
+                        .map(error -> Map.of(
+                                "field", String.valueOf(result.getMethodParameter().getParameterName()),
+                                "message", String.valueOf(error.getDefaultMessage()))))
+                .toList();
+
+        return handleExceptionInternal(ex, validationProblem(errors), headers, status, request);
+    }
+
+    private static ProblemDetail validationProblem(List<Map<String, String>> errors) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "One or more fields are invalid.");
         problem.setProperty("code", ErrorCode.VALIDATION_FAILED.name());
         problem.setProperty("errors", errors);
-        return handleExceptionInternal(ex, problem, headers, status, request);
+        return problem;
     }
 
 }
