@@ -13,6 +13,7 @@ import AuthCallbackPage from './features/auth/pages/AuthCallbackPage.tsx'
 import MyEventsPage from './features/my-events/pages/MyEventsPage.tsx'
 import RequireAuth from './features/auth/components/RequireAuth.tsx'
 import AppLayout from './app/AppLayout.tsx'
+import CreateEventPage from './features/admin/pages/CreateEventPage.tsx'
 
 const queryClient = new QueryClient()
 
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
         element: <RequireAuth />,
         children: [
           { path: "/my-events", element: <MyEventsPage /> },
+          { path: "/admin/events/new", element: <CreateEventPage /> },
         ],
       },
 
