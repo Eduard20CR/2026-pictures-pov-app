@@ -32,20 +32,25 @@ Serverless on AWS: each environment with no traffic costs ≤ 25 USD/month.
 
 ```mermaid
 flowchart LR
-    U[Browser] --> CF[CloudFront]
+    U[Browser] -->|HTTPS| CF[CloudFront]
     CF --> WEB[(S3<br/>Frontend)]
-    CF -->|/api/*| APIGW[API Gateway]
-    APIGW --> L[Lambda<br/>Spring Boot]
-    L --> DB[(Aurora Serverless v2<br/>PostgreSQL)]
+    CF -->|/api/*| APIGW[API Gateway<br/>HTTP API]
+    APIGW --> L[Lambda<br/>Spring Boot API]
+    L --> DB[(PostgreSQL<br/>Aurora prod · Neon dev)]
     L -->|Presigned URL| U
     U -->|Direct upload| S3[(S3<br/>Photos)]
-    S3 -->|Event| T[Lambda<br/>Thumbnails]
-    T --> S3
-    L -->|ZIP request| Q[SQS]
-    Q --> Z[Lambda<br/>ZIP generation]
-    Z --> S3
-    Z --> DB
     U -->|Sign-in| COG[Cognito]
+    L -->|Validates token, reads user info| COG
+    S3 -->|ObjectCreated originals/| IP[Lambda<br/>Image processor]
+    IP -->|Reads header, deletes invalid| S3
+    IP -->|Marks READY| DB
+    SCH[EventBridge Scheduler] -->|Every 30 min| UC[Lambda<br/>Upload cleanup]
+    UC -->|HeadObject| S3
+    UC -->|Marks READY or releases quota| DB
+    L -.->|ZIP request| Q[SQS]
+    Q -.-> Z[Lambda<br/>ZIP generation]
+    Z -.-> S3
+    Z -.-> DB
 ```
 
 | Part | Technology | ADR |
@@ -63,13 +68,17 @@ flowchart LR
 
 ```
 apps/
-  web/            Frontend (React)
-  api/            Backend (Spring Boot)
+  web/              Frontend (React)
+  api/              Backend (Spring Boot)
+  image-processor/  Lambda that validates uploaded photos (Node.js)
+  upload-cleanup/   Scheduled Lambda that frees stale uploads (Node.js)
+db/                 Liquibase migrations
 infra/
-  bootstrap/      Bucket for the Terraform state
-  modules/        Reusable Terraform modules
-  environments/   dev and prod
-docs/             Requirements and ADRs
+  bootstrap/        Bucket for the Terraform state
+  modules/          Reusable Terraform modules
+  environments/     dev and prod
+scripts/            Helper scripts
+docs/               Requirements and ADRs
 ```
 
 ## Getting started
