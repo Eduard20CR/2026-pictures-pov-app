@@ -12,24 +12,31 @@ import { oidcConfig } from './features/auth/authConfig.ts'
 import AuthCallbackPage from './features/auth/pages/AuthCallbackPage.tsx'
 import MyEventsPage from './features/my-events/pages/MyEventsPage.tsx'
 import RequireAuth from './features/auth/components/RequireAuth.tsx'
+import AppLayout from './app/AppLayout.tsx'
 
 const queryClient = new QueryClient()
 
 const router = createBrowserRouter([
-  // Public routes: guests and the sign-in callback.
-  { path: "/", element: <App /> },
-  { path: "/events/:publicCode", element: <EventPage /> },
-  { path: "/auth/callback", element: <AuthCallbackPage /> },
-
-  // Private routes: everything inside RequireAuth needs a session.
   {
-    element: <RequireAuth />,
+    // Layout route: no path, it only wraps every page with the header and footer.
+    element: <AppLayout />,
     children: [
-      { path: "/my-events", element: <MyEventsPage /> },
+      // Public routes: guests and the sign-in callback.
+      { path: "/", element: <App /> },
+      { path: "/events/:publicCode", element: <EventPage /> },
+      { path: "/auth/callback", element: <AuthCallbackPage /> },
+
+      // Private routes: everything inside RequireAuth needs a session.
+      {
+        element: <RequireAuth />,
+        children: [
+          { path: "/my-events", element: <MyEventsPage /> },
+        ],
+      },
+
+      { path: "*", element: <NotFound /> },
     ],
   },
-
-  { path: "*", element: <NotFound /> },
 ]);
 
 createRoot(document.getElementById('root')!).render(
