@@ -4,8 +4,7 @@ import { usePublicEvent } from '../hooks/usePublicEvent'
 import { useQuota } from '../hooks/useQuota'
 import { useUploadQueue } from '../hooks/useUploadQueue'
 import { UploadList } from '../components/UploadList'
-
-
+import { EventStatusScreen } from '../components/EventStatusScreen'
 
 function EventPage() {
     const { publicCode = '' } = useParams()
@@ -23,19 +22,19 @@ function EventPage() {
 
     if (event === null) {
         return (
-            <main className="flex min-h-screen flex-col items-center justify-center gap-2 p-4 text-center">
-                <h1 className="text-2xl font-bold">Evento no encontrado</h1>
-                <p>Revisa el enlace o vuelve a escanear el código QR.</p>
-            </main>
+            <EventStatusScreen
+                title="Evento no encontrado"
+                text="Revisa el enlace o vuelve a escanear el código QR."
+            />
         )
     }
 
     if (event === 'closed') {
         return (
-            <main className="flex min-h-screen flex-col items-center justify-center gap-2 p-4 text-center">
-                <h1 className="text-2xl font-bold">Este evento ya cerró</h1>
-                <p>Ya no se reciben fotos. ¡Gracias por participar!</p>
-            </main>
+            <EventStatusScreen
+                title="Este evento ya cerró"
+                text="Ya no se reciben fotos. ¡Gracias por participar!"
+            />
         )
     }
 
