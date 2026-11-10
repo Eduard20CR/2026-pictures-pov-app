@@ -20,6 +20,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me": {
         parameters: {
             query?: never;
@@ -100,6 +116,31 @@ export interface components {
             uploadUrl: string;
             /** Format: date-time */
             expiresAt: string;
+        };
+        CreateEventRequest: {
+            /** @example Boda Ana y Luis */
+            name: string;
+            /**
+             * Format: date
+             * @example 2026-12-20
+             */
+            eventDate: string;
+            /**
+             * Format: email
+             * @example ana@example.com
+             */
+            ownerEmail: string;
+        };
+        AdminEventResponse: {
+            /** Format: uuid */
+            id: string;
+            publicCode: string;
+            name: string;
+            /** Format: date */
+            eventDate: string;
+            /** @enum {string} */
+            status: "DRAFT" | "ACTIVE" | "CLOSED" | "ARCHIVED" | "DELETED";
+            ownerEmail: string;
         };
         MeResponse: {
             /** Format: uuid */
@@ -182,6 +223,53 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
+            };
+        };
+    };
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateEventRequest"];
+            };
+        };
+        responses: {
+            /** @description Event created in DRAFT and assigned to the owner email */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminEventResponse"];
+                };
+            };
+            /** @description Invalid or missing fields */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not an administrator */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
