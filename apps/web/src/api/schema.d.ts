@@ -27,7 +27,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["list"];
         put?: never;
         post: operations["create"];
         delete?: never;
@@ -140,7 +140,8 @@ export interface components {
             eventDate: string;
             /** @enum {string} */
             status: "DRAFT" | "ACTIVE" | "CLOSED" | "ARCHIVED" | "DELETED";
-            ownerEmail: string;
+            /** @description Null when the event has no owner invitation */
+            ownerEmail?: string;
         };
         MeResponse: {
             /** Format: uuid */
@@ -163,6 +164,17 @@ export interface components {
             used: number;
             /** Format: int32 */
             remaining: number;
+        };
+        AdminEventPage: {
+            items: components["schemas"]["AdminEventResponse"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            size: number;
+            /** Format: int64 */
+            totalItems: number;
+            /** Format: int32 */
+            totalPages: number;
         };
     };
     responses: never;
@@ -223,6 +235,52 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
+            };
+        };
+    };
+    list: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description All events, newest event date first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminEventPage"];
+                };
+            };
+            /** @description Invalid page or size */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not an administrator */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

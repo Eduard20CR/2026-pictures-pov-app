@@ -49,6 +49,45 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
   /admin/events:
+    get:
+      tags:
+      - admin-event-controller
+      operationId: list
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+          maximum: 100
+          minimum: 1
+      responses:
+        "200":
+          description: "All events, newest event date first"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminEventPage"
+        "400":
+          description: Invalid page or size
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Not signed in
+        "403":
+          description: Not an administrator
     post:
       tags:
       - admin-event-controller
@@ -242,11 +281,11 @@ components:
           - DELETED
         ownerEmail:
           type: string
+          description: Null when the event has no owner invitation
       required:
       - eventDate
       - id
       - name
-      - ownerEmail
       - publicCode
       - status
     MeResponse:
@@ -297,3 +336,28 @@ components:
       - limit
       - remaining
       - used
+    AdminEventPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminEventResponse"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalItems:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+      required:
+      - items
+      - page
+      - size
+      - totalItems
+      - totalPages
