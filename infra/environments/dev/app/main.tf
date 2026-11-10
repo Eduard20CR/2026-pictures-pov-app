@@ -37,6 +37,9 @@ module "api_http" {
   lambda_invoke_arn    = module.api_lambda.alias_invoke_arn
   lambda_function_name = module.api_lambda.function_name
   lambda_alias_name    = module.api_lambda.alias_name
+
+  throttling_rate_limit  = 10
+  throttling_burst_limit = 20
 }
 
 module "web_bucket" {
