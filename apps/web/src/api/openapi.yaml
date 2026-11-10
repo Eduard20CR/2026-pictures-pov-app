@@ -48,6 +48,34 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+  /admin/events:
+    post:
+      tags:
+      - admin-event-controller
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEventRequest"
+        required: true
+      responses:
+        "201":
+          description: Event created in DRAFT and assigned to the owner email
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminEventResponse"
+        "400":
+          description: Invalid or missing fields
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Not signed in
+        "403":
+          description: Not an administrator
   /me:
     get:
       tags:
@@ -169,6 +197,58 @@ components:
       - expiresAt
       - imageId
       - uploadUrl
+    CreateEventRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Boda Ana y Luis
+          maxLength: 100
+          minLength: 0
+        eventDate:
+          type: string
+          format: date
+          example: 2026-12-20
+        ownerEmail:
+          type: string
+          format: email
+          example: ana@example.com
+          maxLength: 320
+          minLength: 0
+      required:
+      - eventDate
+      - name
+      - ownerEmail
+    AdminEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        publicCode:
+          type: string
+        name:
+          type: string
+        eventDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - ACTIVE
+          - CLOSED
+          - ARCHIVED
+          - DELETED
+        ownerEmail:
+          type: string
+      required:
+      - eventDate
+      - id
+      - name
+      - ownerEmail
+      - publicCode
+      - status
     MeResponse:
       type: object
       properties:

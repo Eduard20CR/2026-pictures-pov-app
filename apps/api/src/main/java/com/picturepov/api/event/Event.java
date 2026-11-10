@@ -39,6 +39,22 @@ public class Event {
 
     protected Event() {}
 
+    private static final String DEFAULT_COLOR = "#000000";
+    private static final int DEFAULT_IMAGES_PER_USER = 10;
+
+    static Event draft(String name, LocalDate eventDate, String publicCode) {
+        Event event = new Event();
+        event.id = UUID.randomUUID();
+        event.name = name.trim();
+        event.eventDate = eventDate;
+        event.publicCode = publicCode;
+        event.color = DEFAULT_COLOR;
+        event.imagesPerUser = DEFAULT_IMAGES_PER_USER;
+        event.status = EventStatus.DRAFT;
+        event.createdAt = Instant.now();
+        return event;
+    }
+
     public UUID getId() { return id; }
     public String getName() { return name; }
     public String getColor() { return color; }
