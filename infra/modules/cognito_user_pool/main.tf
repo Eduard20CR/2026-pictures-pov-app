@@ -6,8 +6,14 @@ resource "aws_cognito_user_pool" "pool" {
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
 
+  # Self sign-up: the user confirms the email code before getting a session.
   admin_create_user_config {
-    allow_admin_create_user_only = true
+    allow_admin_create_user_only = false
+  }
+
+  # A changed email applies only after the new one is verified (RN-04).
+  user_attribute_update_settings {
+    attributes_require_verification_before_update = ["email"]
   }
 
   account_recovery_setting {
