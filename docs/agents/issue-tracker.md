@@ -15,7 +15,7 @@ Issues live in GitHub Issues on `Eduard20CR/2026-pictures-pov-app`. Use `gh` (2.
 
 ## Conventions
 
-- Labels: `type:` epic (groups stories as sub-issues, not estimated) / story / task / spike; `area:` api, web, infra, ci, docs; `priority:` must, should, could (MoSCoW); `points:` 1, 2, 3, 5, 8, 13. Items over 8 points are split. Stories use *Given / when / then* criteria and end with a `## References` line citing `RF-`, `RN-`, `P-` or `RNF-` IDs.
+- Labels: `type:` epic (groups issues as sub-issues, not estimated) / story (value a user sees: "As a guest…") / technical (a system need users never see: "As the system, I need…"). Issues state the need, never the implementation; that is decided when the issue is refined. No tasks or spikes; `area:` api, web, infra, ci, docs; `priority:` must, should, could (MoSCoW); `points:` 1, 2, 3, 5, 8, 13. Items over 8 points are split. Stories use *Given / when / then* criteria and end with a `## References` line citing `RF-`, `RN-`, `P-` or `RNF-` IDs.
 - Acceptance criteria live only in issues; the requirements documents hold one line per requirement.
 - "Publish to the issue tracker" means create a GitHub issue. "Fetch the ticket" means **Read** above.
 - **PRs as a request surface: no.**
