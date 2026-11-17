@@ -24,7 +24,7 @@ Guests scan a QR code at an event and upload their photos, with no account neede
 
 **Not in the first version:** videos · payments · self-service sign-up · comments and reactions · gallery for guests · photo editing · facial recognition · native app.
 
-Details: [functional requirements](docs/01_requisitos_funcionales.md).
+Details: [functional requirements](docs/01_functional_requirements.md).
 
 ## Architecture
 
@@ -95,6 +95,7 @@ After the first `terraform apply` of an environment, create its first admin:
 
 ## Documentation
 
-- [Functional requirements](docs/01_requisitos_funcionales.md)
-- [Non-functional requirements](docs/02_requisitos_no_funcionales.md)
+- [Functional requirements](docs/01_functional_requirements.md)
+- [Non-functional requirements](docs/02_non_functional_requirements.md)
+- [Glossary](GLOSSARY.md)
 - [Architecture decisions (ADR)](docs/adr/README.md)
