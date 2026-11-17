@@ -4,8 +4,8 @@
 |---|---|
 | Project | Pictures POV App |
 | Document | Non-functional requirements |
-| Version | 0.4 |
-| Status | Draft |
+| Version | 0.5 |
+| Status | Ready |
 | Date | 2026-11-17 |
 | Owner | Oscar |
 
@@ -17,6 +17,7 @@
 | 0.2 | 2026-10-06 | ZIP files included in RNF-SEG-05; RNF-REN-06 measures background generation. |
 | 0.3 | 2026-10-28 | Guests no longer view the event gallery: RNF-REN-01 measures the organizer's gallery; RNF-REN-05 retired. |
 | 0.4 | 2026-11-17 | Translated into English. Identifiers and content are unchanged. |
+| 0.5 | 2026-11-17 | Aligned with functional requirements 1.2: RNF-PRI-01 covers thumbnails; RNF-REN-01, RNF-REN-03 and RNF-DIS-01 name the gallery and the review; RNF-CAP-02 uses the Open state; RNF-SEG-04 cites RF-SIS-04. RNF-COS-01 becomes M, as the architecture already treats it. Status Ready. |
 
 ---
 
@@ -33,7 +34,7 @@
 | RNF-SEG-01 | All communication between clients and the system must be encrypted with TLS 1.2 or higher. | M |
 | RNF-SEG-02 | Authorization of every operation must be validated on the server, regardless of what the interface shows (RN-04, RN-05). | M |
 | RNF-SEG-03 | The system must validate the real type of each uploaded file from its content, not its extension or the type declared by the client. Files that fail validation must not be published (RF-SIS-01). | M |
-| RNF-SEG-04 | Each event's public identifier must have at least 128 bits of entropy and not be sequential (RF-ORG-02). | M |
+| RNF-SEG-04 | Each event's public identifier must have at least 128 bits of entropy and not be sequential (RF-SIS-04). | M |
 | RNF-SEG-05 | Photos and ZIP files must not be accessible through permanent public URLs; access must use signed, temporary links (RN-08, RF-ORG-14). | M |
 | RNF-SEG-06 | Endpoints accessible without authentication must rate-limit requests per device and per IP address. | S |
 | RNF-SEG-07 | Credentials and secrets must not be stored in the source code or the repository. | M |
@@ -42,7 +43,7 @@
 
 | ID | Requirement | Priority |
 |---|---|---|
-| RNF-PRI-01 | Images shown to guests must not contain location metadata. | S |
+| RNF-PRI-01 | Thumbnails must not contain location metadata (RF-SIS-03). | S |
 | RNF-PRI-02 | The system must store about guests only the device identifier and, if provided, their name. | M |
 | RNF-PRI-03 | Photos deleted by retention or permanent deletion must not be recoverable, backups included, once 35 days have passed since deletion. | S |
 
@@ -50,9 +51,9 @@
 
 | ID | Requirement | Priority |
 |---|---|---|
-| RNF-REN-01 | The event gallery, viewed by the organizer or a moderator, must show the first 30 thumbnails in under 3 seconds (p95) on a 4G mobile connection. | M |
+| RNF-REN-01 | The gallery and the review must show their first 30 thumbnails in under 3 seconds (p95) on a 4G mobile connection. | M |
 | RNF-REN-02 | Each thumbnail must take at most 100 KB. | S |
-| RNF-REN-03 | An uploaded photo must be available in the gallery in under 10 seconds (p95) after the upload finishes. | S |
+| RNF-REN-03 | An uploaded photo must appear in the review in under 10 seconds (p95) after the upload finishes. | S |
 | RNF-REN-04 | API operations, excluding file transfer, must respond in under 500 ms (p95) and under 1.5 s (p99). | S |
 | RNF-REN-05 | *Retired.* | — |
 | RNF-REN-06 | Background generation of the ZIP file of a 2,000-photo event, from the request until the download link is available on the event page, must complete in under 15 minutes (RF-ORG-14). | S |
@@ -62,13 +63,13 @@
 | ID | Requirement | Priority |
 |---|---|---|
 | RNF-CAP-01 | The system must support 300 devices uploading photos simultaneously to one event, with an error rate below 1%. | M |
-| RNF-CAP-02 | The system must support 20 events in the Active state simultaneously without degrading the performance targets of section 4. | S |
+| RNF-CAP-02 | The system must support 20 Open events simultaneously without degrading the performance targets of section 4. | S |
 
 ## 6. Availability and recovery
 
 | ID | Requirement | Priority |
 |---|---|---|
-| RNF-DIS-01 | Monthly availability of photo upload and the organizer's gallery must be 99.5% or higher. | S |
+| RNF-DIS-01 | Monthly availability of photo upload, the gallery and the review must be 99.5% or higher. | S |
 | RNF-DIS-02 | Retrying an interrupted upload must not consume additional quota or duplicate the photo (RF-INV-05). | M |
 | RNF-DIS-03 | If the database is lost, the recovery point (RPO) must not exceed 24 hours and the recovery time (RTO) must not exceed 4 hours. | S |
 | RNF-DIS-04 | Photos must be stored in a service with redundancy across at least three availability zones. | M |
@@ -98,5 +99,5 @@
 
 | ID | Requirement | Priority |
 |---|---|---|
-| RNF-COS-01 | The infrastructure cost of each environment with no traffic must not exceed 25 USD per month. | S |
+| RNF-COS-01 | The infrastructure cost of each environment with no traffic must not exceed 25 USD per month. | M |
 | RNF-COS-02 | The infrastructure cost attributable to a 300-photo event, over its whole lifecycle, must not exceed 2 USD. | S |
