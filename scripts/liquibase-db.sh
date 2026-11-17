@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs Liquibase against the database configured in /db. Usage: ./db-liquibase.sh <command>
+# Runs Liquibase against the database configured in /db. Usage: ./scripts/liquibase-db.sh <command>
 # We normally run it with status or update.
 
 set -euo pipefail

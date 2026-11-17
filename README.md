@@ -4,25 +4,27 @@ Guests scan a QR code at an event and upload their photos, with no account neede
 
 ## How it works
 
-1. An administrator creates the event and assigns it to an organizer.
-2. The organizer places the event's QR code at the venue.
+1. An administrator creates the event for an organizer's email; the event starts Open.
+2. The organizer creates an account with that email, accepts the event and places its QR code at the venue.
 3. Guests scan it and upload photos from their phone (10 per device by default).
-4. Each guest sees and can delete only the photos they uploaded, while the event is active.
-5. The organizer moderates the photos and downloads them as a ZIP.
+4. Each guest sees and can delete only the photos they uploaded, while the event is Open.
+5. The organizer and their moderators review the photos and hide the ones that should not appear in the gallery.
+6. The organizer downloads every photo as a ZIP.
 
 ## Roles
 
 | Role | Who | Can |
 |---|---|---|
 | Guest | Event attendee, no account | Upload photos and delete their own |
-| Organizer | Customer with assigned events | Customize the event, moderate and download photos |
+| Organizer | User with the event's OWNER invitation | Customize the event, invite moderators, moderate and download photos |
+| Moderator | User invited by the organizer | View the gallery and review, hide and show photos |
 | Administrator | Platform team | Manage all events and users |
 
 ## Scope
 
-**Included:** QR access without registration · uploads with per-device and per-event limits · event gallery for the organizer and moderators · sign-in with Google or email · moderation · single and ZIP downloads · admin panel · thumbnails · automatic deletion after a retention period.
+**Included:** QR access without registration · uploads with per-device and per-event limits · gallery and review for the organizer and moderators · account creation and sign-in with email · moderation · single and ZIP downloads · admin panel · thumbnails · automatic deletion after a retention period.
 
-**Not in the first version:** videos · payments · self-service sign-up · comments and reactions · gallery for guests · photo editing · facial recognition · native app.
+**Not in the first version:** videos · payments · self-service event creation · sign-in with Google · comments and reactions · gallery for guests · photo editing · facial recognition · native app.
 
 Details: [functional requirements](docs/01_functional_requirements.md).
 
@@ -83,7 +85,28 @@ docs/               Requirements and ADRs
 
 ## Getting started
 
-Pending: documented after phase 1.
+Needs Java 21, Node 24, Docker and the Liquibase CLI.
+
+```bash
+# 1. Database: Postgres in Docker, then the migrations
+docker run -d --name pov-db -p 5432:5432 \
+  -e POSTGRES_DB=picturepov -e POSTGRES_USER=app -e POSTGRES_PASSWORD=app postgres:17-alpine
+./scripts/liquibase-db.sh update
+
+# 2. API on http://localhost:8080/api (signs in against the dev Cognito by default)
+cd apps/api && ./mvnw spring-boot:run
+
+# 3. Web on http://localhost:5173; Vite proxies /api to the API
+cd apps/web && cp .env.example .env && npm ci && npm run dev
+```
+
+| Task | Command |
+|---|---|
+| API tests (throwaway Postgres) | `./scripts/api-test.sh` |
+| Web checks | `cd apps/web && npm run lint && npm test && npm run build` |
+| Refresh the OpenAPI contract and web types | `./scripts/openapi-export.sh` |
+
+Fill `apps/web/.env` from `terraform output` in `infra/environments/dev/app`. Uploads need `PHOTOS_BUCKET` set for the API.
 
 ### First administrator
 

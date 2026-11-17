@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs the API tests locally against a throwaway Postgres in Docker (mirrors .github/workflows/api-ci.yml).
+# Runs the API tests locally against a throwaway Postgres in Docker (mirrors .github/workflows/api-build-test.yaml).
 set -euo pipefail
 
 CONTAINER=pov-db

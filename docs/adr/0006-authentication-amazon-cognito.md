@@ -1,6 +1,6 @@
 # 0006. Authentication with Amazon Cognito
 
-- **Status:** Accepted
+- **Status:** Partially superseded by [0018](0018-self-sign-up-email-only.md) (no Google; self sign-up)
 - **Date:** 2026-10-09
 
 ## Context

@@ -4,7 +4,7 @@
 |---|---|
 | Project | Pictures POV App |
 | Document | Functional requirements |
-| Version | 1.1 |
+| Version | 1.2 |
 | Status | Ready |
 | Date | 2026-11-17 |
 | Owner | Oscar |
@@ -24,6 +24,8 @@
 | 0.9 | 2026-11-17 | Organizers and moderators share one list of events, labelled by role (AC RF-ORG-01). Invitations are accepted from that list (AC RF-AUT-05.6). Reassigning to a current moderator is rejected (AC RF-ADM-03.3). Declining an invitation is out of scope. |
 | 1.0 | 2026-11-17 | Acceptance criteria moved to the GitHub issues, so each criterion has one home; this document keeps requirements, business rules, parameters and scope. |
 | 1.1 | 2026-11-17 | RN-06 defines the event lifecycle transitions. |
+| 1.2 | 2026-11-17 | Full review. Added RF-AUT-06 (create an account), RF-ORG-24 (gallery) and RN-10 (deleting a user). Sign-in with Google out of scope (RF-AUT-01, RN-04). RN-06: states Open, Closed and Archived; events start Open; deletion is not a state. Hiding affects only the gallery (RF-ORG-14, RF-ORG-16, RF-ORG-20). Location removed from thumbnails only (RF-SIS-03). Moderator permissions as an allow-list (section 7). Administrator manages users (RF-ADM-09 to RF-ADM-11). Out of scope: "self-service event creation". Fixed the link to section 3. |
+
 ---
 
 ## 1. Introduction
@@ -52,7 +54,7 @@ The document covers the functional requirements of the system's four roles (admi
 - **Wording.** Each requirement describes a single verifiable capability, in the form "The system must allow the [role] to …" or "The system must …".
 - **Priority (MoSCoW).** **M** (Must): mandatory for the first version. **S** (Should): important, not blocking. **C** (Could): desirable. **W** (Won't): out of scope for this version.
 - **Acceptance criteria.** Live only in the GitHub issue that implements each requirement; the issue cites the requirement ID.
-- **References.** `RN-NN` refers to a business rule and `P-NN` to a configurable parameter, both defined in [reglas-de-negocio.md](reglas-de-negocio.md).
+- **References.** `RN-NN` refers to a business rule and `P-NN` to a configurable parameter, both defined in [section 3](#3-business-rules-and-parameters).
 
 ## 3. Business rules and parameters
 
@@ -65,12 +67,13 @@ Identifier format `RN-<NN>`, never reused.
 | RN-01 | A device can upload at most the event's per-device photo limit (P-01 by default), and an event at most P-03 photos in total. |
 | RN-02 | A device is identified only by a cookie; it is not a verified identity. |
 | RN-03 | Hiding or deleting a photo does not restore quota. |
-| RN-04 | A user accesses an event only through an *Accepted* invitation whose email matches their verified email. Each email maps to one account, whatever the sign-in method. |
+| RN-04 | A user accesses an event only through an *Accepted* invitation whose email matches their verified email. Each email maps to one account. |
 | RN-05 | The permissions of each role are fixed (administrator, organizer, moderator; section 7 for the moderator) and are checked on the server for every request. |
-| RN-06 | An event is Draft, Active, Closed, Archived or Deleted; only Active accepts guests. Draft and Closed become Active when the organizer opens uploads or, for Draft, when the upload window starts. Active becomes Closed when the organizer closes uploads or the window ends. The window acts only at its start and end; a manual change in between stands. Any state except Deleted becomes Archived when P-05 elapses, and its photos are deleted. The administrator can delete an event in any state. Archived and Deleted are terminal. |
+| RN-06 | An event is Open, Closed or Archived, and is created Open; only Open accepts guests. The organizer closes and reopens uploads; the upload window, if set, opens them at its start and closes them at its end, and a manual change in between stands. When P-05 elapses after the event date, the event becomes Archived and its photos are deleted; Archived is final. An administrator can delete an event in any state; it then disappears for everyone (RN-07). |
 | RN-07 | Deletion takes effect for users immediately; the file is physically removed after P-04. |
 | RN-08 | Original photos and ZIP files are accessible only through signed, temporary links (P-07, P-12). ZIP generation per event is limited by P-08. |
 | RN-09 | Blocking an organizer does not affect guests: their events remain accessible. |
+| RN-10 | A user who is the organizer of an event that is not Archived cannot be deleted until it is reassigned or deleted. Deleting a user removes their MODERATOR invitations. |
 
 ### 3.2 Parameters
 
@@ -95,15 +98,16 @@ Identifier format `P-<NN>`, never reused.
 
 ## 4. Authentication
 
-Applies to administrators, organizers and moderators. Guests do not authenticate.
+Applies to users: anyone with an account. Guests do not authenticate.
 
 | ID | Requirement | Priority |
 |---|---|---|
-| RF-AUT-01 | The system must allow administrators, organizers and moderators to **sign in** with a Google account or with email and password. | M |
-| RF-AUT-02 | The system must allow administrators, organizers and moderators to **sign out**. | M |
-| RF-AUT-03 | The system must allow a user with email and password to **recover their password**. | M |
+| RF-AUT-01 | The system must allow users to **sign in** with email and password. | M |
+| RF-AUT-02 | The system must allow users to **sign out**. | M |
+| RF-AUT-03 | The system must allow users to **recover their password** by email. | M |
 | RF-AUT-04 | The system must require **multi-factor authentication** for administrators. | S |
-| RF-AUT-05 | The system must allow an invitee to **accept an invitation** to an event after creating an account and verifying their email. | M |
+| RF-AUT-05 | The system must allow a user to **accept an invitation** addressed to their verified email (RN-04). | M |
+| RF-AUT-06 | The system must allow anyone to **create an account** with email and password, confirmed by a code sent to that email. | M |
 
 ---
 
@@ -126,9 +130,9 @@ Applies to administrators, organizers and moderators. Guests do not authenticate
 
 | ID | Requirement | Priority |
 |---|---|---|
-| RF-ADM-09 | The system must allow the administrator to **search organizers and moderators** by email. | M |
-| RF-ADM-10 | The system must allow the administrator to **block and unblock** an organizer or moderator. | M |
-| RF-ADM-11 | The system must allow the administrator to **delete** an organizer or moderator. | S |
+| RF-ADM-09 | The system must allow the administrator to **search users** by email. | M |
+| RF-ADM-10 | The system must allow the administrator to **block and unblock** a user (P-09, RN-09). | M |
+| RF-ADM-11 | The system must allow the administrator to **delete** a user (RN-10). | S |
 | RF-ADM-12 | The system must allow the administrator to **grant and revoke the administrator role** for another user. | S |
 
 ### 5.3 Audit
@@ -148,7 +152,7 @@ Applies to administrators, organizers and moderators. Guests do not authenticate
 | RF-ORG-01 | The system must allow the organizer to **view the list of their events**. | M |
 | RF-ORG-02 | The system must allow the organizer to **get the event link** to share it with guests. | M |
 | RF-ORG-03 | The system must allow the organizer to **download the event's QR code** in a printable format (PNG and PDF). | M |
-| RF-ORG-04 | The system must allow the organizer to **open or close uploads** manually, regardless of the upload window. | S |
+| RF-ORG-04 | The system must allow the organizer to **close and reopen uploads** manually, regardless of the upload window (RN-06). | S |
 | RF-ORG-05 | The system must show the organizer **event statistics**: uploaded photos, participating devices and hidden photos. | C |
 
 ### 6.2 Customization
@@ -163,13 +167,16 @@ Applies to administrators, organizers and moderators. Guests do not authenticate
 
 ### 6.3 Viewing and downloading photos
 
+The **gallery** shows an event's visible photos; the **review** shows all of them, hidden ones included, and is where photos are hidden or shown.
+
 | ID | Requirement | Priority |
 |---|---|---|
-| RF-ORG-10 | The system must allow the organizer to **view all photos** of their event, including hidden ones. | M |
+| RF-ORG-24 | The system must allow the organizer to **view the event's gallery**. | M |
+| RF-ORG-10 | The system must allow the organizer to **review all photos** of their event, including hidden ones. | M |
 | RF-ORG-11 | The system must allow the organizer to **view each photo at full size** and navigate between them. | M |
 | RF-ORG-12 | The system must allow the organizer to **filter and group photos by uploader**. | S |
 | RF-ORG-13 | The system must allow the organizer to **download an individual photo** at its original resolution. | M |
-| RF-ORG-14 | The system must allow the organizer to **download all of the event's photos** in a ZIP file. | M |
+| RF-ORG-14 | The system must allow the organizer to **download all of the event's photos**, hidden ones included, in a ZIP file (RN-08). | M |
 | RF-ORG-15 | The system must allow the organizer to **select several photos** and download them in a ZIP file. | C |
 
 ### 6.4 Moderation
@@ -180,7 +187,7 @@ Applies to administrators, organizers and moderators. Guests do not authenticate
 | RF-ORG-17 | The system must allow the organizer to **show again** a hidden photo. | M |
 | RF-ORG-18 | The system must allow the organizer to **delete** a photo. | M |
 | RF-ORG-19 | The system must allow the organizer to **hide or delete all photos from a device** in a single action. | S |
-| RF-ORG-20 | The system must allow the organizer to choose between **post-moderation**, in which photos are published when uploaded, and **pre-moderation**, in which they are published after approval. | C |
+| RF-ORG-20 | The system must allow the organizer to choose between **post-moderation**, in which photos enter the gallery when uploaded, and **pre-moderation**, in which they start hidden until shown. | C |
 
 ### 6.5 Moderators
 
@@ -193,12 +200,12 @@ Applies to administrators, organizers and moderators. Guests do not authenticate
 
 ## 7. Moderator
 
-A moderator acts only on the events for which they hold an accepted MODERATOR invitation. A moderator cannot delete photos, download photos or ZIP files, open or close uploads, edit the event's customization, change the moderation mode, or invite or remove moderators; the server responds 403 (RN-05).
+A moderator can do only what this section lists, and only on events where they hold an accepted MODERATOR invitation; anything else is refused with 403 (RN-05).
 
 | ID | Requirement | Priority |
 |---|---|---|
 | RF-MOD-01 | The system must allow the moderator to **view the list of the events they moderate**. | M |
-| RF-MOD-02 | The system must allow the moderator to **view all photos** of the event, including hidden ones, at full size (as in RF-ORG-10 and RF-ORG-11). | M |
+| RF-MOD-02 | The system must allow the moderator to **view the gallery and review all photos** at full size (as in RF-ORG-24, RF-ORG-10 and RF-ORG-11). | M |
 | RF-MOD-03 | The system must allow the moderator to **filter and group photos by uploader** (as in RF-ORG-12). | S |
 | RF-MOD-04 | The system must show the moderator **event statistics** (as in RF-ORG-05). | C |
 | RF-MOD-05 | The system must allow the moderator to **get the event link and download its QR code** (as in RF-ORG-02 and RF-ORG-03). | M |
@@ -209,7 +216,7 @@ A moderator acts only on the events for which they hold an accepted MODERATOR in
 
 ## 8. Guest
 
-A guest can only upload photos and delete the photos they uploaded, and only while the event is in the Active state (RN-06). A guest never sees photos uploaded by other devices.
+A guest can only upload photos and delete the photos they uploaded, and only while the event is Open (RN-06). A guest never sees photos uploaded by other devices.
 
 | ID | Requirement | Priority |
 |---|---|---|
@@ -237,7 +244,7 @@ Behavior the system performs without direct user intervention.
 |---|---|---|
 | RF-SIS-01 | The system must **accept only images** in JPEG, PNG, WebP or HEIC format, with a size not exceeding P-02. | M |
 | RF-SIS-02 | The system must **generate a thumbnail** in WebP format for each uploaded photo. | M |
-| RF-SIS-03 | The system must **correct the orientation** of images according to their EXIF metadata and **remove location metadata** from images shown to third parties. | S |
+| RF-SIS-03 | The system must **correct the orientation** of thumbnails according to their EXIF metadata and keep **no location metadata** in them; originals are kept unchanged. | S |
 | RF-SIS-04 | The system must generate each event's link with a **non-sequential, unpredictable identifier**. | M |
 | RF-SIS-05 | The system must **automatically delete the photos** of an event once the retention period P-05 has elapsed since the event date. | S |
 | RF-SIS-06 | The system must **notify by email** the invitee when an invitation is created for them, and the organizer before the automatic deletion of their event's photos. | S |
@@ -252,8 +259,9 @@ The following capabilities are not part of this version (priority W):
 | Capability | Note |
 |---|---|
 | Video uploads | — |
+| Sign-in with Google | Email and password only ([ADR 0018](adr/0018-self-sign-up-email-only.md)). |
 | Payments and subscription plans | — |
-| Self-service organizer registration | Events are assigned only by an administrator, through an OWNER invitation. |
+| Self-service event creation | Anyone can create an account (RF-AUT-05), but events are assigned only by an administrator, through an OWNER invitation (RN-04). |
 | Declining an invitation | A *Pending* invitation stays pending until accepted or removed (RF-ORG-23, RF-ADM-03). |
 | Comments and reactions on photos | — |
 | Photo editing | Includes filters and cropping. |
