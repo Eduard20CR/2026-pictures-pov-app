@@ -13,12 +13,3 @@ output "github_actions_dev_role_arns" {
     upload_cleanup  = aws_iam_role.github_actions_dev_upload_cleanup.arn
   }
 }
-
-output "github_actions_prod_role_arns" {
-  description = "IAM roles assumed by GitHub Actions in prod, one per workflow."
-  value = {
-    infra = aws_iam_role.github_actions_prod_infra.arn
-    api   = aws_iam_role.github_actions_prod_api.arn
-    web   = aws_iam_role.github_actions_prod_web.arn
-  }
-}

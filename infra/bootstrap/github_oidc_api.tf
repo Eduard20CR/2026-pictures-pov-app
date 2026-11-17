@@ -36,23 +36,3 @@ resource "aws_iam_role_policy" "github_actions_dev_api" {
   role   = aws_iam_role.github_actions_dev_api.id
   policy = data.aws_iam_policy_document.github_actions_dev_api.json
 }
-
-# PROD
-
-resource "aws_iam_role" "github_actions_prod_api" {
-  name               = "${var.project}-prod-gha-api"
-  assume_role_policy = data.aws_iam_policy_document.github_trust_prod.json
-
-  tags = {
-    Environment = "prod"
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "github_actions_prod_api" {
-  role       = aws_iam_role.github_actions_prod_api.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-}
-
-
-
-

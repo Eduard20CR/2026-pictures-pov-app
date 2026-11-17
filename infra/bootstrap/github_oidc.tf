@@ -35,25 +35,5 @@ data "aws_iam_policy_document" "github_trust_dev" {
   }
 }
 
-data "aws_iam_policy_document" "github_trust_prod" {
-  statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-
-    principals {
-      type        = "Federated"
-      identifiers = [aws_iam_openid_connect_provider.github.arn]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "token.actions.githubusercontent.com:aud"
-      values   = ["sts.amazonaws.com"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${local.github_repo}:environment:prod"]
-    }
-  }
-}
+# Prod roles are added with prod (#229): least-privilege, trusted only from a
+# protected GitHub `prod` environment limited to `main`.
