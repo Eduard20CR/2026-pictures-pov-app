@@ -97,18 +97,23 @@ export interface components {
              */
             sizeBytes: number;
         };
-        ProblemDetail: {
+        ApiProblem: {
             /** Format: uri */
-            type?: string;
-            title?: string;
+            type: string;
+            title: string;
             /** Format: int32 */
-            status?: number;
+            status: number;
             detail?: string;
             /** Format: uri */
             instance?: string;
-            properties?: {
-                [key: string]: unknown;
-            };
+            /** @enum {string} */
+            code: "EVENT_NOT_FOUND" | "UPLOAD_LIMIT_REACHED" | "UNSUPPORTED_CONTENT_TYPE" | "FILE_TOO_LARGE" | "EVENT_CLOSED" | "MALFORMED_REQUEST_BODY" | "VALIDATION_FAILED" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "INTERNAL_ERROR";
+            /** @description Invalid fields; only with VALIDATION_FAILED */
+            errors?: components["schemas"]["FieldError"][];
+        };
+        FieldError: {
+            field: string;
+            message: string;
         };
         UploadResponse: {
             /** Format: uuid */
@@ -209,13 +214,13 @@ export interface operations {
                     "*/*": components["schemas"]["UploadResponse"];
                 };
             };
-            /** @description Unsupported type or invalid size */
+            /** @description Unsupported type, invalid size or malformed body */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                    "application/problem+json": components["schemas"]["ApiProblem"];
                 };
             };
             /** @description Event does not exist, is archived or was deleted */
@@ -224,16 +229,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                    "application/problem+json": components["schemas"]["ApiProblem"];
                 };
             };
-            /** @description Upload limit reached */
+            /** @description Upload limit reached, or the event is closed */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Unexpected error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
                 };
             };
         };
@@ -265,7 +279,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                    "application/problem+json": components["schemas"]["ApiProblem"];
                 };
             };
             /** @description Not signed in */
@@ -273,14 +287,27 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
             };
             /** @description Not an administrator */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Unexpected error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
             };
         };
     };
@@ -312,7 +339,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                    "application/problem+json": components["schemas"]["ApiProblem"];
                 };
             };
             /** @description Not signed in */
@@ -320,14 +347,27 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
             };
             /** @description Not an administrator */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Unexpected error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
             };
         };
     };
@@ -355,7 +395,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["MeResponse"];
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Unexpected error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
                 };
             };
         };
@@ -386,7 +435,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                    "application/problem+json": components["schemas"]["ApiProblem"];
                 };
             };
             /** @description Event is closed and no longer accepts photos */
@@ -395,7 +444,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Unexpected error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
                 };
             };
         };
@@ -426,7 +484,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Event is closed and no longer accepts photos */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Unexpected error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
                 };
             };
         };

@@ -2,8 +2,6 @@ import { api } from '../../../api/client'
 import type { UploadTicket } from '../types'
 import { UploadError } from './UploadError'
 
-type ApiError = { code?: string }
-
 export async function requestUpload(publicCode: string, file: File): Promise<UploadTicket> {
     const { data, error, response } = await api.POST('/events/{publicCode}/uploads', {
         params: { path: { publicCode } },
@@ -11,9 +9,8 @@ export async function requestUpload(publicCode: string, file: File): Promise<Upl
     })
 
     if (!response.ok || !data) {
-        const apiError = error as ApiError | undefined
-        const code = apiError?.code ?? `HTTP_${response.status}`
-        throw new UploadError(code)
+        // A body from outside the API (e.g. a gateway error) has no code: fall back to the status
+        throw new UploadError(error?.code ?? `HTTP_${response.status}`)
     }
 
     return data

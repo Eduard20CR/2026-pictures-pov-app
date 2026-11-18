@@ -32,23 +32,29 @@ paths:
               schema:
                 $ref: "#/components/schemas/UploadResponse"
         "400":
-          description: Unsupported type or invalid size
+          description: "Unsupported type, invalid size or malformed body"
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/ProblemDetail"
+                $ref: "#/components/schemas/ApiProblem"
         "404":
           description: "Event does not exist, is archived or was deleted"
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/ProblemDetail"
+                $ref: "#/components/schemas/ApiProblem"
         "409":
-          description: Upload limit reached
+          description: "Upload limit reached, or the event is closed"
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/ProblemDetail"
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Unexpected error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
   /admin/events:
     get:
       tags:
@@ -84,11 +90,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/ProblemDetail"
+                $ref: "#/components/schemas/ApiProblem"
         "401":
           description: Not signed in
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
         "403":
           description: Not an administrator
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Unexpected error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
     post:
       tags:
       - admin-event-controller
@@ -112,11 +132,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/ProblemDetail"
+                $ref: "#/components/schemas/ApiProblem"
         "401":
           description: Not signed in
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
         "403":
           description: Not an administrator
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Unexpected error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
   /me:
     get:
       tags:
@@ -132,9 +166,15 @@ paths:
         "401":
           description: Missing or invalid access token
           content:
-            '*/*':
+            application/problem+json:
               schema:
-                $ref: "#/components/schemas/MeResponse"
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Unexpected error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
   /events/{publicCode}:
     get:
       tags:
@@ -158,13 +198,19 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/ProblemDetail"
+                $ref: "#/components/schemas/ApiProblem"
         "409":
           description: Event is closed and no longer accepts photos
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/ProblemDetail"
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Unexpected error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
   /events/{publicCode}/quota:
     get:
       tags:
@@ -188,7 +234,19 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/ProblemDetail"
+                $ref: "#/components/schemas/ApiProblem"
+        "409":
+          description: Event is closed and no longer accepts photos
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Unexpected error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
 components:
   schemas:
     UploadRequest:
@@ -204,7 +262,7 @@ components:
       required:
       - contentType
       - sizeBytes
-    ProblemDetail:
+    ApiProblem:
       type: object
       properties:
         type:
@@ -220,9 +278,43 @@ components:
         instance:
           type: string
           format: uri
-        properties:
-          type: object
-          additionalProperties: {}
+        code:
+          type: string
+          enum:
+          - EVENT_NOT_FOUND
+          - UPLOAD_LIMIT_REACHED
+          - UNSUPPORTED_CONTENT_TYPE
+          - FILE_TOO_LARGE
+          - EVENT_CLOSED
+          - MALFORMED_REQUEST_BODY
+          - VALIDATION_FAILED
+          - BAD_REQUEST
+          - UNAUTHENTICATED
+          - FORBIDDEN
+          - NOT_FOUND
+          - METHOD_NOT_ALLOWED
+          - UNSUPPORTED_MEDIA_TYPE
+          - INTERNAL_ERROR
+        errors:
+          type: array
+          description: Invalid fields; only with VALIDATION_FAILED
+          items:
+            $ref: "#/components/schemas/FieldError"
+      required:
+      - code
+      - status
+      - title
+      - type
+    FieldError:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+      required:
+      - field
+      - message
     UploadResponse:
       type: object
       properties:
