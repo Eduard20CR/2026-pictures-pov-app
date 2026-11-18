@@ -78,7 +78,7 @@ db/                 Liquibase migrations
 infra/
   bootstrap/        Bucket for the Terraform state
   modules/          Reusable Terraform modules
-  environments/     dev and prod
+  environments/     dev (prod added later)
 scripts/            Helper scripts
 docs/               Requirements and ADRs
 ```
