@@ -57,6 +57,8 @@ class ImageUploadService {
                 .key(image.getS3Key())
                 .contentType(image.getContentType())
                 .contentLength(image.getSizeBytes())
+                // Create-only: once the photo exists, S3 rejects a reused URL with 412.
+                .ifNoneMatch("*")
                 .build();
 
         PresignedPutObjectRequest presigned = s3Presigner.presignPutObject(presign -> presign

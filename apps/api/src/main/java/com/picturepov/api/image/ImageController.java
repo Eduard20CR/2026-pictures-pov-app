@@ -22,7 +22,7 @@ class ImageController {
 
     @PostMapping("/{publicCode}/uploads")
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiResponse(responseCode = "201", description = "Upload reserved; PUT the photo to uploadUrl")
+    @ApiResponse(responseCode = "201", description = "Upload reserved; PUT the photo once to uploadUrl with If-None-Match set to * (412 means it is already stored)")
     @ApiResponse(responseCode = "400", description = "Unsupported type or invalid size", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "Event does not exist, is archived or was deleted", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "409", description = "Upload limit reached", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))

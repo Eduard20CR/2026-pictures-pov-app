@@ -36,6 +36,7 @@ describe("handler", () => {
 
   it("deletes the row BEFORE the object when the file is not an image", async () => {
     readFirstBytes.mockResolvedValue(PDF);
+    deleteImageRow.mockResolvedValue(true);
 
     await handler(s3Event("originals/e1/img-1"));
 
@@ -45,6 +46,15 @@ describe("handler", () => {
     // If the Lambda dies in between, S3 retries and the object is still there.
     expect(deleteImageRow.mock.invocationCallOrder[0])
       .toBeLessThan(deleteObject.mock.invocationCallOrder[0]);
+  });
+
+  it("keeps the file of a validated photo even if an invalid file shows up for it", async () => {
+    readFirstBytes.mockResolvedValue(PDF);
+    deleteImageRow.mockResolvedValue(false); // a READY or HIDDEN row still holds the key
+
+    await handler(s3Event("originals/e1/img-1"));
+
+    expect(deleteObject).not.toHaveBeenCalled();
   });
 
   it("decodes the key that S3 sends URL-encoded", async () => {

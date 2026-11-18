@@ -14,8 +14,10 @@ export async function handler(event: S3Event): Promise<void> {
       await markReady(key);
     } else {
       console.warn("Not a valid image, rejecting", key);
-      await deleteImageRow(key);
-      await deleteObject(bucket, key);
+      const fileUnclaimed = await deleteImageRow(key);
+      if (fileUnclaimed) {
+        await deleteObject(bucket, key);
+      }
     }
   }
 }

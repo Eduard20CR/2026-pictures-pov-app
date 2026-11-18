@@ -200,7 +200,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Upload reserved; PUT the photo to uploadUrl */
+            /** @description Upload reserved; PUT the photo once to uploadUrl with If-None-Match set to * (412 means it is already stored) */
             201: {
                 headers: {
                     [name: string]: unknown;
