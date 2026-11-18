@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -40,4 +41,15 @@ public class MeControllerTest {
         assertThat(userRepository.findById(sub)).isPresent();
     }
 
+    @Test
+    void unexpectedFailureReturnsProblemWithoutInternalDetails() throws Exception {
+        // guion
+        when(userInfoClient.fetch(anyString())).thenThrow(new IllegalStateException("Cognito userInfo returned no email"));
+
+        // correr + revisar
+        mockMvc.perform(get("/me").with(jwt().jwt(token -> token.subject(UUID.randomUUID().toString()))))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.detail").value("Unexpected error."));
+    }
 }
