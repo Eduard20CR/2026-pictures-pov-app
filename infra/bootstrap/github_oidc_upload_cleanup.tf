@@ -2,7 +2,7 @@
 
 resource "aws_iam_role" "github_actions_dev_upload_cleanup" {
   name               = "${var.project}-dev-gha-upload-cleanup"
-  assume_role_policy = data.aws_iam_policy_document.github_trust_dev.json
+  assume_role_policy = data.aws_iam_policy_document.github_trust_dev["upload_cleanup"].json
 
   tags = {
     Environment = "dev"
