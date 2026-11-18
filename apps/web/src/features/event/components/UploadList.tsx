@@ -4,6 +4,7 @@ const ERROR_MESSAGES: Record<string, string> = {
     UPLOAD_LIMIT_REACHED: 'Ya subiste todas las fotos permitidas.',
     UNSUPPORTED_CONTENT_TYPE: 'Solo se aceptan fotos JPEG, PNG, WebP o HEIC.',
     FILE_TOO_LARGE: 'La foto pesa más de 20 MB.',
+    INVALID_FILE_SIZE: 'La foto está vacía.',
     EVENT_NOT_FOUND: 'Este evento ya no está disponible.',
     EVENT_CLOSED: 'Este evento ya no recibe fotos.',
 }
@@ -12,6 +13,7 @@ const PERMANENT_ERRORS = new Set([
     'UPLOAD_LIMIT_REACHED',
     'UNSUPPORTED_CONTENT_TYPE',
     'FILE_TOO_LARGE',
+    'INVALID_FILE_SIZE',
     'EVENT_NOT_FOUND',
     'EVENT_CLOSED',
 ])

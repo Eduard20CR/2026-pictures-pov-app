@@ -45,4 +45,9 @@ public class GuestLimitRepositoryTest {
         assertThat(guestLimitRepository.countUploads(eventId, guestId)).isEqualTo(2);
     }
 
+    @Test
+    void reservesNothingWhenLimitIsZero() {
+        assertThat(guestLimitRepository.reserveUpload(eventId, guestId, 0)).isFalse();
+        assertThat(guestLimitRepository.countUploads(eventId, guestId)).isEqualTo(0);
+    }
 }

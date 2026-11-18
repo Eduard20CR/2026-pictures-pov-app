@@ -16,7 +16,8 @@ class GuestLimitRepository {
         boolean reserveUpload(UUID eventId, UUID guestId, int limit) {
         int rows = jdbc.sql("""
                 INSERT INTO guest_limits (id, event_id, guest_id, upload_count)
-                VALUES (gen_random_uuid(), :eventId, :guestId, 1)
+                SELECT gen_random_uuid(), :eventId, :guestId, 1
+                WHERE :limit > 0
                 ON CONFLICT (event_id, guest_id)
                 DO UPDATE SET upload_count = guest_limits.upload_count + 1,
                               updated_at   = now()

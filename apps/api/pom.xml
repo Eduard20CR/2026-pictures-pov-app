@@ -29,6 +29,18 @@
     <properties>
         <java.version>21</java.version>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <!-- One version for every AWS SDK module -->
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>2.56.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -53,7 +65,6 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>ssm</artifactId>
-            <version>2.56.0</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -63,12 +74,10 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
-            <version>2.55.13</version>
         </dependency>
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>signin</artifactId>
-            <version>2.55.12</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>

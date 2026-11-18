@@ -72,8 +72,11 @@ class ImageUploadService {
         if (!isAllowedType(request.contentType())) {
             throw new BadRequestException(ErrorCode.UNSUPPORTED_CONTENT_TYPE, "Only JPEG, PNG, WebP or HEIC images are allowed");
         }
-        if (request.sizeBytes() < 1 || request.sizeBytes() > maxSizeBytes) {
-            throw new BadRequestException(ErrorCode.FILE_TOO_LARGE, "Image size must be between 1 byte and " + maxSizeBytes + " bytes");
+        if (request.sizeBytes() < 1) {
+            throw new BadRequestException(ErrorCode.INVALID_FILE_SIZE, "Image size must be at least 1 byte");
+        }
+        if (request.sizeBytes() > maxSizeBytes) {
+            throw new BadRequestException(ErrorCode.FILE_TOO_LARGE, "Image size must be at most " + maxSizeBytes + " bytes");
         }
     }
 
