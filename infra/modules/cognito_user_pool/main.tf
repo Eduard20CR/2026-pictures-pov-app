@@ -6,6 +6,11 @@ resource "aws_cognito_user_pool" "pool" {
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
 
+  # Ana@x.com and ana@x.com are one user (RN-04). Fixed at creation: changing it replaces the pool.
+  username_configuration {
+    case_sensitive = false
+  }
+
   # Self sign-up: the user confirms the email code before getting a session.
   admin_create_user_config {
     allow_admin_create_user_only = false

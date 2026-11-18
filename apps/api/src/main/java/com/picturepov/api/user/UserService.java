@@ -3,6 +3,7 @@ package com.picturepov.api.user;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,7 +26,10 @@ class UserService {
             return existing.get();
         }
 
-        String email = userInfoClient.fetchEmail(jwt.getTokenValue());
-        return userRepository.save(new User(id, email));
+        CognitoUserInfoClient.UserInfo info = userInfoClient.fetch(jwt.getTokenValue());
+        if (!info.isEmailVerified()) {
+            throw new IllegalStateException("Cognito email is not verified");
+        }
+        return userRepository.save(new User(id, info.email().trim().toLowerCase(Locale.ROOT)));
     }
 }

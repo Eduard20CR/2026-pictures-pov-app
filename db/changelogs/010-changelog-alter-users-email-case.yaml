@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: 10
+      author: "Oscar Vasquez"
+      comment: "RN-04: one account per email, whatever its case (#232). Stored emails become lowercase; uniqueness ignores case."
+      changes:
+        - sql:
+            sql: >
+              UPDATE users SET email = lower(email) WHERE email <> lower(email);
+              ALTER TABLE users DROP CONSTRAINT users_email_key;
+              CREATE UNIQUE INDEX uq_users_email_lower ON users (lower(email));
+      rollback:
+        - sql:
+            sql: >
+              DROP INDEX uq_users_email_lower;
+              ALTER TABLE users ADD CONSTRAINT users_email_key UNIQUE (email);

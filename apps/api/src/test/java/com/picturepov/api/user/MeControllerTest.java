@@ -30,7 +30,7 @@ public class MeControllerTest {
     void firstRequestCreatesUserWithCognitoSub() throws Exception {
         // guion
         UUID sub = UUID.randomUUID();
-        when(userInfoClient.fetchEmail(anyString())).thenReturn("new@example.com");
+        when(userInfoClient.fetch(anyString())).thenReturn(new CognitoUserInfoClient.UserInfo("new@example.com", "true"));
 
         // correr
         mockMvc.perform(get("/me").with(jwt().jwt(token -> token.subject(sub.toString()))))
