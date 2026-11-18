@@ -46,8 +46,8 @@ flowchart LR
     S3 -->|ObjectCreated originals/| IP[Lambda<br/>Image processor]
     IP -->|Reads header, deletes invalid| S3
     IP -->|Marks READY| DB
-    SCH[EventBridge Scheduler] -->|Every 30 min| UC[Lambda<br/>Upload cleanup]
-    UC -->|HeadObject| S3
+    SCH[EventBridge Scheduler] -->|Daily| UC[Lambda<br/>Upload cleanup]
+    UC -->|Reads first bytes; deletes invalid files| S3
     UC -->|Marks READY or releases quota| DB
     L -.->|ZIP request| Q[SQS]
     Q -.-> Z[Lambda<br/>ZIP generation]
@@ -73,7 +73,7 @@ apps/
   web/              Frontend (React)
   api/              Backend (Spring Boot)
   image-processor/  Lambda that validates uploaded photos (Node.js)
-  upload-cleanup/   Scheduled Lambda that frees stale uploads (Node.js)
+  upload-cleanup/   Scheduled Lambda that validates or frees stale uploads (Node.js)
 db/                 Liquibase migrations
 infra/
   bootstrap/        Bucket for the Terraform state
