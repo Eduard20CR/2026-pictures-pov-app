@@ -12,7 +12,7 @@ cd "$REPO_ROOT/apps/api"
 ./mvnw -B -q package -DskipTests
 
 # 2. Start the API in the background and stop it when the script exits
-java -jar target/api-0.0.1-SNAPSHOT.jar --server.port="$PORT" >/dev/null &
+java -jar target/api-0.0.1-SNAPSHOT.jar --spring.profiles.active=local --server.port="$PORT" >/dev/null &
 API_PID=$!
 trap 'kill "$API_PID" 2>/dev/null' EXIT
 

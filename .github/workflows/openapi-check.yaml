@@ -36,7 +36,7 @@ jobs:
 
       - name: Start API
         working-directory: apps/api
-        run: java -jar target/api-0.0.1-SNAPSHOT.jar --server.port=8081 > api.log 2>&1 &
+        run: java -jar target/api-0.0.1-SNAPSHOT.jar --spring.profiles.active=local --server.port=8081 > api.log 2>&1 &
 
       - name: Download contract
         run: >
