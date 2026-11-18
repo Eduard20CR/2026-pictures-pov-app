@@ -67,6 +67,13 @@ class ImageUploadServiceTest {
     }
 
     @Test
+    void rejectsEmptyFileAsInvalidSize(){
+        assertThatThrownBy(()->imageUploadService.createUpload("abc", UUID.randomUUID(), new UploadRequest("image/jpeg", 0)))
+                .isInstanceOfSatisfying(BadRequestException.class, ex -> assertThat(ex.getCode()).isEqualTo(ErrorCode.INVALID_FILE_SIZE));
+        verifyNoInteractions(guestLimitService);
+    }
+
+    @Test
     void reservesQuotaThenReturnsASignedUrlForThePhoto() {
         UUID eventId = UUID.randomUUID();
         Event event = mock(Event.class);

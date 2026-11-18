@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 11
+      author: "Oscar Vasquez"
+      comment: "RNF-REN-03: indexes for the photo Lambdas (lookup by s3_key, pending cleanup) and per-guest lists (#239 DB-07)."
+      changes:
+        - sql:
+            sql: >
+              ALTER TABLE images ADD CONSTRAINT uq_images_s3_key UNIQUE (s3_key);
+              CREATE INDEX ix_images_pending_created ON images (created_at) WHERE status = 'PENDING';
+              CREATE INDEX ix_images_event_guest ON images (event_id, guest_id);
+      rollback:
+        - sql:
+            sql: >
+              DROP INDEX ix_images_event_guest;
+              DROP INDEX ix_images_pending_created;
+              ALTER TABLE images DROP CONSTRAINT uq_images_s3_key;
