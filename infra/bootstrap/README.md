@@ -58,15 +58,15 @@ Delete the local `terraform.tfstate` and `terraform.tfstate.backup` only after c
 
 ### 3. Use the same bucket in every other configuration
 
-Each environment (`infra/environments/<environment>/`) declares the same backend with its own `key`:
+Each environment has an `app` and a `data` configuration (`infra/environments/<environment>/{app,data}/`, [ADR 0019](../../docs/adr/0019-terraform-state-split-app-data.md)), each with the same backend and its own `key`:
 
 | Configuration | `key` |
 | --- | --- |
 | Bootstrap | `bootstrap/terraform.tfstate` |
-| dev | `dev/terraform.tfstate` |
-| prod | `prod/terraform.tfstate` |
+| `<environment>` app | `<environment>/app/terraform.tfstate` |
+| `<environment>` data | `<environment>/data/terraform.tfstate` |
 
-Then run, from the environment folder:
+Then run, from the configuration folder (`data` first):
 
 ```sh
 terraform init

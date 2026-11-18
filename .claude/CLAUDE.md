@@ -9,7 +9,7 @@ Same as CI (`.github/workflows/*-build-test.yaml`, `infra-check.yaml`).
 | App | Check |
 |---|---|
 | `apps/api` (Spring Boot 4.1.1, Java 21) | `./mvnw -B verify` |
-| `apps/web` (React, Vite, TS) | `npm run lint && npm test && npm run build`; after an API change, `npm run api:types` with the API running |
+| `apps/web` (React, Vite, TS) | `npm run lint && npm test && npm run build`; after an API change, `scripts/openapi-export.sh` (starts the API, exports the contract, runs `npm run api:types`) |
 | `apps/image-processor`, `apps/upload-cleanup` (Node Lambdas) | `npm run typecheck && npm test && npm run build` |
 | `infra/` (Terraform) | `terraform fmt -check -recursive`; per stack `terraform init -backend=false && terraform validate` |
 
@@ -23,7 +23,7 @@ Full picture in `README.md`. Rules that span several documents:
 - **Migrations in CI/CD, not at startup:** Liquibase changelogs in `db/`, backward compatible with the running version.
 - **Photos never go through the backend:** presigned S3 uploads; S3-triggered Lambdas make thumbnails; photos and ZIPs only via temporary signed links (RNF-SEG-05).
 - **Cost:** each idle environment ≤ 25 USD/month (RNF-COS-01). No services with fixed idle cost (e.g. Fargate + ALB).
-- **Infrastructure:** Terraform; dev and prod in one AWS account, isolated by `<project>-<environment>-` names, the `Environment` tag, separate state keys and one IAM role each (ADR 0012). CI/CD with GitHub Actions + OIDC.
+- **Infrastructure:** Terraform; dev and prod in one AWS account, isolated by `<project>-<environment>-` names, the `Environment` tag, separate state keys (`app` / `data`, ADR 0019) and one IAM role per workflow per environment (ADRs 0012, 0020). CI/CD with GitHub Actions + OIDC.
 - **Terraform state in S3** (ADR 0011), bucket from `infra/bootstrap/`; `s3` backend with `use_lockfile` and its own key everywhere. No committed state, no DynamoDB, no HCP Terraform.
 
 ## Documentation

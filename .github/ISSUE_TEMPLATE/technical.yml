@@ -1,0 +1,27 @@
+name: Technical need
+description: A system need users never see (security, operations, docs), written as a need, not an implementation.
+labels: ["type: technical"]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Need
+      value: "As the **system**, I need … so that …"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: "- [ ] "
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      value: "- "
+  - type: input
+    id: references
+    attributes:
+      label: References

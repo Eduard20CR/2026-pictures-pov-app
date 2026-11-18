@@ -1,6 +1,6 @@
 # 0011. Terraform state in Amazon S3
 
-- **Status:** Accepted
+- **Status:** Partially superseded by [0019](0019-terraform-state-split-app-data.md) (state keys split into app and data)
 - **Date:** 2026-10-13
 
 ## Context

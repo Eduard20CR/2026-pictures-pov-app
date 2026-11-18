@@ -29,7 +29,7 @@ Person an invitation is addressed to, known only by email until they accept it.
 Attendee of an event. Has no account in the system.
 
 **Device**:
-Browser identified by a unique identifier stored in a cookie, issued per event. It is not a verified identity (RN-02).
+Browser identified by a unique identifier stored in a cookie. One cookie serves every event, so the same identifier links a browser across events. It is not a verified identity (RN-02).
 
 ### Events
 
