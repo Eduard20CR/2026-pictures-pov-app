@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: 9
+      author: "Oscar Vasquez"
+      comment: "RN-06: states OPEN, CLOSED, ARCHIVED; events start OPEN; deletion is deleted_at, not a state (#227). DELETED rows get the migration time, as the real deletion time was never stored."
+      changes:
+        - addColumn:
+            tableName: events
+            columns:
+              - column:
+                  name: deleted_at
+                  type: timestamptz
+        - sql:
+            sql: >
+              ALTER TABLE events DROP CONSTRAINT ck_events_status;
+              UPDATE events SET deleted_at = now(), status = 'CLOSED' WHERE status = 'DELETED';
+              UPDATE events SET status = 'OPEN' WHERE status = 'ACTIVE';
+              UPDATE events SET status = 'CLOSED' WHERE status = 'DRAFT';
+              ALTER TABLE events
+              ADD CONSTRAINT ck_events_status CHECK (status IN ('OPEN', 'CLOSED', 'ARCHIVED'));
+        - addDefaultValue:
+            tableName: events
+            columnName: status
+            defaultValue: OPEN
+      rollback:
+        - sql:
+            sql: >
+              ALTER TABLE events DROP CONSTRAINT ck_events_status;
+              UPDATE events SET status = 'ACTIVE' WHERE status = 'OPEN';
+              UPDATE events SET status = 'DELETED' WHERE deleted_at IS NOT NULL;
+              ALTER TABLE events
+              ADD CONSTRAINT ck_events_status
+              CHECK (status IN ('DRAFT', 'ACTIVE', 'CLOSED', 'ARCHIVED', 'DELETED'));
+        - addDefaultValue:
+            tableName: events
+            columnName: status
+            defaultValue: DRAFT
+        - dropColumn:
+            tableName: events
+            columnName: deleted_at

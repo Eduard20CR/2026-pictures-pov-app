@@ -30,7 +30,7 @@ public class GuestLimitService {
 
     @Transactional(readOnly = true)
     QuotaResponse getQuota(String publicCode, UUID guestId) {
-        Event event = eventService.getActiveEvent(publicCode);
+        Event event = eventService.getOpenEvent(publicCode);
         int used = guestLimitRepository.countUploads(event.getId(), guestId);
         return QuotaResponse.of(event.getImagesPerUser(), used);
     }

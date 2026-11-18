@@ -72,7 +72,7 @@ class ImageUploadServiceTest {
         Event event = mock(Event.class);
         when(event.getId()).thenReturn(eventId);
         when(event.getImagesPerUser()).thenReturn(10);
-        when(eventService.getActiveEvent("abc")).thenReturn(event);
+        when(eventService.getOpenEvent("abc")).thenReturn(event);
         when(imageRepository.save(any(Image.class))).thenAnswer(call -> call.getArgument(0));
 
         UploadResponse response = imageUploadService.createUpload("abc", guestId, new UploadRequest("image/jpeg", 1000));
@@ -87,7 +87,7 @@ class ImageUploadServiceTest {
 
     @Test
     void closedEventReservesNothing() {
-        when(eventService.getActiveEvent("abc"))
+        when(eventService.getOpenEvent("abc"))
                 .thenThrow(new ConflictException(ErrorCode.EVENT_CLOSED, "closed"));
 
         assertThatThrownBy(() -> imageUploadService.createUpload("abc", guestId, new UploadRequest("image/jpeg", 1000)))

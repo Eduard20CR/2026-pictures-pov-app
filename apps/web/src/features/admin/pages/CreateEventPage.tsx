@@ -2,7 +2,7 @@ import { useCreateEvent } from '../hooks/useCreateEvent'
 import { CreateEventError } from '../api/CreateEventError'
 import type { SubmitEvent } from 'react'
 
-// Admin page: creates an event in DRAFT and assigns it to the owner's email.
+// Admin page: creates an Open event with an OWNER invitation for the organizer's email.
 export default function CreateEventPage() {
     const createEvent = useCreateEvent()
 
@@ -17,7 +17,7 @@ export default function CreateEventPage() {
         createEvent.mutate({
             name: String(form.get('name')),
             eventDate: String(form.get('eventDate')),
-            ownerEmail: String(form.get('ownerEmail')),
+            organizerEmail: String(form.get('organizerEmail')),
         })
     }
 
@@ -39,9 +39,9 @@ export default function CreateEventPage() {
                 </label>
 
                 <label className="flex flex-col gap-1">
-                    Correo del dueño
-                    <input name="ownerEmail" type="email" required className="rounded border px-3 py-2" />
-                    {fieldErrors.ownerEmail && <span role="alert" className="text-sm text-red-600">{fieldErrors.ownerEmail}</span>}
+                    Correo del organizador
+                    <input name="organizerEmail" type="email" required className="rounded border px-3 py-2" />
+                    {fieldErrors.organizerEmail && <span role="alert" className="text-sm text-red-600">{fieldErrors.organizerEmail}</span>}
                 </label>
 
                 <button
@@ -59,7 +59,7 @@ export default function CreateEventPage() {
 
             {createEvent.data && (
                 <p role="status">
-                    Evento creado en borrador. Código: <strong>{createEvent.data.publicCode}</strong>
+                    Evento creado y abierto. Código: <strong>{createEvent.data.publicCode}</strong>
                 </p>
             )}
         </main>

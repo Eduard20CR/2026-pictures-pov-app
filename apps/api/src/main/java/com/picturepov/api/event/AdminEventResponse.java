@@ -11,11 +11,11 @@ public record AdminEventResponse(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String name,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate eventDate,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) EventStatus status,
-        @Schema(description = "Null when the event has no owner invitation") String ownerEmail
+        @Schema(description = "Email of the OWNER invitation; null when the event has none") String organizerEmail
 ) {
-    static AdminEventResponse from(Event event, Invitation owner) {
+    static AdminEventResponse from(Event event, Invitation ownerInvitation) {
         return new AdminEventResponse(
                 event.getId(), event.getPublicCode(), event.getName(),
-                event.getEventDate(), event.getStatus(), owner.getEmail());
+                event.getEventDate(), event.getStatus(), ownerInvitation.getEmail());
     }
 }

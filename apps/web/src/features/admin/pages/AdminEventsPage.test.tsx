@@ -10,13 +10,13 @@ vi.mock('../hooks/useAdminEvents')
 beforeEach(() => {
     vi.clearAllMocks()
 
-    // Default: page 1 of 2, one event with owner and one without
+    // Default: page 1 of 2, one event with an organizer and one without
     vi.mocked(useAdminEvents).mockReturnValue(
         {
             data: {
                 items: [
-                    { id: '1', publicCode: 'a', name: 'Navidad', eventDate: '2026-12-25', status: 'DRAFT', ownerEmail: 'ana@example.com' },
-                    { id: '2', publicCode: 'b', name: 'Boda', eventDate: '2026-12-12', status: 'ACTIVE' },
+                    { id: '1', publicCode: 'a', name: 'Navidad', eventDate: '2026-12-25', status: 'OPEN', organizerEmail: 'ana@example.com' },
+                    { id: '2', publicCode: 'b', name: 'Boda', eventDate: '2026-12-12', status: 'CLOSED' },
                 ],
                 page: 0, size: 20, totalItems: 22, totalPages: 2,
             },
@@ -36,11 +36,19 @@ function renderPage() {
     )
 }
 
-test('shows each event with its owner, or "Sin dueño" when it has none', () => {
+test('shows each event with its organizer, or "Sin organizador" when it has none', () => {
     renderPage()
 
+    expect(screen.getByRole('columnheader', { name: 'Organizador' })).toBeTruthy()
     expect(screen.getByText('ana@example.com')).toBeTruthy()
-    expect(screen.getByText('Sin dueño')).toBeTruthy()
+    expect(screen.getByText('Sin organizador')).toBeTruthy()
+})
+
+test('shows each status in Spanish', () => {
+    renderPage()
+
+    expect(screen.getByText('Abierto')).toBeTruthy()
+    expect(screen.getByText('Cerrado')).toBeTruthy()
 })
 
 test('"Siguiente" asks for the next page', () => {

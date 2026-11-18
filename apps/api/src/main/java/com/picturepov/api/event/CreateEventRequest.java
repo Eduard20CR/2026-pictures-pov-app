@@ -12,6 +12,6 @@ public record CreateEventRequest(
         @NotNull LocalDate eventDate,
 
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "ana@example.com")
-        @NotBlank @Email @Size(max = 320) String ownerEmail
+        @NotBlank @Email @Size(max = 320) String organizerEmail
 ) {
 }

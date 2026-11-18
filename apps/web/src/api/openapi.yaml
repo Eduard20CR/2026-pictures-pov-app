@@ -37,7 +37,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
         "404":
-          description: Event does not exist or is not active
+          description: "Event does not exist, is archived or was deleted"
           content:
             application/problem+json:
               schema:
@@ -100,7 +100,8 @@ paths:
         required: true
       responses:
         "201":
-          description: Event created in DRAFT and assigned to the owner email
+          description: "Event created Open, with an OWNER invitation for the organizer\
+            \ email"
           content:
             '*/*':
               schema:
@@ -146,13 +147,13 @@ paths:
           type: string
       responses:
         "200":
-          description: Active event
+          description: Open event
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PublicEventResponse"
         "404":
-          description: Event does not exist or is not active
+          description: "Event does not exist, is archived or was deleted"
           content:
             application/problem+json:
               schema:
@@ -182,7 +183,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/QuotaResponse"
         "404":
-          description: Event does not exist or is not active
+          description: "Event does not exist, is archived or was deleted"
           content:
             application/problem+json:
               schema:
@@ -248,7 +249,7 @@ components:
           type: string
           format: date
           example: 2026-12-20
-        ownerEmail:
+        organizerEmail:
           type: string
           format: email
           example: ana@example.com
@@ -257,7 +258,7 @@ components:
       required:
       - eventDate
       - name
-      - ownerEmail
+      - organizerEmail
     AdminEventResponse:
       type: object
       properties:
@@ -274,14 +275,12 @@ components:
         status:
           type: string
           enum:
-          - DRAFT
-          - ACTIVE
+          - OPEN
           - CLOSED
           - ARCHIVED
-          - DELETED
-        ownerEmail:
+        organizerEmail:
           type: string
-          description: Null when the event has no owner invitation
+          description: Email of the OWNER invitation; null when the event has none
       required:
       - eventDate
       - id

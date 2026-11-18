@@ -129,7 +129,7 @@ export interface components {
              * Format: email
              * @example ana@example.com
              */
-            ownerEmail: string;
+            organizerEmail: string;
         };
         AdminEventResponse: {
             /** Format: uuid */
@@ -139,9 +139,9 @@ export interface components {
             /** Format: date */
             eventDate: string;
             /** @enum {string} */
-            status: "DRAFT" | "ACTIVE" | "CLOSED" | "ARCHIVED" | "DELETED";
-            /** @description Null when the event has no owner invitation */
-            ownerEmail?: string;
+            status: "OPEN" | "CLOSED" | "ARCHIVED";
+            /** @description Email of the OWNER invitation; null when the event has none */
+            organizerEmail?: string;
         };
         MeResponse: {
             /** Format: uuid */
@@ -218,7 +218,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
-            /** @description Event does not exist or is not active */
+            /** @description Event does not exist, is archived or was deleted */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -297,7 +297,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Event created in DRAFT and assigned to the owner email */
+            /** @description Event created Open, with an OWNER invitation for the organizer email */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -371,7 +371,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Active event */
+            /** @description Open event */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -380,7 +380,7 @@ export interface operations {
                     "*/*": components["schemas"]["PublicEventResponse"];
                 };
             };
-            /** @description Event does not exist or is not active */
+            /** @description Event does not exist, is archived or was deleted */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -420,7 +420,7 @@ export interface operations {
                     "*/*": components["schemas"]["QuotaResponse"];
                 };
             };
-            /** @description Event does not exist or is not active */
+            /** @description Event does not exist, is archived or was deleted */
             404: {
                 headers: {
                     [name: string]: unknown;

@@ -28,10 +28,10 @@ test('sends the form values when the admin submits', () => {
 
     fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'Boda' } })
     fireEvent.change(screen.getByLabelText('Fecha'), { target: { value: '2099-12-20' } })
-    fireEvent.change(screen.getByLabelText('Correo del dueño'), { target: { value: 'ana@example.com' } })
+    fireEvent.change(screen.getByLabelText('Correo del organizador'), { target: { value: 'ana@example.com' } })
     fireEvent.click(screen.getByRole('button', { name: 'Crear evento' }))
 
-    expect(mutate).toHaveBeenCalledWith({ name: 'Boda', eventDate: '2099-12-20', ownerEmail: 'ana@example.com' })
+    expect(mutate).toHaveBeenCalledWith({ name: 'Boda', eventDate: '2099-12-20', organizerEmail: 'ana@example.com' })
 })
 
 test('shows the error next to each invalid field', () => {
@@ -47,5 +47,5 @@ test('shows the public code after the event is created', () => {
 
     render(<CreateEventPage />)
 
-    expect(screen.getByRole('status').textContent).toContain('n7o3KnlYQn3zovbx0hVaOA')
+    expect(screen.getByRole('status').textContent).toBe('Evento creado y abierto. Código: n7o3KnlYQn3zovbx0hVaOA')
 })

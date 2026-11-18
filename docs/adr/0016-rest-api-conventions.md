@@ -5,7 +5,7 @@
 
 ## Context
 
-Every endpoint must look and behave the same so the frontend, the OpenAPI contract (RNF-OPE-06) and the error handling stay consistent. The API has one client, the SPA, deployed together with the backend. Guests have no account; owners, moderators and admins log in with Cognito ([0006](0006-authentication-amazon-cognito.md)).
+Every endpoint must look and behave the same so the frontend, the OpenAPI contract (RNF-OPE-06) and the error handling stay consistent. The API has one client, the SPA, deployed together with the backend. Guests have no account; organizers, moderators and admins log in with Cognito ([0006](0006-authentication-amazon-cognito.md)).
 
 ## Options
 
@@ -49,7 +49,7 @@ Authorization: Bearer eyJraWQiOi...
       "id": "3f2b8c1e-7a4d-4e8b-9c2f-1d5e6a7b8c9d",
       "name": "Ana & Luis Wedding",
       "eventDate": "2026-12-05",
-      "status": "ACTIVE",
+      "status": "OPEN",
       "createdAt": "2026-10-27T16:45:00Z"
     }
   ],

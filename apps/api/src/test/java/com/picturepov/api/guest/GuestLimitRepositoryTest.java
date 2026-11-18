@@ -26,7 +26,7 @@ public class GuestLimitRepositoryTest {
     void createEvent() {
         jdbc.sql("""
                 INSERT INTO events (id, name, color, public_code, event_date, images_per_user, status)
-                VALUES (:id, 'Test event', '#000000', :code, DATE '2026-12-12', 2, 'ACTIVE')
+                VALUES (:id, 'Test event', '#000000', :code, DATE '2026-12-12', 2, 'OPEN')
                 """)
                 .param("id", eventId)
                 .param("code", eventId.toString().substring(0, 22))

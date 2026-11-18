@@ -1,5 +1,12 @@
 import { Link, useSearchParams } from 'react-router'
 import { useAdminEvents } from '../hooks/useAdminEvents'
+import type { AdminEvent } from '../types'
+
+const STATUS_LABELS: Record<AdminEvent['status'], string> = {
+    OPEN: 'Abierto',
+    CLOSED: 'Cerrado',
+    ARCHIVED: 'Archivado',
+}
 
 // Admin page: every event on the platform, newest event date first, 20 per page.
 export default function AdminEventsPage() {
@@ -39,7 +46,7 @@ export default function AdminEventsPage() {
                             <th className="py-2">Nombre</th>
                             <th className="py-2">Fecha</th>
                             <th className="py-2">Estado</th>
-                            <th className="py-2">Dueño</th>
+                            <th className="py-2">Organizador</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -47,8 +54,8 @@ export default function AdminEventsPage() {
                             <tr key={event.id} className="border-b">
                                 <td className="py-2">{event.name}</td>
                                 <td className="py-2">{event.eventDate}</td>
-                                <td className="py-2">{event.status}</td>
-                                <td className="py-2">{event.ownerEmail ?? 'Sin dueño'}</td>
+                                <td className="py-2">{STATUS_LABELS[event.status]}</td>
+                                <td className="py-2">{event.organizerEmail ?? 'Sin organizador'}</td>
                             </tr>
                         ))}
                     </tbody>

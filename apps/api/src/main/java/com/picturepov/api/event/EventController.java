@@ -22,8 +22,8 @@ class EventController {
     }
 
     @GetMapping("/{publicCode}")
-    @ApiResponse(responseCode = "200", description = "Active event")
-    @ApiResponse(responseCode = "404", description = "Event does not exist or is not active",
+    @ApiResponse(responseCode = "200", description = "Open event")
+    @ApiResponse(responseCode = "404", description = "Event does not exist, is archived or was deleted",
             content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "409", description = "Event is closed and no longer accepts photos",
             content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))

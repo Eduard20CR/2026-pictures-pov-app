@@ -19,7 +19,7 @@ class GuestController {
 
     @GetMapping("/{publicCode}/quota")
     @ApiResponse(responseCode = "200", description = "Upload quota of the current device")
-    @ApiResponse(responseCode = "404", description = "Event does not exist or is not active", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "Event does not exist, is archived or was deleted", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     QuotaResponse getQuota(@PathVariable String publicCode, @RequestAttribute(GuestIdFilter.ATTRIBUTE) UUID guestId) {
         return guestLimitService.getQuota(publicCode, guestId);
     }

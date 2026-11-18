@@ -24,7 +24,7 @@ class ImageController {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiResponse(responseCode = "201", description = "Upload reserved; PUT the photo to uploadUrl")
     @ApiResponse(responseCode = "400", description = "Unsupported type or invalid size", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
-    @ApiResponse(responseCode = "404", description = "Event does not exist or is not active", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "Event does not exist, is archived or was deleted", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "409", description = "Upload limit reached", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     UploadResponse createUpload(@PathVariable String publicCode, @RequestAttribute(GuestIdFilter.ATTRIBUTE) UUID guestId, @RequestBody UploadRequest request) {
         return imageUploadService.createUpload(publicCode, guestId, request);
