@@ -107,7 +107,7 @@ export interface components {
             /** Format: uri */
             instance?: string;
             /** @enum {string} */
-            code: "EVENT_NOT_FOUND" | "UPLOAD_LIMIT_REACHED" | "UNSUPPORTED_CONTENT_TYPE" | "FILE_TOO_LARGE" | "EVENT_CLOSED" | "MALFORMED_REQUEST_BODY" | "VALIDATION_FAILED" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "INTERNAL_ERROR";
+            code: "EVENT_NOT_FOUND" | "UPLOAD_LIMIT_REACHED" | "UNSUPPORTED_CONTENT_TYPE" | "FILE_TOO_LARGE" | "INVALID_FILE_SIZE" | "EVENT_CLOSED" | "MALFORMED_REQUEST_BODY" | "VALIDATION_FAILED" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "INTERNAL_ERROR";
             /** @description Invalid fields; only with VALIDATION_FAILED */
             errors?: components["schemas"]["FieldError"][];
         };
