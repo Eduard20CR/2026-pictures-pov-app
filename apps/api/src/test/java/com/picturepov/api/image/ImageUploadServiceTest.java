@@ -86,6 +86,19 @@ class ImageUploadServiceTest {
     }
 
     @Test
+    void signedUrlOnlyCreatesThePhotoSoItCannotReplaceIt() {
+        Event event = mock(Event.class);
+        when(event.getId()).thenReturn(UUID.randomUUID());
+        when(eventService.getOpenEvent("abc")).thenReturn(event);
+        when(imageRepository.save(any(Image.class))).thenAnswer(call -> call.getArgument(0));
+
+        UploadResponse response = imageUploadService.createUpload("abc", guestId, new UploadRequest("image/jpeg", 1000));
+
+        // S3 refuses the PUT with 412 once the object exists (conditional write).
+        assertThat(response.uploadUrl()).containsPattern("X-Amz-SignedHeaders=[^&]*if-none-match");
+    }
+
+    @Test
     void closedEventReservesNothing() {
         when(eventService.getOpenEvent("abc"))
                 .thenThrow(new ConflictException(ErrorCode.EVENT_CLOSED, "closed"));

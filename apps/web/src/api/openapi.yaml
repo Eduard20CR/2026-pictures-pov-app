@@ -25,7 +25,8 @@ paths:
         required: true
       responses:
         "201":
-          description: Upload reserved; PUT the photo to uploadUrl
+          description: Upload reserved; PUT the photo once to uploadUrl with If-None-Match
+            set to * (412 means it is already stored)
           content:
             '*/*':
               schema:

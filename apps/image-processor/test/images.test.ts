@@ -27,7 +27,7 @@ describe("markReady", () => {
 });
 
 describe("deleteImageRow", () => {
-  beforeEach(() => query.mockReset().mockResolvedValue({ rowCount: 1 }));
+  beforeEach(() => query.mockReset().mockResolvedValue({ rows: [{ file_unclaimed: true }] }));
 
   it("deletes the PENDING row and gives the quota back", async () => {
     await deleteImageRow("events/1/photo.jpg");
@@ -37,5 +37,12 @@ describe("deleteImageRow", () => {
     expect(sql).toContain("DELETE FROM images");
     expect(sql).toContain("upload_count - 1");
     expect(params).toEqual(["events/1/photo.jpg"]);
+  });
+
+  it("reports whether a validated photo still holds the key", async () => {
+    query.mockResolvedValue({ rows: [{ file_unclaimed: false }] });
+
+    await expect(deleteImageRow("events/1/photo.jpg")).resolves.toBe(false);
+    expect(query.mock.calls[0][0]).toContain("status <> 'PENDING'");
   });
 });
