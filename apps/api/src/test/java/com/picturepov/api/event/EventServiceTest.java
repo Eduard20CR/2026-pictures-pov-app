@@ -26,9 +26,9 @@ class EventServiceTest {
     EventService eventService;
 
     @Test
-    void returnsActiveEvent() {
+    void returnsOpenEvent() {
         Event event = mock(Event.class);
-        when(event.getStatus()).thenReturn(EventStatus.ACTIVE);
+        when(event.getStatus()).thenReturn(EventStatus.OPEN);
         when(event.getName()).thenReturn("Boda de prueba");
         when(eventRepository.findByPublicCode("abc")).thenReturn(Optional.of(event));
 
@@ -46,9 +46,9 @@ class EventServiceTest {
     }
 
     @Test
-    void throwsWhenEventIsNotActive() {
+    void throwsNotFoundWhenEventIsArchived() {
         Event event = mock(Event.class);
-        when(event.getStatus()).thenReturn(EventStatus.DRAFT);
+        when(event.getStatus()).thenReturn(EventStatus.ARCHIVED);
         when(eventRepository.findByPublicCode("abc")).thenReturn(Optional.of(event));
 
         assertThatThrownBy(() -> eventService.getPublicEvent("abc"))
@@ -63,6 +63,6 @@ class EventServiceTest {
 
         assertThatThrownBy(() -> eventService.getPublicEvent("abc"))
                 .isInstanceOf(ConflictException.class)
-                .extracting("code").isEqualTo(ErrorCode.EVENT_CLOSED);;
+                .extracting("code").isEqualTo(ErrorCode.EVENT_CLOSED);
     }
 }

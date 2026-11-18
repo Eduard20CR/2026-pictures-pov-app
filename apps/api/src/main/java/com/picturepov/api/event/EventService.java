@@ -28,9 +28,9 @@ public class EventService {
 
     @Transactional
     AdminEventResponse create(CreateEventRequest request) {
-        Event event = eventRepository.save(Event.draft(request.name(), request.eventDate(), publicCodeGenerator.generate()));
-        Invitation owner = invitationService.createOwner(event.getId(), request.ownerEmail());
-        return AdminEventResponse.from(event, owner);
+        Event event = eventRepository.save(Event.open(request.name(), request.eventDate(), publicCodeGenerator.generate()));
+        Invitation ownerInvitation = invitationService.createOwner(event.getId(), request.organizerEmail());
+        return AdminEventResponse.from(event, ownerInvitation);
     }
 
     private static final Sort NEWEST_FIRST =
@@ -42,14 +42,14 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
-    public Event getActiveEvent(String publicCode) {
+    public Event getOpenEvent(String publicCode) {
         Event event = eventRepository.findByPublicCode(publicCode)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.EVENT_NOT_FOUND, "Event not found"));
 
         if (event.getStatus() == EventStatus.CLOSED) {
             throw new ConflictException(ErrorCode.EVENT_CLOSED, "Event no longer accepts photos");
         }
-        if (event.getStatus() != EventStatus.ACTIVE) {
+        if (event.getStatus() != EventStatus.OPEN) {
             throw new NotFoundException(ErrorCode.EVENT_NOT_FOUND, "Event not found");
         }
         return event;
@@ -57,6 +57,6 @@ public class EventService {
 
     @Transactional(readOnly = true)
     PublicEventResponse getPublicEvent(String publicCode) {
-        return PublicEventResponse.from(getActiveEvent(publicCode));
+        return PublicEventResponse.from(getOpenEvent(publicCode));
     }
 }

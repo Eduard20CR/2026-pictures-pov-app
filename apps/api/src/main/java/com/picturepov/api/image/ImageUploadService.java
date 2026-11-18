@@ -46,7 +46,7 @@ class ImageUploadService {
     UploadResponse createUpload(String publicCode, UUID guestId, UploadRequest request) {
         validateFileFormat(request);
 
-        Event event = eventService.getActiveEvent(publicCode);
+        Event event = eventService.getOpenEvent(publicCode);
         guestLimitService.reserveUpload(event.getId(), guestId, event.getImagesPerUser());
 
         Image image = imageRepository.save(

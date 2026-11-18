@@ -22,7 +22,7 @@ class AdminEventController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiResponse(responseCode = "201", description = "Event created in DRAFT and assigned to the owner email")
+    @ApiResponse(responseCode = "201", description = "Event created Open, with an OWNER invitation for the organizer email")
     @ApiResponse(responseCode = "400", description = "Invalid or missing fields", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Not signed in", content = @Content)
     @ApiResponse(responseCode = "403", description = "Not an administrator", content = @Content)

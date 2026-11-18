@@ -42,7 +42,7 @@ class GuestLimitServiceTest {
         Event event = mock(Event.class);
         when(event.getId()).thenReturn(eventId);
         when(event.getImagesPerUser()).thenReturn(10);
-        when(eventService.getActiveEvent("abc")).thenReturn(event);
+        when(eventService.getOpenEvent("abc")).thenReturn(event);
         when(guestLimitRepository.countUploads(eventId, guestId)).thenReturn(3);
 
         QuotaResponse quota = guestLimitService.getQuota("abc", guestId);
