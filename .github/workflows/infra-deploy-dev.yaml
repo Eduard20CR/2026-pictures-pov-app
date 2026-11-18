@@ -30,7 +30,7 @@ jobs:
         with:
           role-to-assume: ${{ vars.AWS_DEV_GHA_ROLE_ARN_INFRA }}
           aws-region: us-east-1
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_version: "~1.14.0"
       - run: terraform init -input=false

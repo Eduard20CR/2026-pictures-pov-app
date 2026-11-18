@@ -3,3 +3,9 @@ variable "project" {
   type        = string
   default     = "pictures-pov"
 }
+
+variable "environment" {
+  description = "Project environment."
+  type        = string
+  default     = "dev"
+}

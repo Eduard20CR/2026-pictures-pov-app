@@ -4,13 +4,14 @@ Pictures POV App: guests upload event photos via QR code, no account, and see or
 
 ## Commands
 
-Same as CI (`.github/workflows/*-build-test.yaml`).
+Same as CI (`.github/workflows/*-build-test.yaml`, `infra-check.yaml`).
 
 | App | Check |
 |---|---|
 | `apps/api` (Spring Boot 4.1.1, Java 21) | `./mvnw -B verify` |
 | `apps/web` (React, Vite, TS) | `npm run lint && npm test && npm run build`; after an API change, `npm run api:types` with the API running |
 | `apps/image-processor`, `apps/upload-cleanup` (Node Lambdas) | `npm run typecheck && npm test && npm run build` |
+| `infra/` (Terraform) | `terraform fmt -check -recursive`; per stack `terraform init -backend=false && terraform validate` |
 
 ## Architecture rules
 
