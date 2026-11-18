@@ -1,6 +1,7 @@
 module "s3_artifacts_bucket" {
   source = "../../../modules/s3_artifacts_bucket"
   name   = local.name_prefix
+  apps   = ["api", "image-processor", "upload-cleanup"]
 }
 
 module "api_lambda" {

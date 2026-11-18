@@ -2,6 +2,11 @@ data "aws_caller_identity" "current" {}
 
 resource "aws_s3_bucket" "photos" {
   bucket = "${var.name}-photos-${data.aws_caller_identity.current.account_id}"
+
+  # The only copy of the guests' photos: Terraform refuses any plan that would delete it.
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "photos" {

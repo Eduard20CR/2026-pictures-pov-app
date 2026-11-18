@@ -13,14 +13,22 @@ resource "aws_s3_bucket_public_access_block" "artifacts" {
   restrict_public_buckets = true
 }
 
+# Only the per-commit zips (<app>/builds/<sha>.zip) expire. <app>/latest.zip is what
+# Terraform passes as s3_key, so it must stay to recreate a function after 30 days.
 resource "aws_s3_bucket_lifecycle_configuration" "artifacts" {
   bucket = aws_s3_bucket.artifacts.id
-  rule {
-    id     = "expire-old-zips"
-    status = "Enabled"
-    filter {}
-    expiration {
-      days = 30
+
+  dynamic "rule" {
+    for_each = toset(var.apps)
+    content {
+      id     = "expire-${rule.value}-builds"
+      status = "Enabled"
+      filter {
+        prefix = "${rule.value}/builds/"
+      }
+      expiration {
+        days = 30
+      }
     }
   }
 }
