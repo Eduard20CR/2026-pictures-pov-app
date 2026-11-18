@@ -42,7 +42,8 @@ resource "aws_iam_role_policy" "ssm_read" {
 
 data "aws_iam_policy_document" "photos_read" {
   statement {
-    actions   = ["s3:GetObject"]
+    # Delete: an upload that is not a real image is removed (RNF-SEG-03).
+    actions   = ["s3:GetObject", "s3:DeleteObject"]
     resources = ["${var.photos_bucket_arn}/originals/*"]
   }
   statement {
@@ -111,8 +112,8 @@ resource "aws_iam_role_policy" "scheduler_invoke" {
 
 resource "aws_scheduler_schedule" "this" {
   name                = var.name
-  schedule_expression = "rate(30 minutes)"
-  state               = "DISABLED"
+  schedule_expression = "rate(1 day)"
+  state               = "ENABLED"
 
   flexible_time_window {
     mode = "OFF"

@@ -1,3 +1,4 @@
+// Copied in apps/upload-cleanup/src/fileType.ts (no shared packages): keep both in sync.
 export type ImageType = "jpeg" | "png" | "webp" | "heic";
 
 export function detectImageType(bytes: Uint8Array): ImageType | null {

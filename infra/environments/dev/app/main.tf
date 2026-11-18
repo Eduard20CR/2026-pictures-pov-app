@@ -16,6 +16,7 @@ module "api_lambda" {
     COGNITO_ISSUER_URI    = "https://${module.cognito.user_pool_endpoint}"
     COGNITO_USER_INFO_URI = "https://${module.cognito.login_domain}/oauth2/userInfo"
     COGNITO_CLIENT_ID     = module.cognito.client_id
+    PHOTOS_UPLOAD_URL_TTL = "${local.upload_ttl_minutes}m"
   }
 }
 
@@ -86,8 +87,9 @@ module "upload_cleanup_lambda" {
   ssm_parameter_path = local.ssm_parameter_path
   photos_bucket_arn  = module.s3_photos_bucket.bucket_arn
   environment_variables = {
-    SSM_DB_PATH   = local.ssm_parameter_path
-    PHOTOS_BUCKET = module.s3_photos_bucket.bucket_name
+    SSM_DB_PATH        = local.ssm_parameter_path
+    PHOTOS_BUCKET      = module.s3_photos_bucket.bucket_name
+    UPLOAD_TTL_MINUTES = tostring(local.upload_ttl_minutes)
   }
 }
 
