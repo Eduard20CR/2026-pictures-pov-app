@@ -1,5 +1,6 @@
 package com.picturepov.api.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,7 @@ class CognitoUserInfoClient {
         this.userInfoUri = userInfoUri;
     }
 
-    String fetchEmail(String accessToken) {
+    UserInfo fetch(String accessToken) {
         UserInfo info = restClient.get()
                 .uri(userInfoUri)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
@@ -26,8 +27,13 @@ class CognitoUserInfoClient {
             throw new IllegalStateException("Cognito userInfo returned no email");
         }
 
-        return info.email();
+        return info;
     }
 
-    record UserInfo(String email) {}
+    /** Cognito returns {@code email_verified} as a string or a boolean, depending on the source of the user. */
+    record UserInfo(String email, @JsonProperty("email_verified") String emailVerified) {
+        boolean isEmailVerified() {
+            return "true".equalsIgnoreCase(emailVerified);
+        }
+    }
 }
