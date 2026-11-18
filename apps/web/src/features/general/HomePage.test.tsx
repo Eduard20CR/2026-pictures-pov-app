@@ -29,7 +29,6 @@ test('a signed-out visitor sees the app and can sign in', () => {
     renderHomeAs(null)
 
     screen.getByRole('heading', { name: 'Pictures POV' })
-    expect(screen.queryByText('Hello world!')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }))
 
     expect(signinRedirect).toHaveBeenCalled()

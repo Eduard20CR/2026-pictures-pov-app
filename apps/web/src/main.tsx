@@ -41,6 +41,8 @@ const router = createBrowserRouter([
             children: [
               { path: "/admin/events", element: <AdminEventsPage /> },
               { path: "/admin/events/new", element: <CreateEventPage /> },
+              // Any other /admin path: refused for non-admins, 404 for admins.
+              { path: "/admin/*", element: <NotFound /> },
             ],
           },
         ],
