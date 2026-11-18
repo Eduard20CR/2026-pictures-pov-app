@@ -4,9 +4,9 @@
 |---|---|
 | Project | Pictures POV App |
 | Document | Functional requirements |
-| Version | 1.2 |
+| Version | 1.3 |
 | Status | Ready |
-| Date | 2026-11-17 |
+| Date | 2026-11-18 |
 | Owner | Oscar |
 
 ## Change history
@@ -25,6 +25,7 @@
 | 1.0 | 2026-11-17 | Acceptance criteria moved to the GitHub issues, so each criterion has one home; this document keeps requirements, business rules, parameters and scope. |
 | 1.1 | 2026-11-17 | RN-06 defines the event lifecycle transitions. |
 | 1.2 | 2026-11-17 | Full review. Added RF-AUT-06 (create an account), RF-ORG-24 (gallery) and RN-10 (deleting a user). Sign-in with Google out of scope (RF-AUT-01, RN-04). RN-06: states Open, Closed and Archived; events start Open; deletion is not a state. Hiding affects only the gallery (RF-ORG-14, RF-ORG-16, RF-ORG-20). Location removed from thumbnails only (RF-SIS-03). Moderator permissions as an allow-list (section 7). Administrator manages users (RF-ADM-09 to RF-ADM-11). Out of scope: "self-service event creation". Fixed the link to section 3. |
+| 1.3 | 2026-11-18 | RN-03: a rejected or abandoned upload restores quota. Section 10 cites RF-AUT-06 for account creation. |
 
 ---
 
@@ -66,7 +67,7 @@ Identifier format `RN-<NN>`, never reused.
 |---|---|
 | RN-01 | A device can upload at most the event's per-device photo limit (P-01 by default), and an event at most P-03 photos in total. |
 | RN-02 | A device is identified only by a cookie; it is not a verified identity. |
-| RN-03 | Hiding or deleting a photo does not restore quota. |
+| RN-03 | Hiding or deleting a photo does not restore quota. A rejected or abandoned upload does ([ADR 0021](adr/0021-rejected-upload-returns-quota.md)). |
 | RN-04 | A user accesses an event only through an *Accepted* invitation whose email matches their verified email. Each email maps to one account. |
 | RN-05 | The permissions of each role are fixed (administrator, organizer, moderator; section 7 for the moderator) and are checked on the server for every request. |
 | RN-06 | An event is Open, Closed or Archived, and is created Open; only Open accepts guests. The organizer closes and reopens uploads; the upload window, if set, opens them at its start and closes them at its end, and a manual change in between stands. When P-05 elapses after the event date, the event becomes Archived and its photos are deleted; Archived is final. An administrator can delete an event in any state; it then disappears for everyone (RN-07). |
@@ -261,7 +262,7 @@ The following capabilities are not part of this version (priority W):
 | Video uploads | — |
 | Sign-in with Google | Email and password only ([ADR 0018](adr/0018-self-sign-up-email-only.md)). |
 | Payments and subscription plans | — |
-| Self-service event creation | Anyone can create an account (RF-AUT-05), but events are assigned only by an administrator, through an OWNER invitation (RN-04). |
+| Self-service event creation | Anyone can create an account (RF-AUT-06), but events are assigned only by an administrator, through an OWNER invitation (RN-04). |
 | Declining an invitation | A *Pending* invitation stays pending until accepted or removed (RF-ORG-23, RF-ADM-03). |
 | Comments and reactions on photos | — |
 | Photo editing | Includes filters and cropping. |

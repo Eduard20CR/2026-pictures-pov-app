@@ -16,14 +16,18 @@ Key architecture decisions, one per file, in a short [MADR](https://adr.github.i
 | [0008](0008-background-zip-generation.md) | Background ZIP generation | Accepted |
 | [0009](0009-backend-build-tool-maven.md) | Maven as the backend build tool | Accepted |
 | [0010](0010-database-migrations-liquibase.md) | Database migrations with Liquibase in CI/CD | Accepted |
-| [0011](0011-terraform-state-amazon-s3.md) | Terraform state in Amazon S3 | Accepted |
-| [0012](0012-single-aws-account.md) | Single AWS account for development and production | Accepted |
+| [0011](0011-terraform-state-amazon-s3.md) | Terraform state in Amazon S3 | Partially superseded by 0019 |
+| [0012](0012-single-aws-account.md) | Single AWS account for development and production | Partially superseded by 0019, 0020 |
 | [0013](0013-lambda-zip-snapstart-web-adapter.md) | Lambda zip with SnapStart and AWS Lambda Web Adapter | Accepted |
 | [0014](0014-public-aurora-lambda-outside-vpc.md) | Public Aurora endpoint with Lambda outside the VPC | Accepted |
 | [0015](0015-dev-database-neon-credentials-ssm.md) | Neon for the dev database, credentials in SSM Parameter Store | Accepted |
 | [0016](0016-rest-api-conventions.md) | REST API conventions | Accepted |
 | [0017](0017-api-same-origin-cloudfront.md) | API served under /api on the CloudFront origin | Accepted |
 | [0018](0018-self-sign-up-email-only.md) | Self sign-up with email and password only | Accepted |
+| [0019](0019-terraform-state-split-app-data.md) | Terraform state split into app and data per environment | Accepted |
+| [0020](0020-ci-role-per-workflow.md) | One CI role per workflow per environment | Accepted |
+| [0021](0021-rejected-upload-returns-quota.md) | Rejected or abandoned uploads return their quota | Accepted |
+
 ## Rules
 
 - File name: `NNNN-title-with-hyphens.md`. Numbers are never reused.

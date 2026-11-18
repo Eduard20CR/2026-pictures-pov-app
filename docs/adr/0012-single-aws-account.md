@@ -1,6 +1,6 @@
 # 0012. Single AWS account for development and production
 
-- **Status:** Accepted
+- **Status:** Partially superseded by [0019](0019-terraform-state-split-app-data.md) (state keys) and [0020](0020-ci-role-per-workflow.md) (one CI role per workflow)
 - **Date:** 2026-10-13
 
 ## Context
