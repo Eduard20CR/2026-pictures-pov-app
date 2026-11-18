@@ -1,8 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.tsx'
 import NotFound from './features/general/NotFound.tsx'
+import HomePage from './features/general/HomePage.tsx'
 import { createBrowserRouter } from "react-router"
 import { RouterProvider } from "react-router/dom"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -12,6 +12,7 @@ import { oidcConfig } from './features/auth/authConfig.ts'
 import AuthCallbackPage from './features/auth/pages/AuthCallbackPage.tsx'
 import MyEventsPage from './features/my-events/pages/MyEventsPage.tsx'
 import RequireAuth from './features/auth/components/RequireAuth.tsx'
+import RequireAdmin from './features/auth/components/RequireAdmin.tsx'
 import AppLayout from './app/AppLayout.tsx'
 import CreateEventPage from './features/admin/pages/CreateEventPage.tsx'
 import AdminEventsPage from './features/admin/pages/AdminEventsPage.tsx'
@@ -24,7 +25,7 @@ const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       // Public routes: guests and the sign-in callback.
-      { path: "/", element: <App /> },
+      { path: "/", element: <HomePage /> },
       { path: "/events/:publicCode", element: <EventPage /> },
       { path: "/auth/callback", element: <AuthCallbackPage /> },
 
@@ -33,8 +34,15 @@ const router = createBrowserRouter([
         element: <RequireAuth />,
         children: [
           { path: "/my-events", element: <MyEventsPage /> },
-          { path: "/admin/events", element: <AdminEventsPage /> },
-          { path: "/admin/events/new", element: <CreateEventPage /> },
+
+          // Admin routes: RequireAdmin refuses users outside the admins group.
+          {
+            element: <RequireAdmin />,
+            children: [
+              { path: "/admin/events", element: <AdminEventsPage /> },
+              { path: "/admin/events/new", element: <CreateEventPage /> },
+            ],
+          },
         ],
       },
 

@@ -93,7 +93,7 @@ docker run -d --name pov-db -p 5432:5432 \
   -e POSTGRES_DB=picturepov -e POSTGRES_USER=app -e POSTGRES_PASSWORD=app postgres:17-alpine
 ./scripts/liquibase-db.sh update
 
-# 2. API on http://localhost:8080/api (signs in against the dev Cognito by default)
+# 2. API on http://localhost:8080/api (the local profile signs in against the dev Cognito)
 cd apps/api && ./mvnw spring-boot:run
 
 # 3. Web on http://localhost:5173; Vite proxies /api to the API

@@ -39,7 +39,7 @@ jobs:
           aws-region: us-east-1
       - name: Upload zip and update function
         run: |
-          KEY="upload-cleanup/${GITHUB_SHA::7}.zip"
+          KEY="upload-cleanup/builds/${GITHUB_SHA::7}.zip"
           aws s3 cp dist/function.zip "s3://${{ vars.DEV_API_ARTIFACTS_BUCKET }}/$KEY"
           aws s3 cp dist/function.zip "s3://${{ vars.DEV_API_ARTIFACTS_BUCKET }}/upload-cleanup/latest.zip"
           aws lambda update-function-code \

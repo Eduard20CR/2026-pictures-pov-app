@@ -48,7 +48,7 @@ jobs:
       - name: Upload zip to S3
         id: upload
         run: |
-          KEY="api/${GITHUB_SHA::7}.zip"
+          KEY="api/builds/${GITHUB_SHA::7}.zip"
           aws s3 cp target/api.zip "s3://${{ vars.DEV_API_ARTIFACTS_BUCKET }}/$KEY"
           aws s3 cp target/api.zip "s3://${{ vars.DEV_API_ARTIFACTS_BUCKET }}/api/latest.zip"
           echo "key=$KEY" >> "$GITHUB_OUTPUT"
