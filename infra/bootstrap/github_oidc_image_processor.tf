@@ -2,7 +2,7 @@
 
 resource "aws_iam_role" "github_actions_dev_image_processor" {
   name               = "${var.project}-dev-gha-image-processor"
-  assume_role_policy = data.aws_iam_policy_document.github_trust_dev.json
+  assume_role_policy = data.aws_iam_policy_document.github_trust_dev["image_processor"].json
 
   tags = {
     Environment = "dev"

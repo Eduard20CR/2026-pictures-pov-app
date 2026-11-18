@@ -3,7 +3,7 @@
 
 resource "aws_iam_role" "github_actions_dev_api" {
   name               = "${var.project}-dev-gha-api"
-  assume_role_policy = data.aws_iam_policy_document.github_trust_dev.json
+  assume_role_policy = data.aws_iam_policy_document.github_trust_dev["api"].json
 
   tags = {
     Environment = "dev"

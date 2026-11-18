@@ -1,6 +1,6 @@
 resource "aws_iam_role" "github_actions_dev_infra" {
   name               = "${var.project}-dev-gha-infra"
-  assume_role_policy = data.aws_iam_policy_document.github_trust_dev.json
+  assume_role_policy = data.aws_iam_policy_document.github_trust_dev["infra"].json
 
   tags = {
     Environment = "dev"
@@ -9,8 +9,9 @@ resource "aws_iam_role" "github_actions_dev_infra" {
 
 data "aws_iam_policy_document" "github_actions_dev_infra" {
   statement {
+    # No SSM access: dev infra must never read secrets (#229).
     sid       = "AppServices"
-    actions   = ["lambda:*", "apigateway:*", "cloudfront:*", "logs:*", "ssm:GetParameter*", "scheduler:*", "cognito-idp:*"]
+    actions   = ["lambda:*", "apigateway:*", "cloudfront:*", "logs:*", "scheduler:*", "cognito-idp:*"]
     resources = ["*"]
   }
 
