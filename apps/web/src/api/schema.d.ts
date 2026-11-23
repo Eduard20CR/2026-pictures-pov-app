@@ -52,6 +52,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/invitations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["updateInvitation"];
+        trace?: never;
+    };
     "/me": {
         parameters: {
             query?: never;
@@ -60,6 +76,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getCurrentUser"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listMyPendingInvitations"];
         put?: never;
         post?: never;
         delete?: never;
@@ -153,7 +185,7 @@ export interface components {
             /** Format: uri */
             instance?: string;
             /** @enum {string} */
-            code: "EVENT_NOT_FOUND" | "UPLOAD_LIMIT_REACHED" | "UNSUPPORTED_CONTENT_TYPE" | "FILE_TOO_LARGE" | "INVALID_FILE_SIZE" | "EVENT_CLOSED" | "MALFORMED_REQUEST_BODY" | "VALIDATION_FAILED" | "INVITATION_ALREADY_EXISTS" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "INTERNAL_ERROR";
+            code: "EVENT_NOT_FOUND" | "UPLOAD_LIMIT_REACHED" | "UNSUPPORTED_CONTENT_TYPE" | "FILE_TOO_LARGE" | "INVALID_FILE_SIZE" | "EVENT_CLOSED" | "MALFORMED_REQUEST_BODY" | "VALIDATION_FAILED" | "INVITATION_ALREADY_EXISTS" | "INVITATION_NOT_FOUND" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "INTERNAL_ERROR";
             /** @description Invalid fields; only with VALIDATION_FAILED */
             errors?: components["schemas"]["FieldError"][];
         };
@@ -213,10 +245,26 @@ export interface components {
             /** @description Email of the OWNER invitation; null when the event has none */
             organizerEmail?: string;
         };
+        UpdateInvitationRequest: {
+            /**
+             * @description Only ACCEPTED: declining is out of scope
+             * @enum {string}
+             */
+            status: "ACCEPTED";
+        };
         CurrentUserResponse: {
             /** Format: uuid */
             id: string;
             email: string;
+        };
+        PendingInvitationResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            eventId: string;
+            eventName: string;
+            /** @enum {string} */
+            role: "OWNER" | "MODERATOR";
         };
         MyEventResponse: {
             /** Format: uuid */
@@ -531,6 +579,75 @@ export interface operations {
             };
         };
     };
+    updateInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateInvitationRequest"];
+            };
+        };
+        responses: {
+            /** @description Accepted and linked to the signed-in user: the event joins their events with the invitation's role */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Status missing or other than ACCEPTED */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Missing or invalid access token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Email not verified, or the invitation is for another email */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description No Pending invitation with that id: removed, already accepted, its event deleted, or never existed */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Unexpected error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+        };
+    };
     getCurrentUser: {
         parameters: {
             query?: never;
@@ -547,6 +664,44 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CurrentUserResponse"];
+                };
+            };
+            /** @description Missing or invalid access token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Unexpected error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+        };
+    };
+    listMyPendingInvitations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Pending invitations for the signed-in user's verified email, newest first; empty if the email is not verified */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PendingInvitationResponse"][];
                 };
             };
             /** @description Missing or invalid access token */

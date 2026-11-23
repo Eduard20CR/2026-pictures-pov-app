@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-class CurrentUserService {
+public class CurrentUserService {
     private final UserRepository userRepository;
     private final CognitoUserInfoClient userInfoClient;
 
@@ -35,6 +35,16 @@ class CurrentUserService {
         if (!info.isEmailVerified()) {
             throw new IllegalStateException("Cognito email is not verified");
         }
-        return userRepository.save(new User(id, info.email().trim().toLowerCase(Locale.ROOT)));
+        return userRepository.save(new User(id, normalizeEmail(info.email())));
+    }
+
+    /** The user's email in lowercase, read live from Cognito; empty if Cognito does not mark it verified (RN-04). */
+    public Optional<String> findVerifiedEmail(Jwt jwt) {
+        CognitoUserInfoClient.UserInfo info = userInfoClient.fetchUserInfo(jwt.getTokenValue());
+        return info.isEmailVerified() ? Optional.of(normalizeEmail(info.email())) : Optional.empty();
+    }
+
+    private static String normalizeEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
     }
 }
