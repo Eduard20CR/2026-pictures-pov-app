@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -29,6 +30,6 @@ class MyEventsController {
     @ApiResponse(responseCode = "401", description = "Missing or invalid access token",
             content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ApiProblem.class)))
     List<MyEventResponse> myEvents(@AuthenticationPrincipal Jwt jwt) {
-        return eventRepository.findMyEvents(UUID.fromString(jwt.getSubject()));
+        return eventRepository.findMyEvents(UUID.fromString(Objects.requireNonNull(jwt.getSubject())));
     }
 }
