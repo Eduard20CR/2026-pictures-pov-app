@@ -2,9 +2,10 @@ import { Link, useParams } from 'react-router'
 import { useMyEvent } from '../hooks/useMyEvent'
 import { ROLE_LABELS, STATUS_LABELS } from '../labels'
 import InviteModeratorForm from '../components/InviteModeratorForm'
+import CopyEventLinkButton from '../components/CopyEventLinkButton'
 
 // Private page: RequireAuth guarantees there is a session here.
-// Link, QR and photos are added by their own stories.
+// QR and photos are added by their own stories.
 export default function MyEventPage() {
     const { id = '' } = useParams()
     const event = useMyEvent(id)
@@ -29,6 +30,9 @@ export default function MyEventPage() {
                         <dt className="font-semibold">Mi rol</dt>
                         <dd>{ROLE_LABELS[event.data.role]}</dd>
                     </dl>
+                    <div className="self-start">
+                        <CopyEventLinkButton publicCode={event.data.publicCode} />
+                    </div>
                     {event.data.role === 'OWNER' && <InviteModeratorForm eventId={event.data.id} />}
                 </>
             )}

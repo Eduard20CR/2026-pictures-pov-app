@@ -3,6 +3,7 @@ import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
 import { useSignOut } from '../../auth/hooks/useSignOut'
 import { useMyEvents } from '../hooks/useMyEvents'
 import { ROLE_LABELS, STATUS_LABELS } from '../labels'
+import CopyEventLinkButton from '../components/CopyEventLinkButton'
 
 // Private page: RequireAuth guarantees there is a session here.
 // Events where I hold an Accepted invitation, newest event date first, no pagination.
@@ -27,6 +28,7 @@ export default function MyEventsPage() {
                             <th className="py-2">Fecha</th>
                             <th className="py-2">Estado</th>
                             <th className="py-2">Mi rol</th>
+                            <th className="py-2">Enlace</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -38,6 +40,7 @@ export default function MyEventsPage() {
                                 <td className="py-2">{event.eventDate}</td>
                                 <td className="py-2">{STATUS_LABELS[event.status]}</td>
                                 <td className="py-2">{ROLE_LABELS[event.role]}</td>
+                                <td className="py-2"><CopyEventLinkButton publicCode={event.publicCode} /></td>
                             </tr>
                         ))}
                     </tbody>
