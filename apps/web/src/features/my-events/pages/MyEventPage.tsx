@@ -3,9 +3,10 @@ import { useMyEvent } from '../hooks/useMyEvent'
 import { ROLE_LABELS, STATUS_LABELS } from '../labels'
 import InviteModeratorForm from '../components/InviteModeratorForm'
 import CopyEventLinkButton from '../components/CopyEventLinkButton'
+import DownloadEventQrButtons from '../components/DownloadEventQrButtons'
 
 // Private page: RequireAuth guarantees there is a session here.
-// QR and photos are added by their own stories.
+// Photos are added by their own stories.
 export default function MyEventPage() {
     const { id = '' } = useParams()
     const event = useMyEvent(id)
@@ -30,8 +31,9 @@ export default function MyEventPage() {
                         <dt className="font-semibold">Mi rol</dt>
                         <dd>{ROLE_LABELS[event.data.role]}</dd>
                     </dl>
-                    <div className="self-start">
+                    <div className="flex flex-wrap items-center gap-2">
                         <CopyEventLinkButton publicCode={event.data.publicCode} />
+                        <DownloadEventQrButtons publicCode={event.data.publicCode} eventName={event.data.name} />
                     </div>
                     {event.data.role === 'OWNER' && <InviteModeratorForm eventId={event.data.id} />}
                 </>

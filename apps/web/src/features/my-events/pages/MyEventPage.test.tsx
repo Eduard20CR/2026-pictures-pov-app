@@ -7,9 +7,11 @@ import { useMyEvent } from '../hooks/useMyEvent'
 import { useInviteModerator } from '../hooks/useInviteModerator'
 import { InviteModeratorError } from '../api/InviteModeratorError'
 import type { MyEvent } from '../types'
+import { downloadEventQrPdf, downloadEventQrPng } from '../qr/eventQrCode'
 
 vi.mock('../hooks/useMyEvent')
 vi.mock('../hooks/useInviteModerator')
+vi.mock('../qr/eventQrCode')
 
 const mutate = vi.fn()
 
@@ -111,4 +113,16 @@ test.each(['OWNER', 'MODERATOR'] as const)('as %s I copy the public event link',
 
     expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/events/a`)
     await waitFor(() => expect(screen.getByRole('button', { name: 'Enlace copiado' })).toBeTruthy())
+})
+
+test.each(['OWNER', 'MODERATOR'] as const)('as %s I download the event QR code as PNG and PDF', (role) => {
+    givenEvent({ ...myEvent, role })
+
+    renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'Descargar QR (PNG)' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Descargar QR (PDF)' }))
+
+    const link = `${window.location.origin}/events/a`
+    expect(downloadEventQrPng).toHaveBeenCalledWith(link, 'qr-a.png')
+    expect(downloadEventQrPdf).toHaveBeenCalledWith(link, 'Boda Ana y Luis', 'qr-a.pdf')
 })
