@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import MyEventsPage from './MyEventsPage'
@@ -41,8 +41,8 @@ test('shows each event with its name, date, status and my role in Spanish', () =
 
     const rows = screen.getAllByRole('row').slice(1)
     expect(rows.map((row) => row.textContent)).toEqual([
-        'Boda Ana y Luis2026-12-12AbiertoOrganizador',
-        'Navidad2026-11-01CerradoModerador',
+        'Boda Ana y Luis2026-12-12AbiertoOrganizadorCopiar enlace',
+        'Navidad2026-11-01CerradoModeradorCopiar enlace',
     ])
 })
 
@@ -63,4 +63,20 @@ test('each event links to its page', () => {
     renderPage()
 
     expect(screen.getByRole('link', { name: 'Boda Ana y Luis' }).getAttribute('href')).toBe('/my-events/1')
+})
+
+test('I copy the public link of an event from its row', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    givenEvents([
+        { id: '1', publicCode: 'a', name: 'Boda Ana y Luis', eventDate: '2026-12-12', status: 'OPEN', role: 'OWNER' },
+        { id: '2', publicCode: 'b', name: 'Navidad', eventDate: '2026-11-01', status: 'CLOSED', role: 'MODERATOR' },
+    ])
+
+    renderPage()
+    const navidad = screen.getByRole('row', { name: /Navidad/ })
+    fireEvent.click(within(navidad).getByRole('button', { name: 'Copiar enlace' }))
+
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/events/b`)
+    await waitFor(() => expect(within(navidad).getByRole('button', { name: 'Enlace copiado' })).toBeTruthy())
 })

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import MyEventPage from './MyEventPage'
@@ -99,4 +99,16 @@ test('a moderator does not see the invite form', () => {
     renderPage()
 
     expect(screen.queryByRole('button', { name: 'Invitar moderador' })).toBeNull()
+})
+
+test.each(['OWNER', 'MODERATOR'] as const)('as %s I copy the public event link', async (role) => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    givenEvent({ ...myEvent, role })
+
+    renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'Copiar enlace' }))
+
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/events/a`)
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Enlace copiado' })).toBeTruthy())
 })
