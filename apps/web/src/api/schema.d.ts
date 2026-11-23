@@ -52,6 +52,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["myEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{publicCode}": {
         parameters: {
             query?: never;
@@ -152,6 +168,21 @@ export interface components {
             /** Format: uuid */
             id: string;
             email: string;
+        };
+        MyEventResponse: {
+            /** Format: uuid */
+            id: string;
+            publicCode: string;
+            name: string;
+            /** Format: date */
+            eventDate: string;
+            /** @enum {string} */
+            status: "OPEN" | "CLOSED" | "ARCHIVED";
+            /**
+             * @description The signed-in user's role on the event
+             * @enum {string}
+             */
+            role: "OWNER" | "MODERATOR";
         };
         PublicEventResponse: {
             publicCode: string;
@@ -387,6 +418,44 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MeResponse"];
+                };
+            };
+            /** @description Missing or invalid access token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Unexpected error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+        };
+    };
+    myEvents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Events where the signed-in user holds an Accepted invitation, newest event date first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MyEventResponse"][];
                 };
             };
             /** @description Missing or invalid access token */

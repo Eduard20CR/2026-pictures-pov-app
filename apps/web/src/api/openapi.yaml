@@ -175,6 +175,33 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ApiProblem"
+  /me/events:
+    get:
+      tags:
+      - my-events-controller
+      operationId: myEvents
+      responses:
+        "200":
+          description: "Events where the signed-in user holds an Accepted invitation,\
+            \ newest event date first"
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MyEventResponse"
+        "401":
+          description: Missing or invalid access token
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Unexpected error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
   /events/{publicCode}:
     get:
       tags:
@@ -392,6 +419,38 @@ components:
       required:
       - email
       - id
+    MyEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        publicCode:
+          type: string
+        name:
+          type: string
+        eventDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+          - OPEN
+          - CLOSED
+          - ARCHIVED
+        role:
+          type: string
+          description: The signed-in user's role on the event
+          enum:
+          - OWNER
+          - MODERATOR
+      required:
+      - eventDate
+      - id
+      - name
+      - publicCode
+      - role
+      - status
     PublicEventResponse:
       type: object
       properties:

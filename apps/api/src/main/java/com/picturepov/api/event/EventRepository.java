@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,4 +36,16 @@ interface EventRepository extends JpaRepository<Event, UUID> {
         AND i.status = com.picturepov.api.invitation.InvitationStatus.ACCEPTED
         """)
     Optional<InvitationRole> findAcceptedRole(UUID eventId, UUID userId);
+
+    /** Same rule as {@link #findAcceptedRole}, for every event of the user. */
+    @Query("""
+        SELECT new com.picturepov.api.event.MyEventResponse(
+            e.id, e.publicCode, e.name, e.eventDate, e.status, i.role)
+        FROM Invitation i
+        JOIN Event e ON e.id = i.eventId
+        WHERE i.userId = :userId
+        AND i.status = com.picturepov.api.invitation.InvitationStatus.ACCEPTED
+        ORDER BY e.eventDate DESC, e.createdAt DESC
+        """)
+    List<MyEventResponse> findMyEvents(UUID userId);
 }
