@@ -35,11 +35,24 @@ public class Invitation {
     protected Invitation() {}
 
     public static Invitation createOwner(UUID eventId, String email) {
+        return createPending(eventId, email, InvitationRole.OWNER);
+    }
+
+    public static Invitation createModerator(UUID eventId, String email) {
+        return createPending(eventId, email, InvitationRole.MODERATOR);
+    }
+
+    /** Emails are stored in lowercase: one invitation per event and email. */
+    public static String normalizeEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private static Invitation createPending(UUID eventId, String email, InvitationRole role) {
         Invitation invitation = new Invitation();
         invitation.id = UUID.randomUUID();
         invitation.eventId = eventId;
-        invitation.email = email.trim().toLowerCase(Locale.ROOT);
-        invitation.role = InvitationRole.OWNER;
+        invitation.email = normalizeEmail(email);
+        invitation.role = role;
         invitation.status = InvitationStatus.PENDING;
         return invitation;
     }
