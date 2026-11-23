@@ -110,12 +110,12 @@ Fill `apps/web/.env` from `terraform output` in `infra/environments/dev/app`. Up
 
 ### Photo Lambdas against the local database
 
-Local uploads land in the dev bucket, but the dev Lambdas use the dev database, so local rows stay `PENDING`. After uploading, run the same handlers once by hand (AWS credentials from your profile; `PHOTOS_BUCKET` from `apps/api/src/main/resources/application-local.properties`; `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` as for the API):
+Local uploads land in the dev bucket, but the dev Lambdas use the dev database, so local rows stay `PENDING`. After uploading, run `npm run local` by hand:
 
-| Command | Effect |
+| App | Does |
 |---|---|
-| `cd apps/image-processor && PHOTOS_BUCKET=<bucket> npm run local` | Validates each `PENDING` photo already in the bucket: valid → `READY`, invalid → row, quota slot and file removed. Skips files not uploaded yet. |
-| `cd apps/upload-cleanup && PHOTOS_BUCKET=<bucket> npm run local` | One cleanup pass: releases uploads older than twice P-10 (`UPLOAD_TTL_MINUTES`, default 15). |
+| [image-processor](apps/image-processor/README.md#local-run) | Validates the local `PENDING` photos already in the bucket |
+| [upload-cleanup](apps/upload-cleanup/README.md#local-run) | Releases local uploads abandoned for more than twice P-10 |
 
 ### First administrator
 

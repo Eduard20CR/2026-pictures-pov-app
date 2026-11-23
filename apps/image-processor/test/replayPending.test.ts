@@ -11,21 +11,21 @@ vi.mock("../src/images", () => ({ findPendingKeys }));
 const objectExists = vi.fn();
 vi.mock("../src/s3", () => ({ objectExists }));
 
-const { processPending } = await import("../src/local");
+const { replayPending } = await import("../src/replayPending");
 
 // What the handler would see in AWS: the decoded key of each event.
 const handledKeys = () =>
   (handler.mock.calls as [S3Event][]).map(([event]) =>
     decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, " ")));
 
-describe("processPending", () => {
+describe("replayPending", () => {
   beforeEach(() => vi.resetAllMocks());
 
   it("calls the handler once per PENDING row with an S3 event for its bucket", async () => {
     findPendingKeys.mockResolvedValue(["originals/e1/a", "originals/e1/my photo (1)"]);
     objectExists.mockResolvedValue(true);
 
-    await processPending("photos");
+    await replayPending("photos");
 
     expect(handler).toHaveBeenCalledTimes(2);
     expect(handledKeys()).toEqual(["originals/e1/a", "originals/e1/my photo (1)"]);
@@ -38,7 +38,7 @@ describe("processPending", () => {
     findPendingKeys.mockResolvedValue(["originals/e1/a", "originals/e1/b"]);
     objectExists.mockImplementation(async (_bucket: string, key: string) => key === "originals/e1/b");
 
-    await processPending("photos");
+    await replayPending("photos");
 
     expect(objectExists).toHaveBeenCalledWith("photos", "originals/e1/a");
     expect(handledKeys()).toEqual(["originals/e1/b"]);
