@@ -97,8 +97,88 @@ class MyEventsControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void organizerOpensTheirEventWithTheirRole() throws Exception {
+        // guion
+        UUID event = createEvent("Boda Ana y Luis", "2099-12-12");
+        UUID organizer = createUser("ana@example.com");
+        invite(event, organizer, OWNER, ACCEPTED);
+
+        // correr + revisar
+        myEvent(event, organizer)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(event.toString()))
+                .andExpect(jsonPath("$.name").value("Boda Ana y Luis"))
+                .andExpect(jsonPath("$.eventDate").value("2099-12-12"))
+                .andExpect(jsonPath("$.status").value("OPEN"))
+                .andExpect(jsonPath("$.role").value("OWNER"));
+    }
+
+    @Test
+    void moderatorOpensTheEventAsModerator() throws Exception {
+        // guion
+        UUID event = createEvent("Boda Ana y Luis", "2099-12-12");
+        UUID moderator = createUser("beto@example.com");
+        invite(event, moderator, MODERATOR, ACCEPTED);
+
+        // correr + revisar
+        myEvent(event, moderator)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("MODERATOR"));
+    }
+
+    @Test
+    void userWithoutAnInvitationGets404() throws Exception {
+        // guion
+        UUID event = createEvent("Evento de A", "2099-12-12");
+        invite(event, createUser("ana@example.com"), OWNER, ACCEPTED);
+        UUID stranger = createUser("beto@example.com");
+
+        // correr + revisar
+        myEvent(event, stranger)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("EVENT_NOT_FOUND"));
+    }
+
+    @Test
+    void userWithAPendingInvitationGets404() throws Exception {
+        // guion
+        UUID event = createEvent("Pendiente", "2099-12-12");
+        UUID user = createUser("ana@example.com");
+        invite(event, user, MODERATOR, PENDING);
+
+        // correr + revisar
+        myEvent(event, user)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("EVENT_NOT_FOUND"));
+    }
+
+    @Test
+    void deletedEventGets404() throws Exception {
+        // guion
+        UUID event = createEvent("Borrado", "2099-12-12");
+        UUID user = createUser("ana@example.com");
+        invite(event, user, OWNER, ACCEPTED);
+        jdbc.sql("UPDATE events SET deleted_at = now() WHERE id = :id").param("id", event).update();
+
+        // correr + revisar
+        myEvent(event, user)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("EVENT_NOT_FOUND"));
+    }
+
+    @Test
+    void anonymousCallerOpeningAnEventGets401() throws Exception {
+        mockMvc.perform(get("/me/events/{id}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+    }
+
     private ResultActions myEvents(UUID userId) throws Exception {
         return mockMvc.perform(get("/me/events").with(jwt().jwt(token -> token.subject(userId.toString()))));
+    }
+
+    private ResultActions myEvent(UUID eventId, UUID userId) throws Exception {
+        return mockMvc.perform(get("/me/events/{id}", eventId).with(jwt().jwt(token -> token.subject(userId.toString()))));
     }
 
     private UUID createEvent(String name, String eventDate) {
