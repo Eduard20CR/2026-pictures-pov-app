@@ -8,7 +8,8 @@ import type { MyEvent } from '../types'
 
 vi.mock('../hooks/useMyEvents')
 vi.mock('../../auth/hooks/useMe')
-vi.mock('../../auth/hooks/useSignOut')
+// Factory: an automock would load the real module, which needs the Cognito env vars.
+vi.mock('../../auth/hooks/useSignOut', () => ({ useSignOut: () => vi.fn() }))
 
 function givenEvents(events: MyEvent[]) {
     vi.mocked(useMyEvents).mockReturnValue(
