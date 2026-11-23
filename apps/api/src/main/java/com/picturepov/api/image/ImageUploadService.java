@@ -3,8 +3,8 @@ package com.picturepov.api.image;
 import com.picturepov.api.common.error.BadRequestException;
 import com.picturepov.api.common.error.ErrorCode;
 import com.picturepov.api.event.Event;
-import com.picturepov.api.event.EventService;
-import com.picturepov.api.guest.GuestLimitService;
+import com.picturepov.api.event.GuestEventService;
+import com.picturepov.api.guest.GuestQuotaService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,23 +18,23 @@ import java.util.UUID;
 @Service
 class ImageUploadService {
 
-    private final EventService eventService;
-    private final GuestLimitService guestLimitService;
+    private final GuestEventService guestEventService;
+    private final GuestQuotaService guestQuotaService;
     private final ImageRepository imageRepository;
     private final S3Presigner s3Presigner;
     private final String bucket;
     private final long maxSizeBytes;
     private final Duration uploadUrlTtl;
 
-    ImageUploadService(EventService eventService,
-                       GuestLimitService guestLimitService,
+    ImageUploadService(GuestEventService guestEventService,
+                       GuestQuotaService guestQuotaService,
                        ImageRepository imageRepository,
                        S3Presigner s3Presigner,
                        @Value("${app.photos.bucket}") String bucket,
                        @Value("${app.photos.max-size-bytes}") long maxSizeBytes,
                        @Value("${app.photos.upload-url-ttl}") Duration uploadUrlTtl) {
-        this.eventService = eventService;
-        this.guestLimitService = guestLimitService;
+        this.guestEventService = guestEventService;
+        this.guestQuotaService = guestQuotaService;
         this.imageRepository = imageRepository;
         this.s3Presigner = s3Presigner;
         this.bucket = bucket;
@@ -43,14 +43,14 @@ class ImageUploadService {
     }
 
     @Transactional
-    UploadResponse createUpload(String publicCode, UUID guestId, UploadRequest request) {
+    PresignedUploadResponse createPresignedUpload(String publicCode, UUID guestId, PresignedUploadRequest request) {
         validateFileFormat(request);
 
-        Event event = eventService.getOpenEvent(publicCode);
-        guestLimitService.reserveUpload(event.getId(), guestId, event.getImagesPerUser());
+        Event event = guestEventService.getOpenEvent(publicCode);
+        guestQuotaService.reserveUploadSlot(event.getId(), guestId, event.getImagesPerUser());
 
         Image image = imageRepository.save(
-                Image.pending(event.getId(), guestId, request.contentType(), request.sizeBytes()));
+                Image.createPending(event.getId(), guestId, request.contentType(), request.sizeBytes()));
 
         PutObjectRequest putObject = PutObjectRequest.builder()
                 .bucket(bucket)
@@ -65,10 +65,10 @@ class ImageUploadService {
                 .signatureDuration(uploadUrlTtl)
                 .putObjectRequest(putObject));
 
-        return new UploadResponse(image.getId(), presigned.url().toString(), presigned.expiration());
+        return new PresignedUploadResponse(image.getId(), presigned.url().toString(), presigned.expiration());
     }
 
-    private void validateFileFormat(UploadRequest request) {
+    private void validateFileFormat(PresignedUploadRequest request) {
         if (!isAllowedType(request.contentType())) {
             throw new BadRequestException(ErrorCode.UNSUPPORTED_CONTENT_TYPE, "Only JPEG, PNG, WebP or HEIC images are allowed");
         }

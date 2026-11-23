@@ -44,7 +44,7 @@ public class Event {
     private static final String DEFAULT_COLOR = "#000000";
     private static final int DEFAULT_IMAGES_PER_USER = 10;
 
-    static Event open(String name, LocalDate eventDate, String publicCode) {
+    static Event createOpen(String name, LocalDate eventDate, String publicCode) {
         Event event = new Event();
         event.id = UUID.randomUUID();
         event.name = name.trim();

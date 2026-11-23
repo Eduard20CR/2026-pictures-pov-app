@@ -4,8 +4,8 @@ import com.picturepov.api.common.error.BadRequestException;
 import com.picturepov.api.common.error.ConflictException;
 import com.picturepov.api.common.error.ErrorCode;
 import com.picturepov.api.event.Event;
-import com.picturepov.api.event.EventService;
-import com.picturepov.api.guest.GuestLimitService;
+import com.picturepov.api.event.GuestEventService;
+import com.picturepov.api.guest.GuestQuotaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,8 +31,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ImageUploadServiceTest {
 
-    @Mock EventService eventService;
-    @Mock GuestLimitService guestLimitService;
+    @Mock GuestEventService guestEventService;
+    @Mock GuestQuotaService guestQuotaService;
     @Mock ImageRepository imageRepository;
 
     // A real presigner: signing a URL is local math, it never calls AWS.
@@ -48,29 +48,29 @@ class ImageUploadServiceTest {
     @BeforeEach
     void setUp() {
         imageUploadService = new ImageUploadService(
-                eventService, guestLimitService, imageRepository, s3Presigner,
+                guestEventService, guestQuotaService, imageRepository, s3Presigner,
                 "test-bucket", 20_971_520L, Duration.ofMinutes(5));
     }
 
     @Test
     void rejectsUnsupportedContentType(){
-        assertThatThrownBy(()->imageUploadService.createUpload("abc", UUID.randomUUID(), new UploadRequest("image/gif", 1000)))
+        assertThatThrownBy(()->imageUploadService.createPresignedUpload("abc", UUID.randomUUID(), new PresignedUploadRequest("image/gif", 1000)))
                 .isInstanceOf(BadRequestException.class);
-        verifyNoInteractions(guestLimitService);
+        verifyNoInteractions(guestQuotaService);
     }
 
     @Test
     void rejectsFileLargerThanLimit(){
-        assertThatThrownBy(()->imageUploadService.createUpload("abc", UUID.randomUUID(), new UploadRequest("image/jpeg", 20_971_521L)))
+        assertThatThrownBy(()->imageUploadService.createPresignedUpload("abc", UUID.randomUUID(), new PresignedUploadRequest("image/jpeg", 20_971_521L)))
                 .isInstanceOf(BadRequestException.class);
-        verifyNoInteractions(guestLimitService);
+        verifyNoInteractions(guestQuotaService);
     }
 
     @Test
     void rejectsEmptyFileAsInvalidSize(){
-        assertThatThrownBy(()->imageUploadService.createUpload("abc", UUID.randomUUID(), new UploadRequest("image/jpeg", 0)))
+        assertThatThrownBy(()->imageUploadService.createPresignedUpload("abc", UUID.randomUUID(), new PresignedUploadRequest("image/jpeg", 0)))
                 .isInstanceOfSatisfying(BadRequestException.class, ex -> assertThat(ex.getCode()).isEqualTo(ErrorCode.INVALID_FILE_SIZE));
-        verifyNoInteractions(guestLimitService);
+        verifyNoInteractions(guestQuotaService);
     }
 
     @Test
@@ -79,13 +79,13 @@ class ImageUploadServiceTest {
         Event event = mock(Event.class);
         when(event.getId()).thenReturn(eventId);
         when(event.getImagesPerUser()).thenReturn(10);
-        when(eventService.getOpenEvent("abc")).thenReturn(event);
+        when(guestEventService.getOpenEvent("abc")).thenReturn(event);
         when(imageRepository.save(any(Image.class))).thenAnswer(call -> call.getArgument(0));
 
-        UploadResponse response = imageUploadService.createUpload("abc", guestId, new UploadRequest("image/jpeg", 1000));
+        PresignedUploadResponse response = imageUploadService.createPresignedUpload("abc", guestId, new PresignedUploadRequest("image/jpeg", 1000));
 
-        InOrder order = inOrder(guestLimitService, imageRepository);
-        order.verify(guestLimitService).reserveUpload(eventId, guestId, 10);
+        InOrder order = inOrder(guestQuotaService, imageRepository);
+        order.verify(guestQuotaService).reserveUploadSlot(eventId, guestId, 10);
         order.verify(imageRepository).save(any(Image.class));
         assertThat(response.uploadUrl())
                 .contains("test-bucket")
@@ -96,10 +96,10 @@ class ImageUploadServiceTest {
     void signedUrlOnlyCreatesThePhotoSoItCannotReplaceIt() {
         Event event = mock(Event.class);
         when(event.getId()).thenReturn(UUID.randomUUID());
-        when(eventService.getOpenEvent("abc")).thenReturn(event);
+        when(guestEventService.getOpenEvent("abc")).thenReturn(event);
         when(imageRepository.save(any(Image.class))).thenAnswer(call -> call.getArgument(0));
 
-        UploadResponse response = imageUploadService.createUpload("abc", guestId, new UploadRequest("image/jpeg", 1000));
+        PresignedUploadResponse response = imageUploadService.createPresignedUpload("abc", guestId, new PresignedUploadRequest("image/jpeg", 1000));
 
         // S3 refuses the PUT with 412 once the object exists (conditional write).
         assertThat(response.uploadUrl()).containsPattern("X-Amz-SignedHeaders=[^&]*if-none-match");
@@ -107,11 +107,11 @@ class ImageUploadServiceTest {
 
     @Test
     void closedEventReservesNothing() {
-        when(eventService.getOpenEvent("abc"))
+        when(guestEventService.getOpenEvent("abc"))
                 .thenThrow(new ConflictException(ErrorCode.EVENT_CLOSED, "closed"));
 
-        assertThatThrownBy(() -> imageUploadService.createUpload("abc", guestId, new UploadRequest("image/jpeg", 1000)))
+        assertThatThrownBy(() -> imageUploadService.createPresignedUpload("abc", guestId, new PresignedUploadRequest("image/jpeg", 1000)))
                 .isInstanceOf(ConflictException.class);
-        verifyNoInteractions(guestLimitService, imageRepository);
+        verifyNoInteractions(guestQuotaService, imageRepository);
     }
 }

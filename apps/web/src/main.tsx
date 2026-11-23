@@ -1,12 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import NotFound from './features/general/NotFound.tsx'
+import NotFoundPage from './features/general/NotFoundPage.tsx'
 import HomePage from './features/general/HomePage.tsx'
 import { createBrowserRouter } from "react-router"
 import { RouterProvider } from "react-router/dom"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import EventPage from './features/event/pages/EventPage.tsx'
+import GuestEventPage from './features/guest-event/pages/GuestEventPage.tsx'
 import { AuthProvider } from 'react-oidc-context'
 import { oidcConfig } from './features/auth/authConfig.ts'
 import AuthCallbackPage from './features/auth/pages/AuthCallbackPage.tsx'
@@ -27,7 +27,7 @@ const router = createBrowserRouter([
     children: [
       // Public routes: guests and the sign-in callback.
       { path: "/", element: <HomePage /> },
-      { path: "/events/:publicCode", element: <EventPage /> },
+      { path: "/events/:publicCode", element: <GuestEventPage /> },
       { path: "/auth/callback", element: <AuthCallbackPage /> },
 
       // Private routes: everything inside RequireAuth needs a session.
@@ -44,13 +44,13 @@ const router = createBrowserRouter([
               { path: "/admin/events", element: <AdminEventsPage /> },
               { path: "/admin/events/new", element: <CreateEventPage /> },
               // Any other /admin path: refused for non-admins, 404 for admins.
-              { path: "/admin/*", element: <NotFound /> },
+              { path: "/admin/*", element: <NotFoundPage /> },
             ],
           },
         ],
       },
 
-      { path: "*", element: <NotFound /> },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ]);

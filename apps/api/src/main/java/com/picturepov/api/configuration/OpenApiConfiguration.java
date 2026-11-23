@@ -13,7 +13,7 @@ class OpenApiConfiguration {
 
     /** Any endpoint can fail unexpectedly: documents the 500 on every operation (ApiProblem is registered by the controllers). */
     @Bean
-    OpenApiCustomizer internalErrorResponse() {
+    OpenApiCustomizer documentInternalErrorResponse() {
         return openApi -> {
             var content = new Content().addMediaType("application/problem+json",
                     new MediaType().schema(new Schema<>().$ref("#/components/schemas/ApiProblem")));

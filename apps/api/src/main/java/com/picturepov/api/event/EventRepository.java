@@ -21,7 +21,7 @@ interface EventRepository extends JpaRepository<Event, UUID> {
         ON i.eventId = e.id
         AND i.role = com.picturepov.api.invitation.InvitationRole.OWNER
         """)
-    Page<AdminEventResponse> findAdminEvents(Pageable pageable);
+    Page<AdminEventResponse> findAllWithOrganizerEmail(Pageable pageable);
 
     /**
      * The role the user holds on the event through an Accepted invitation (RN-04).
@@ -35,9 +35,9 @@ interface EventRepository extends JpaRepository<Event, UUID> {
         AND i.userId = :userId
         AND i.status = com.picturepov.api.invitation.InvitationStatus.ACCEPTED
         """)
-    Optional<InvitationRole> findAcceptedRole(UUID eventId, UUID userId);
+    Optional<InvitationRole> findAcceptedInvitationRole(UUID eventId, UUID userId);
 
-    /** Same rule as {@link #findAcceptedRole}, for every event of the user. */
+    /** Same rule as {@link #findAcceptedInvitationRole}, for every event of the user. */
     @Query("""
         SELECT new com.picturepov.api.event.MyEventResponse(
             e.id, e.publicCode, e.name, e.eventDate, e.status, i.role)
@@ -47,5 +47,5 @@ interface EventRepository extends JpaRepository<Event, UUID> {
         AND i.status = com.picturepov.api.invitation.InvitationStatus.ACCEPTED
         ORDER BY e.eventDate DESC, e.createdAt DESC
         """)
-    List<MyEventResponse> findMyEvents(UUID userId);
+    List<MyEventResponse> findEventsWithAcceptedInvitation(UUID userId);
 }

@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin/events")
 class AdminEventController {
 
-    private final EventService eventService;
+    private final AdminEventService adminEventService;
 
-    AdminEventController(EventService eventService) {
-        this.eventService = eventService;
+    AdminEventController(AdminEventService adminEventService) {
+        this.adminEventService = adminEventService;
     }
 
     @PostMapping
@@ -26,8 +26,8 @@ class AdminEventController {
     @ApiResponse(responseCode = "400", description = "Invalid or missing fields", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ApiProblem.class)))
     @ApiResponse(responseCode = "401", description = "Not signed in", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ApiProblem.class)))
     @ApiResponse(responseCode = "403", description = "Not an administrator", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ApiProblem.class)))
-    AdminEventResponse create(@Valid @RequestBody CreateEventRequest request) {
-        return eventService.create(request);
+    AdminEventResponse createEvent(@Valid @RequestBody CreateEventRequest request) {
+        return adminEventService.createEvent(request);
     }
 
 
@@ -36,7 +36,7 @@ class AdminEventController {
     @ApiResponse(responseCode = "400", description = "Invalid page or size", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ApiProblem.class)))
     @ApiResponse(responseCode = "401", description = "Not signed in", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ApiProblem.class)))
     @ApiResponse(responseCode = "403", description = "Not an administrator", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ApiProblem.class)))
-    AdminEventPage list(@RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
-        return eventService.list(page, size);
+    AdminEventPage listAllEvents(@RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+        return adminEventService.listAllEvents(page, size);
     }
 }

@@ -13,7 +13,7 @@ class GuestLimitRepository {
         this.jdbc = jdbc;
     }
 
-        boolean reserveUpload(UUID eventId, UUID guestId, int limit) {
+        boolean tryReserveUploadSlot(UUID eventId, UUID guestId, int limit) {
         int rows = jdbc.sql("""
                 INSERT INTO guest_limits (id, event_id, guest_id, upload_count)
                 SELECT gen_random_uuid(), :eventId, :guestId, 1
@@ -30,7 +30,7 @@ class GuestLimitRepository {
         return rows == 1;
     }
 
-    int countUploads(UUID eventId, UUID guestId) {
+    int countUploadsByGuest(UUID eventId, UUID guestId) {
         return jdbc.sql("""
                 SELECT upload_count
                 FROM guest_limits

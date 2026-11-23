@@ -37,7 +37,7 @@ class EventAccessTest {
         invite(event, organizer, OWNER, ACCEPTED);
 
         // correr + revisar
-        assertThat(eventAccess.roleIn(event, organizer)).isEqualTo(InvitationRole.OWNER);
+        assertThat(eventAccess.getUserRoleInEvent(event, organizer)).isEqualTo(InvitationRole.OWNER);
     }
 
     @Test
@@ -51,7 +51,7 @@ class EventAccessTest {
         invite(eventOfB, userB, OWNER, ACCEPTED);
 
         // correr + revisar
-        assertNotFound(() -> eventAccess.roleIn(eventOfA, userB));
+        assertNotFound(() -> eventAccess.getUserRoleInEvent(eventOfA, userB));
     }
 
     @Test
@@ -62,7 +62,7 @@ class EventAccessTest {
         invite(event, invitee, OWNER, PENDING);
 
         // correr + revisar
-        assertNotFound(() -> eventAccess.roleIn(event, invitee));
+        assertNotFound(() -> eventAccess.getUserRoleInEvent(event, invitee));
     }
 
     @Test
@@ -74,7 +74,7 @@ class EventAccessTest {
         jdbc.sql("UPDATE events SET deleted_at = now() WHERE id = :id").param("id", event).update();
 
         // correr + revisar
-        assertNotFound(() -> eventAccess.roleIn(event, organizer));
+        assertNotFound(() -> eventAccess.getUserRoleInEvent(event, organizer));
     }
 
     @Test

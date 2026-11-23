@@ -12,7 +12,7 @@ public class InvitationService {
         this.invitationRepository = invitationRepository;
     }
 
-    public Invitation createOwner(UUID eventId, String email) {
-        return invitationRepository.save(Invitation.owner(eventId, email));
+    public Invitation createOwnerInvitation(UUID eventId, String email) {
+        return invitationRepository.save(Invitation.createOwner(eventId, email));
     }
 }
