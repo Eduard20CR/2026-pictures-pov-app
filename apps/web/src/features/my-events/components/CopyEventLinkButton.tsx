@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { eventLink } from '../eventLink'
 
 type CopyState = 'idle' | 'copied' | 'failed'
 
@@ -13,7 +14,7 @@ export default function CopyEventLinkButton({ publicCode }: { publicCode: string
     const [state, setState] = useState<CopyState>('idle')
 
     function handleCopy() {
-        const link = `${window.location.origin}/events/${publicCode}`
+        const link = eventLink(publicCode)
         // navigator.clipboard is undefined outside a secure context (e.g. plain HTTP on a LAN IP).
         const copied = navigator.clipboard?.writeText(link) ?? Promise.reject(new Error('CLIPBOARD_UNAVAILABLE'))
         copied.then(
