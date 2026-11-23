@@ -1,18 +1,8 @@
+import { Link } from 'react-router'
 import { useMe } from '../../auth/hooks/useMe'
 import { useSignOut } from '../../auth/hooks/useSignOut'
 import { useMyEvents } from '../hooks/useMyEvents'
-import type { MyEvent } from '../types'
-
-const STATUS_LABELS: Record<MyEvent['status'], string> = {
-    OPEN: 'Abierto',
-    CLOSED: 'Cerrado',
-    ARCHIVED: 'Archivado',
-}
-
-const ROLE_LABELS: Record<MyEvent['role'], string> = {
-    OWNER: 'Organizador',
-    MODERATOR: 'Moderador',
-}
+import { ROLE_LABELS, STATUS_LABELS } from '../labels'
 
 // Private page: RequireAuth guarantees there is a session here.
 // Events where I hold an Accepted invitation, newest event date first, no pagination.
@@ -42,7 +32,9 @@ export default function MyEventsPage() {
                     <tbody>
                         {events.data.map((event) => (
                             <tr key={event.id} className="border-b">
-                                <td className="py-2">{event.name}</td>
+                                <td className="py-2">
+                                    <Link to={`/my-events/${event.id}`} className="underline">{event.name}</Link>
+                                </td>
                                 <td className="py-2">{event.eventDate}</td>
                                 <td className="py-2">{STATUS_LABELS[event.status]}</td>
                                 <td className="py-2">{ROLE_LABELS[event.role]}</td>
