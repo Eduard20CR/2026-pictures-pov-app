@@ -1,4 +1,4 @@
-import { DeleteObjectCommand, GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, HeadObjectCommand, NotFound, S3Client } from "@aws-sdk/client-s3";
 
 const s3 = new S3Client({});
 
@@ -12,4 +12,14 @@ export async function readFirstBytes(bucket: string, key: string): Promise<Uint8
 
 export async function deleteObject(bucket: string, key: string): Promise<void> {
     await s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
+}
+
+export async function objectExists(bucket: string, key: string): Promise<boolean> {
+    try {
+        await s3.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+        return true;
+    } catch (error) {
+        if (error instanceof NotFound) return false;
+        throw error;
+    }
 }

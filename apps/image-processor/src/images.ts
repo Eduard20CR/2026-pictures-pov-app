@@ -35,3 +35,10 @@ export async function deleteImageRow(s3Key: string): Promise<boolean> {
   );
   return result.rows[0].file_unclaimed;
 }
+
+// Local runs only (src/local.ts).
+export async function findPendingKeys(): Promise<string[]> {
+  const pool = await getPool();
+  const result = await pool.query("SELECT s3_key FROM images WHERE status = 'PENDING'");
+  return result.rows.map((row) => row.s3_key);
+}

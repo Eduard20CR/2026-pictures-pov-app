@@ -1,13 +1,35 @@
+// Copied in apps/upload-cleanup/src/db.ts (no shared packages): keep both in sync.
 import { GetParametersByPathCommand, SSMClient } from "@aws-sdk/client-ssm";
-import { Pool } from "pg";
+import { Pool, type PoolConfig } from "pg";
 
 let pool: Pool | undefined;
 
-// Reads the same SSM parameters as the API, once per execution environment.
+// Once per execution environment. DB_URL (local runs): same variables and defaults
+// as the API, no SSL. Otherwise the same SSM parameters as the API.
 export async function getPool(): Promise<Pool> {
   if (pool) return pool;
 
-  const path = process.env.SSM_DB_PATH!;
+  const localUrl = process.env.DB_URL;
+  pool = new Pool(
+    localUrl
+      ? {
+          ...fromJdbcUrl(localUrl),
+          user: process.env.DB_USERNAME ?? "app",
+          password: process.env.DB_PASSWORD ?? "app",
+          ssl: false,
+        }
+      : await fromSsm(process.env.SSM_DB_PATH!),
+  );
+  return pool;
+}
+
+// Lets a one-shot local run exit.
+export async function closePool(): Promise<void> {
+  await pool?.end();
+  pool = undefined;
+}
+
+async function fromSsm(path: string): Promise<PoolConfig> {
   const ssm = new SSMClient({});
   const { Parameters = [] } = await ssm.send(
     new GetParametersByPathCommand({ Path: path, WithDecryption: true }),
@@ -15,17 +37,21 @@ export async function getPool(): Promise<Pool> {
   const value = (name: string) =>
     Parameters.find((p) => p.Name === `${path}/${name}`)?.Value;
 
-  // The API stores a JDBC URL: jdbc:postgresql://host/db?sslmode=require
-  const url = new URL(value("spring.datasource.url")!.replace(/^jdbc:/, ""));
+  return {
+    ...fromJdbcUrl(value("spring.datasource.url")!),
+    user: value("spring.datasource.username"),
+    password: value("spring.datasource.password"),
+    ssl: { rejectUnauthorized: true },
+  };
+}
 
-  pool = new Pool({
+// The API uses a JDBC URL: jdbc:postgresql://host/db?sslmode=require
+function fromJdbcUrl(jdbcUrl: string): PoolConfig {
+  const url = new URL(jdbcUrl.replace(/^jdbc:/, ""));
+  return {
     host: url.hostname,
     port: Number(url.port || 5432),
     database: url.pathname.slice(1),
-    user: value("spring.datasource.username"),
-    password: value("spring.datasource.password"),
     max: 1,
-    ssl: { rejectUnauthorized: true },
-  });
-  return pool;
+  };
 }
