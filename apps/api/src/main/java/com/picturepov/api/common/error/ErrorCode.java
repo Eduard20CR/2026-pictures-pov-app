@@ -9,6 +9,7 @@ public enum ErrorCode {
     EVENT_CLOSED,
     MALFORMED_REQUEST_BODY,
     VALIDATION_FAILED,
+    INVITATION_ALREADY_EXISTS,
     // Generic codes, for errors without a specific one.
     BAD_REQUEST,
     UNAUTHENTICATED,
