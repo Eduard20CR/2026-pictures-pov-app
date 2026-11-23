@@ -108,6 +108,15 @@ cd apps/web && cp .env.example .env && npm ci && npm run dev
 
 Fill `apps/web/.env` from `terraform output` in `infra/environments/dev/app`. Uploads need `PHOTOS_BUCKET` set for the API.
 
+### Photo Lambdas against the local database
+
+Local uploads land in the dev bucket, but the dev Lambdas use the dev database, so local rows stay `PENDING`. After uploading, run `npm run local` by hand:
+
+| App | Does |
+|---|---|
+| [image-processor](apps/image-processor/README.md#local-run) | Validates the local `PENDING` photos already in the bucket |
+| [upload-cleanup](apps/upload-cleanup/README.md#local-run) | Releases local uploads abandoned for more than twice P-10 |
+
 ### First administrator
 
 After the first `terraform apply` of an environment, create its first admin:

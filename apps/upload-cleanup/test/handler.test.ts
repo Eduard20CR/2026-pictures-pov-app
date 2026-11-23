@@ -35,7 +35,7 @@ const deletedKeys = () =>
 describe("handler", () => {
     beforeEach(() => {
         vi.resetAllMocks();
-        // Script: one expired upload, then none left (it left PENDING).
+        // Script: one expired upload.
         findExpired
             .mockResolvedValueOnce([{ id: "img-1", s3Key: "originals/a.jpg" }])
             .mockResolvedValue([]);
@@ -80,17 +80,17 @@ describe("handler", () => {
         expect(markReady).not.toHaveBeenCalled();
     });
 
-    it("keeps going until no expired upload is left", async () => {
+    it("settles a single batch per run", async () => {
         findExpired
             .mockReset()
             .mockResolvedValueOnce([{ id: "img-1", s3Key: "originals/a.jpg" }])
-            .mockResolvedValueOnce([{ id: "img-2", s3Key: "originals/b.jpg" }])
-            .mockResolvedValue([]); // Script: two batches, then none
+            .mockResolvedValueOnce([{ id: "img-2", s3Key: "originals/b.jpg" }]); // Script: two batches
         send.mockRejectedValue(new NoSuchKey({ message: "x", $metadata: {} }));
 
         await handler();
 
-        expect(release.mock.calls).toEqual([["img-1"], ["img-2"]]);
+        expect(findExpired).toHaveBeenCalledOnce();
+        expect(release.mock.calls).toEqual([["img-1"]]);
     });
 
     it("does nothing when there are no expired uploads", async () => {

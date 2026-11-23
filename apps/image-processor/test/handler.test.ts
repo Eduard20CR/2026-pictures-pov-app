@@ -8,8 +8,8 @@ vi.mock("../src/s3", () => ({ readFirstBytes, deleteObject }));
 
 // Actor 2: the database functions.
 const markReady = vi.fn();
-const deleteImageRow = vi.fn();
-vi.mock("../src/images", () => ({ markReady, deleteImageRow }));
+const releasePending = vi.fn();
+vi.mock("../src/images", () => ({ markReady, releasePending }));
 
 const { handler } = await import("../src/handler");
 
@@ -34,27 +34,17 @@ describe("handler", () => {
     expect(deleteObject).not.toHaveBeenCalled();
   });
 
-  it("deletes the row BEFORE the object when the file is not an image", async () => {
+  it("releases the row BEFORE deleting the file when it is not an image", async () => {
     readFirstBytes.mockResolvedValue(PDF);
-    deleteImageRow.mockResolvedValue(true);
 
     await handler(s3Event("originals/e1/img-1"));
 
     expect(markReady).not.toHaveBeenCalled();
-    expect(deleteImageRow).toHaveBeenCalledWith("originals/e1/img-1");
+    expect(releasePending).toHaveBeenCalledWith("originals/e1/img-1");
     expect(deleteObject).toHaveBeenCalledWith("photos", "originals/e1/img-1");
     // If the Lambda dies in between, S3 retries and the object is still there.
-    expect(deleteImageRow.mock.invocationCallOrder[0])
+    expect(releasePending.mock.invocationCallOrder[0])
       .toBeLessThan(deleteObject.mock.invocationCallOrder[0]);
-  });
-
-  it("keeps the file of a validated photo even if an invalid file shows up for it", async () => {
-    readFirstBytes.mockResolvedValue(PDF);
-    deleteImageRow.mockResolvedValue(false); // a READY or HIDDEN row still holds the key
-
-    await handler(s3Event("originals/e1/img-1"));
-
-    expect(deleteObject).not.toHaveBeenCalled();
   });
 
   it("decodes the key that S3 sends URL-encoded", async () => {

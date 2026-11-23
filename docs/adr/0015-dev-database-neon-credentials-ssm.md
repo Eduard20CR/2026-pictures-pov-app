@@ -30,6 +30,7 @@ The dev environment needs a PostgreSQL database within the idle cost limit (RNF-
 - Parameters are named after the Spring property: `/pictures-pov/<env>/db/spring.datasource.{url,username,password}`, created by hand with the AWS managed key `aws/ssm`.
 - Terraform only sets `SSM_DB_PATH` and grants the Lambda role read access to that path.
 - `SsmDbSettings` runs before Spring starts: if `SSM_DB_PATH` exists, it reads the path and sets the values as system properties; otherwise the local defaults apply.
+- The photo Lambdas read the same SSM path; locally (`npm run local`) they use `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` with the API's defaults and no TLS. Terraform never sets `DB_URL`.
 
 ## Consequences
 
