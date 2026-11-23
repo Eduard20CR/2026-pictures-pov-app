@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-/** Who reaches which event (RN-04, RN-05, RNF-SEG-02). Every signed-in event endpoint goes through here. */
+/** Who reaches which event (RN-04, RN-05, RNF-SEG-02). Every endpoint that takes an event id from a signed-in user must check here first. */
 @Service
 public class EventAccess {
 

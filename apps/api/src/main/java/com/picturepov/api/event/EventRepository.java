@@ -1,9 +1,9 @@
 package com.picturepov.api.event;
 
+import com.picturepov.api.invitation.InvitationRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.picturepov.api.invitation.InvitationRole;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
@@ -22,7 +22,10 @@ interface EventRepository extends JpaRepository<Event, UUID> {
         """)
     Page<AdminEventResponse> findAdminEvents(Pageable pageable);
 
-    /** The role the user holds on the event through an Accepted invitation (RN-04). */
+    /**
+     * The role the user holds on the event through an Accepted invitation (RN-04).
+     * The join on Event is required: it applies Event's soft-delete filter, so a deleted event yields nothing.
+     */
     @Query("""
         SELECT i.role
         FROM Invitation i
