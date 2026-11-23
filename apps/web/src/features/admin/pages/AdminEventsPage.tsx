@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from 'react-router'
-import { useAdminEvents } from '../hooks/useAdminEvents'
+import { useAllEvents } from '../hooks/useAllEvents'
 import type { AdminEvent } from '../types'
 
 const STATUS_LABELS: Record<AdminEvent['status'], string> = {
@@ -12,7 +12,7 @@ const STATUS_LABELS: Record<AdminEvent['status'], string> = {
 export default function AdminEventsPage() {
     const [searchParams, setSearchParams] = useSearchParams()
     const page = Number(searchParams.get('page') ?? '0')
-    const events = useAdminEvents(page)
+    const events = useAllEvents(page)
 
     function goToPage(newPage: number) {
         setSearchParams({ page: String(newPage) })

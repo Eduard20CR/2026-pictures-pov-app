@@ -39,7 +39,7 @@ class MyEventsControllerTest {
         invite(event, organizer, OWNER, ACCEPTED);
 
         // correr + revisar
-        myEvents(organizer)
+        listMyEvents(organizer)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value(event.toString()))
@@ -58,7 +58,7 @@ class MyEventsControllerTest {
         invite(createEvent("Nuevo", "2099-12-01"), user, MODERATOR, ACCEPTED);
 
         // correr + revisar
-        myEvents(user)
+        listMyEvents(user)
                 .andExpect(jsonPath("$[*].name", contains("Nuevo", "Medio", "Viejo")))
                 .andExpect(jsonPath("$[0].role").value("MODERATOR"));
     }
@@ -72,7 +72,7 @@ class MyEventsControllerTest {
         invite(createEvent("Evento de B", "2099-12-12"), userB, OWNER, ACCEPTED);
 
         // correr + revisar
-        myEvents(userB)
+        listMyEvents(userB)
                 .andExpect(jsonPath("$[*].name", contains("Evento de B")));
     }
 
@@ -86,7 +86,7 @@ class MyEventsControllerTest {
         jdbc.sql("UPDATE events SET deleted_at = now() WHERE id = :id").param("id", deleted).update();
 
         // correr + revisar
-        myEvents(user)
+        listMyEvents(user)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
@@ -105,7 +105,7 @@ class MyEventsControllerTest {
         invite(event, organizer, OWNER, ACCEPTED);
 
         // correr + revisar
-        myEvent(event, organizer)
+        getMyEvent(event, organizer)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(event.toString()))
                 .andExpect(jsonPath("$.name").value("Boda Ana y Luis"))
@@ -122,7 +122,7 @@ class MyEventsControllerTest {
         invite(event, moderator, MODERATOR, ACCEPTED);
 
         // correr + revisar
-        myEvent(event, moderator)
+        getMyEvent(event, moderator)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.role").value("MODERATOR"));
     }
@@ -135,7 +135,7 @@ class MyEventsControllerTest {
         UUID stranger = createUser("beto@example.com");
 
         // correr + revisar
-        myEvent(event, stranger)
+        getMyEvent(event, stranger)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("EVENT_NOT_FOUND"));
     }
@@ -148,7 +148,7 @@ class MyEventsControllerTest {
         invite(event, user, MODERATOR, PENDING);
 
         // correr + revisar
-        myEvent(event, user)
+        getMyEvent(event, user)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("EVENT_NOT_FOUND"));
     }
@@ -162,7 +162,7 @@ class MyEventsControllerTest {
         jdbc.sql("UPDATE events SET deleted_at = now() WHERE id = :id").param("id", event).update();
 
         // correr + revisar
-        myEvent(event, user)
+        getMyEvent(event, user)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("EVENT_NOT_FOUND"));
     }
@@ -173,11 +173,11 @@ class MyEventsControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    private ResultActions myEvents(UUID userId) throws Exception {
+    private ResultActions listMyEvents(UUID userId) throws Exception {
         return mockMvc.perform(get("/me/events").with(jwt().jwt(token -> token.subject(userId.toString()))));
     }
 
-    private ResultActions myEvent(UUID eventId, UUID userId) throws Exception {
+    private ResultActions getMyEvent(UUID eventId, UUID userId) throws Exception {
         return mockMvc.perform(get("/me/events/{id}", eventId).with(jwt().jwt(token -> token.subject(userId.toString()))));
     }
 

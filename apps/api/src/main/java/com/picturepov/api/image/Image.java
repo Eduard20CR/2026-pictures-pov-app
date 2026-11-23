@@ -38,7 +38,7 @@ public class Image {
 
     protected Image() {}
 
-    static Image pending(UUID eventId, UUID guestId, String contentType, long sizeBytes) {
+    static Image createPending(UUID eventId, UUID guestId, String contentType, long sizeBytes) {
         Image image = new Image();
         image.id = UUID.randomUUID();
         image.eventId = eventId;

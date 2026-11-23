@@ -9,8 +9,8 @@ paths:
   /events/{publicCode}/uploads:
     post:
       tags:
-      - image-controller
-      operationId: createUpload
+      - image-upload-controller
+      operationId: createPresignedUpload
       parameters:
       - name: publicCode
         in: path
@@ -21,7 +21,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UploadRequest"
+              $ref: "#/components/schemas/PresignedUploadRequest"
         required: true
       responses:
         "201":
@@ -30,7 +30,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/UploadResponse"
+                $ref: "#/components/schemas/PresignedUploadResponse"
         "400":
           description: "Unsupported type, invalid size or malformed body"
           content:
@@ -59,7 +59,7 @@ paths:
     get:
       tags:
       - admin-event-controller
-      operationId: list
+      operationId: listAllEvents
       parameters:
       - name: page
         in: query
@@ -112,7 +112,7 @@ paths:
     post:
       tags:
       - admin-event-controller
-      operationId: create
+      operationId: createEvent
       requestBody:
         content:
           application/json:
@@ -154,15 +154,15 @@ paths:
   /me:
     get:
       tags:
-      - me-controller
-      operationId: me
+      - current-user-controller
+      operationId: getCurrentUser
       responses:
         "200":
           description: Signed-in user; created on the first call
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/MeResponse"
+                $ref: "#/components/schemas/CurrentUserResponse"
         "401":
           description: Missing or invalid access token
           content:
@@ -179,7 +179,7 @@ paths:
     get:
       tags:
       - my-events-controller
-      operationId: myEvents
+      operationId: listMyEvents
       responses:
         "200":
           description: "Events where the signed-in user holds an Accepted invitation,\
@@ -206,7 +206,7 @@ paths:
     get:
       tags:
       - my-events-controller
-      operationId: myEvent
+      operationId: getMyEvent
       parameters:
       - name: id
         in: path
@@ -243,8 +243,8 @@ paths:
   /events/{publicCode}:
     get:
       tags:
-      - event-controller
-      operationId: getByPublicCode
+      - guest-event-controller
+      operationId: getGuestEvent
       parameters:
       - name: publicCode
         in: path
@@ -257,7 +257,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/PublicEventResponse"
+                $ref: "#/components/schemas/GuestEventResponse"
         "404":
           description: "Event does not exist, is archived or was deleted"
           content:
@@ -279,8 +279,8 @@ paths:
   /events/{publicCode}/quota:
     get:
       tags:
-      - guest-controller
-      operationId: getQuota
+      - guest-quota-controller
+      operationId: getUploadQuota
       parameters:
       - name: publicCode
         in: path
@@ -293,7 +293,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/QuotaResponse"
+                $ref: "#/components/schemas/UploadQuotaResponse"
         "404":
           description: "Event does not exist, is archived or was deleted"
           content:
@@ -314,7 +314,7 @@ paths:
                 $ref: "#/components/schemas/ApiProblem"
 components:
   schemas:
-    UploadRequest:
+    PresignedUploadRequest:
       type: object
       properties:
         contentType:
@@ -381,7 +381,7 @@ components:
       required:
       - field
       - message
-    UploadResponse:
+    PresignedUploadResponse:
       type: object
       properties:
         imageId:
@@ -446,7 +446,7 @@ components:
       - name
       - publicCode
       - status
-    MeResponse:
+    CurrentUserResponse:
       type: object
       properties:
         id:
@@ -489,7 +489,7 @@ components:
       - publicCode
       - role
       - status
-    PublicEventResponse:
+    GuestEventResponse:
       type: object
       properties:
         publicCode:
@@ -510,7 +510,7 @@ components:
       - imagesPerUser
       - name
       - publicCode
-    QuotaResponse:
+    UploadQuotaResponse:
       type: object
       properties:
         limit:

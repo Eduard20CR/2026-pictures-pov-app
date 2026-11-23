@@ -16,7 +16,7 @@ class CognitoUserInfoClient {
         this.userInfoUri = userInfoUri;
     }
 
-    UserInfo fetch(String accessToken) {
+    UserInfo fetchUserInfo(String accessToken) {
         UserInfo info = restClient.get()
                 .uri(userInfoUri)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)

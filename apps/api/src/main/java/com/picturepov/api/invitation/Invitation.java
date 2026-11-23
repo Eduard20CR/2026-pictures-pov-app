@@ -34,7 +34,7 @@ public class Invitation {
 
     protected Invitation() {}
 
-    public static Invitation owner(UUID eventId, String email) {
+    public static Invitation createOwner(UUID eventId, String email) {
         Invitation invitation = new Invitation();
         invitation.id = UUID.randomUUID();
         invitation.eventId = eventId;

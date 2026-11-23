@@ -106,7 +106,7 @@ class AdminEventControllerTest {
     @Test
     void eventWithoutOrganizerIsListedWithNullEmail() throws Exception {
         // guion
-        eventRepository.save(Event.open("No organizer party", LocalDate.of(2099, 12, 31), "noOrganizerCode0000000"));
+        eventRepository.save(Event.createOpen("No organizer party", LocalDate.of(2099, 12, 31), "noOrganizerCode0000000"));
 
         // correr + revisar
         mockMvc.perform(get("/admin/events").with(asAdmin()))

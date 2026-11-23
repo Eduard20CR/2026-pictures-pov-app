@@ -4,11 +4,11 @@ import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import MyEventsPage from './MyEventsPage'
 import { useMyEvents } from '../hooks/useMyEvents'
-import { useMe } from '../../auth/hooks/useMe'
+import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
 import type { MyEvent } from '../types'
 
 vi.mock('../hooks/useMyEvents')
-vi.mock('../../auth/hooks/useMe')
+vi.mock('../../auth/hooks/useCurrentUser')
 // Factory: an automock would load the real module, which needs the Cognito env vars.
 vi.mock('../../auth/hooks/useSignOut', () => ({ useSignOut: () => vi.fn() }))
 
@@ -24,8 +24,8 @@ function renderPage() {
 
 beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(useMe).mockReturnValue(
-        { data: { id: 'u', email: 'ana@example.com' }, isPending: false, isError: false } as unknown as ReturnType<typeof useMe>,
+    vi.mocked(useCurrentUser).mockReturnValue(
+        { data: { id: 'u', email: 'ana@example.com' }, isPending: false, isError: false } as unknown as ReturnType<typeof useCurrentUser>,
     )
 })
 

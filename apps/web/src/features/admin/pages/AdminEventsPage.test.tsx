@@ -3,15 +3,15 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import AdminEventsPage from './AdminEventsPage'
-import { useAdminEvents } from '../hooks/useAdminEvents'
+import { useAllEvents } from '../hooks/useAllEvents'
 
-vi.mock('../hooks/useAdminEvents')
+vi.mock('../hooks/useAllEvents')
 
 beforeEach(() => {
     vi.clearAllMocks()
 
     // Default: page 1 of 2, one event with an organizer and one without
-    vi.mocked(useAdminEvents).mockReturnValue(
+    vi.mocked(useAllEvents).mockReturnValue(
         {
             data: {
                 items: [
@@ -22,7 +22,7 @@ beforeEach(() => {
             },
             isPending: false,
             isError: false,
-        } as unknown as ReturnType<typeof useAdminEvents>,
+        } as unknown as ReturnType<typeof useAllEvents>,
     )
 })
 
@@ -57,5 +57,5 @@ test('"Siguiente" asks for the next page', () => {
     expect(screen.getByRole('button', { name: 'Anterior' })).toHaveProperty('disabled', true)
     fireEvent.click(screen.getByRole('button', { name: 'Siguiente' }))
 
-    expect(useAdminEvents).toHaveBeenLastCalledWith(1)
+    expect(useAllEvents).toHaveBeenLastCalledWith(1)
 })

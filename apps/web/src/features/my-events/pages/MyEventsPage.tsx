@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { useMe } from '../../auth/hooks/useMe'
+import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
 import { useSignOut } from '../../auth/hooks/useSignOut'
 import { useMyEvents } from '../hooks/useMyEvents'
 import { ROLE_LABELS, STATUS_LABELS } from '../labels'
@@ -7,7 +7,7 @@ import { ROLE_LABELS, STATUS_LABELS } from '../labels'
 // Private page: RequireAuth guarantees there is a session here.
 // Events where I hold an Accepted invitation, newest event date first, no pagination.
 export default function MyEventsPage() {
-    const me = useMe()
+    const currentUser = useCurrentUser()
     const events = useMyEvents()
     const signOut = useSignOut()
 
@@ -44,7 +44,7 @@ export default function MyEventsPage() {
                 </table>
             ))}
 
-            {me.data && <p className="text-sm">Sesión iniciada como {me.data.email}</p>}
+            {currentUser.data && <p className="text-sm">Sesión iniciada como {currentUser.data.email}</p>}
             <button
                 type="button"
                 onClick={signOut}

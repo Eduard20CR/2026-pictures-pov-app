@@ -21,15 +21,15 @@ public class EventAccess {
 
     /** The user's role on the event; 404 if they hold no Accepted invitation, so the event's existence is not revealed. */
     @Transactional(readOnly = true)
-    public InvitationRole roleIn(UUID eventId, UUID userId) {
-        return eventRepository.findAcceptedRole(eventId, userId)
+    public InvitationRole getUserRoleInEvent(UUID eventId, UUID userId) {
+        return eventRepository.findAcceptedInvitationRole(eventId, userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.EVENT_NOT_FOUND, "Event not found"));
     }
 
-    /** As {@link #roleIn}, plus 403 for a moderator: the action is the organizer's only (RN-05). */
+    /** As {@link #getUserRoleInEvent}, plus 403 for a moderator: the action is the organizer's only (RN-05). */
     @Transactional(readOnly = true)
     public void requireOrganizer(UUID eventId, UUID userId) {
-        if (roleIn(eventId, userId) != InvitationRole.OWNER) {
+        if (getUserRoleInEvent(eventId, userId) != InvitationRole.OWNER) {
             throw new AccessDeniedException("Organizer only");
         }
     }

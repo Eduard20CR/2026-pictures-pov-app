@@ -13,7 +13,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["createUpload"];
+        post: operations["createPresignedUpload"];
         delete?: never;
         options?: never;
         head?: never;
@@ -27,9 +27,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list"];
+        get: operations["listAllEvents"];
         put?: never;
-        post: operations["create"];
+        post: operations["createEvent"];
         delete?: never;
         options?: never;
         head?: never;
@@ -43,7 +43,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["me"];
+        get: operations["getCurrentUser"];
         put?: never;
         post?: never;
         delete?: never;
@@ -59,7 +59,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["myEvents"];
+        get: operations["listMyEvents"];
         put?: never;
         post?: never;
         delete?: never;
@@ -75,7 +75,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["myEvent"];
+        get: operations["getMyEvent"];
         put?: never;
         post?: never;
         delete?: never;
@@ -91,7 +91,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["getByPublicCode"];
+        get: operations["getGuestEvent"];
         put?: never;
         post?: never;
         delete?: never;
@@ -107,7 +107,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["getQuota"];
+        get: operations["getUploadQuota"];
         put?: never;
         post?: never;
         delete?: never;
@@ -120,7 +120,7 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        UploadRequest: {
+        PresignedUploadRequest: {
             /** @example image/jpeg */
             contentType: string;
             /**
@@ -147,7 +147,7 @@ export interface components {
             field: string;
             message: string;
         };
-        UploadResponse: {
+        PresignedUploadResponse: {
             /** Format: uuid */
             imageId: string;
             uploadUrl: string;
@@ -180,7 +180,7 @@ export interface components {
             /** @description Email of the OWNER invitation; null when the event has none */
             organizerEmail?: string;
         };
-        MeResponse: {
+        CurrentUserResponse: {
             /** Format: uuid */
             id: string;
             email: string;
@@ -200,7 +200,7 @@ export interface components {
              */
             role: "OWNER" | "MODERATOR";
         };
-        PublicEventResponse: {
+        GuestEventResponse: {
             publicCode: string;
             name: string;
             color: string;
@@ -209,7 +209,7 @@ export interface components {
             /** Format: int32 */
             imagesPerUser: number;
         };
-        QuotaResponse: {
+        UploadQuotaResponse: {
             /** Format: int32 */
             limit: number;
             /** Format: int32 */
@@ -237,7 +237,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    createUpload: {
+    createPresignedUpload: {
         parameters: {
             query?: never;
             header?: never;
@@ -248,7 +248,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UploadRequest"];
+                "application/json": components["schemas"]["PresignedUploadRequest"];
             };
         };
         responses: {
@@ -258,7 +258,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["UploadResponse"];
+                    "*/*": components["schemas"]["PresignedUploadResponse"];
                 };
             };
             /** @description Unsupported type, invalid size or malformed body */
@@ -299,7 +299,7 @@ export interface operations {
             };
         };
     };
-    list: {
+    listAllEvents: {
         parameters: {
             query?: {
                 page?: number;
@@ -358,7 +358,7 @@ export interface operations {
             };
         };
     };
-    create: {
+    createEvent: {
         parameters: {
             query?: never;
             header?: never;
@@ -418,7 +418,7 @@ export interface operations {
             };
         };
     };
-    me: {
+    getCurrentUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -433,7 +433,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["MeResponse"];
+                    "*/*": components["schemas"]["CurrentUserResponse"];
                 };
             };
             /** @description Missing or invalid access token */
@@ -456,7 +456,7 @@ export interface operations {
             };
         };
     };
-    myEvents: {
+    listMyEvents: {
         parameters: {
             query?: never;
             header?: never;
@@ -494,7 +494,7 @@ export interface operations {
             };
         };
     };
-    myEvent: {
+    getMyEvent: {
         parameters: {
             query?: never;
             header?: never;
@@ -543,7 +543,7 @@ export interface operations {
             };
         };
     };
-    getByPublicCode: {
+    getGuestEvent: {
         parameters: {
             query?: never;
             header?: never;
@@ -560,7 +560,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["PublicEventResponse"];
+                    "*/*": components["schemas"]["GuestEventResponse"];
                 };
             };
             /** @description Event does not exist, is archived or was deleted */
@@ -592,7 +592,7 @@ export interface operations {
             };
         };
     };
-    getQuota: {
+    getUploadQuota: {
         parameters: {
             query?: never;
             header?: never;
@@ -609,7 +609,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["QuotaResponse"];
+                    "*/*": components["schemas"]["UploadQuotaResponse"];
                 };
             };
             /** @description Event does not exist, is archived or was deleted */
