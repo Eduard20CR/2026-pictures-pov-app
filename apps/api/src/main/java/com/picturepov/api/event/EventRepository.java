@@ -3,6 +3,7 @@ package com.picturepov.api.event;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import com.picturepov.api.invitation.InvitationRole;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
@@ -20,4 +21,15 @@ interface EventRepository extends JpaRepository<Event, UUID> {
         AND i.role = com.picturepov.api.invitation.InvitationRole.OWNER
         """)
     Page<AdminEventResponse> findAdminEvents(Pageable pageable);
+
+    /** The role the user holds on the event through an Accepted invitation (RN-04). */
+    @Query("""
+        SELECT i.role
+        FROM Invitation i
+        JOIN Event e ON e.id = i.eventId
+        WHERE e.id = :eventId
+        AND i.userId = :userId
+        AND i.status = com.picturepov.api.invitation.InvitationStatus.ACCEPTED
+        """)
+    Optional<InvitationRole> findAcceptedRole(UUID eventId, UUID userId);
 }
