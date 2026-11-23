@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
 import { useSignOut } from '../../auth/hooks/useSignOut'
+import PendingInvitations from '../components/PendingInvitations'
 import { useMyEvents } from '../hooks/useMyEvents'
 import { ROLE_LABELS, STATUS_LABELS } from '../labels'
 import CopyEventLinkButton from '../components/CopyEventLinkButton'
@@ -15,6 +16,8 @@ export default function MyEventsPage() {
     return (
         <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 p-4">
             <h1 className="text-2xl font-bold">Mis eventos</h1>
+
+            <PendingInvitations />
 
             {events.isPending && <p>Cargando eventos...</p>}
             {events.isError && <p role="alert">No se pudieron cargar tus eventos. Intenta de nuevo.</p>}
