@@ -18,7 +18,7 @@ Same as CI (`.github/workflows/*-build-test.yaml`, `infra-check.yaml`).
 Full picture in `README.md`. Rules that span several documents:
 
 - **Separate toolchains, no workspaces:** Maven (`mvnw`) for the API, npm per Node app. No `packages/shared`, no pnpm.
-- **OpenAPI is the boundary:** springdoc generates it (RNF-OPE-06); openapi-typescript generates `apps/web/src/api/`. CI fails if they drift.
+- **OpenAPI is the boundary:** springdoc generates it (RNF-OPE-06); openapi-typescript generates `apps/web/src/api/`. CI fails if they drift. Update `openapi.yaml` and `schema.d.ts` only by running `scripts/openapi-export.sh`, never by hand.
 - **Lambda zip with SnapStart:** `run.sh` + jar with AWS Lambda Web Adapter; API Gateway calls the `live` alias (ADR 0013). Open PostgreSQL connections after the snapshot restore, never during the captured init.
 - **Migrations in CI/CD, not at startup:** Liquibase changelogs in `db/`, backward compatible with the running version.
 - **Photos never go through the backend:** presigned S3 uploads; S3-triggered Lambdas make thumbnails; photos and ZIPs only via temporary signed links (RNF-SEG-05).
