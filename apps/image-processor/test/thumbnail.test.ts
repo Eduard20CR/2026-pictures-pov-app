@@ -58,6 +58,18 @@ describe("makeThumbnail", () => {
     expect([thumbnail.width, thumbnail.height]).toEqual([400, 300]);
   });
 
+  it("stands a sideways iPhone HEIC upright once and drops its location", async () => {
+    // Stored 300x100 with a 90° HEIC rotation and GPS in its EXIF, made with pillow-heif.
+    const heic = await readFile(new URL("fixtures/sideways.heic", import.meta.url));
+    expect((await sharp(heic).metadata()).exif).toBeDefined(); // the original has it
+
+    const thumbnail = await sharp(await makeThumbnail(heic, "heic")).metadata();
+
+    expect([thumbnail.width, thumbnail.height]).toEqual([100, 300]);
+    expect(thumbnail.exif).toBeUndefined();
+    expect(thumbnail.xmp).toBeUndefined();
+  });
+
   it("fails on a file that only looks like an image", async () => {
     const fake = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4]); // JPEG magic bytes, nothing else
 
