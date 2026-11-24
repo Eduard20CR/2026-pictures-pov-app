@@ -30,7 +30,7 @@ export async function makeThumbnail(bytes: Uint8Array, type: ImageType): Promise
 
 // sharp's prebuilt binaries cannot decode HEVC (patents), so libheif in WASM does it.
 // libheif already applies the HEIC rotation, and raw pixels carry no metadata.
-// A burst or Live Photo yields its first image, which iPhones store as the primary one.
+// A burst or Live Photo yields its first image, not necessarily the primary one (accepted in #273).
 async function decodeHeic(bytes: Uint8Array): Promise<Sharp> {
   const { width, height, data } = await decodeHeicPixels({ buffer: bytes });
   return sharp(data, { raw: { width, height, channels: 4 } });

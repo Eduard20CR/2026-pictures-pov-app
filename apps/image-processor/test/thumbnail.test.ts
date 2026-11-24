@@ -61,6 +61,7 @@ describe("makeThumbnail", () => {
   it("stands a sideways iPhone HEIC upright once and drops its location", async () => {
     // Stored 300x100 with a 90° HEIC rotation and GPS in its EXIF, made with pillow-heif.
     const heic = await readFile(new URL("fixtures/sideways.heic", import.meta.url));
+    expect((await sharp(heic).metadata()).exif).toBeDefined(); // the original has it
 
     const thumbnail = await sharp(await makeThumbnail(heic, "heic")).metadata();
 
