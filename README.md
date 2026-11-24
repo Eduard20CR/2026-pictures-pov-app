@@ -15,7 +15,7 @@ Guests scan a QR code at an event and upload their photos, with no account neede
 
 | Role | Who | Can |
 |---|---|---|
-| Guest | Event attendee, no account | Upload photos and delete their own |
+| Guest | Event attendee, no account | Upload photos |
 | Organizer | User with the event's OWNER invitation | Customize the event, invite moderators, moderate and download photos |
 | Moderator | User invited by the organizer | View the gallery and review, hide and show photos |
 | Administrator | Platform team | Manage all events and users |
