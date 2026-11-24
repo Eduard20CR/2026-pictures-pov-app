@@ -57,6 +57,12 @@ public class Invitation {
         return invitation;
     }
 
+    /** Links the invitation to the user who accepted it: from now on EventAccess grants them the role. */
+    void accept(UUID userId) {
+        this.userId = userId;
+        this.status = InvitationStatus.ACCEPTED;
+    }
+
     public UUID getId() { return id; }
     public UUID getEventId() { return eventId; }
     public String getEmail() { return email; }

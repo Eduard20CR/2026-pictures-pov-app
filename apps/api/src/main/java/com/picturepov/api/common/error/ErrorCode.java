@@ -10,6 +10,7 @@ public enum ErrorCode {
     MALFORMED_REQUEST_BODY,
     VALIDATION_FAILED,
     INVITATION_ALREADY_EXISTS,
+    INVITATION_NOT_FOUND,
     // Generic codes, for errors without a specific one.
     BAD_REQUEST,
     UNAUTHENTICATED,
