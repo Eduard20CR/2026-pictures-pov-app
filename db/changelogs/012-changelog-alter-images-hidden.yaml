@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 12
+      author: "Oscar Vasquez"
+      comment: "RF-ORG-16, RF-ORG-20: hiding a photo is separate from its processing (#280). status keeps PENDING/READY; hidden says whether the gallery leaves it out."
+      changes:
+        - sql:
+            sql: >
+              ALTER TABLE images ADD COLUMN hidden boolean NOT NULL DEFAULT false;
+              UPDATE images
+              SET hidden = true, status = CASE WHEN thumb_key IS NULL THEN 'PENDING' ELSE 'READY' END
+              WHERE status = 'HIDDEN';
+              ALTER TABLE images DROP CONSTRAINT ck_images_status;
+              ALTER TABLE images ADD CONSTRAINT ck_images_status CHECK (status IN ('PENDING', 'READY'));
+              CREATE INDEX ix_images_event_created ON images (event_id, created_at DESC, id DESC);
+      rollback:
+        - sql:
+            sql: >
+              DROP INDEX ix_images_event_created;
+              ALTER TABLE images DROP CONSTRAINT ck_images_status;
+              UPDATE images SET status = 'HIDDEN' WHERE hidden;
+              ALTER TABLE images ADD CONSTRAINT ck_images_status CHECK (status IN ('PENDING', 'READY', 'HIDDEN'));
+              ALTER TABLE images DROP COLUMN hidden;

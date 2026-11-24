@@ -12,6 +12,7 @@ import { oidcConfig } from './features/auth/authConfig.ts'
 import AuthCallbackPage from './features/auth/pages/AuthCallbackPage.tsx'
 import MyEventsPage from './features/my-events/pages/MyEventsPage.tsx'
 import MyEventPage from './features/my-events/pages/MyEventPage.tsx'
+import ReviewPage from './features/my-events/pages/ReviewPage.tsx'
 import RequireAuth from './features/auth/components/RequireAuth.tsx'
 import RequireAdmin from './features/auth/components/RequireAdmin.tsx'
 import AppLayout from './app/AppLayout.tsx'
@@ -36,6 +37,7 @@ const router = createBrowserRouter([
         children: [
           { path: "/my-events", element: <MyEventsPage /> },
           { path: "/my-events/:id", element: <MyEventPage /> },
+          { path: "/my-events/:id/review", element: <ReviewPage /> },
 
           // Admin routes: RequireAdmin refuses users outside the admins group.
           {

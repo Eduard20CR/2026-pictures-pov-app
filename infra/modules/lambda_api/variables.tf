@@ -26,5 +26,5 @@ variable "ssm_parameter_path" {
 
 variable "photos_bucket_arn" {
   type        = string
-  description = "ARN of the photos bucket. The function may sign uploads under originals/."
+  description = "ARN of the photos bucket. The function may sign uploads under originals/ and views under thumbs/."
 }
