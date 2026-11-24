@@ -27,6 +27,7 @@ Key architecture decisions, one per file, in a short [MADR](https://adr.github.i
 | [0019](0019-terraform-state-split-app-data.md) | Terraform state split into app and data per environment | Accepted |
 | [0020](0020-ci-role-per-workflow.md) | One CI role per workflow per environment | Accepted |
 | [0021](0021-rejected-upload-returns-quota.md) | Rejected or abandoned uploads return their quota | Accepted |
+| [0022](0022-thumbnails-sharp-heic-wasm.md) | Thumbnails with sharp, HEIC through libheif in WASM | Accepted |
 
 ## Rules
 

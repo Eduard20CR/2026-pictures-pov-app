@@ -1,4 +1,4 @@
-import { DeleteObjectCommand, GetObjectCommand, NoSuchKey } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Actor 1: S3. Only send() is fake.
@@ -10,21 +10,10 @@ vi.mock("@aws-sdk/client-s3", async (importOriginal) => ({
 
 // Actor 2: the database functions.
 const findExpired = vi.fn();
-const markReady = vi.fn();
 const release = vi.fn();
-vi.mock("../src/images", () => ({ findExpired, markReady, release }));
+vi.mock("../src/images", () => ({ findExpired, release }));
 
 const { handler } = await import("../src/handler");
-
-// Script: S3 holds a file with these first bytes; deletes succeed.
-function photoInS3(bytes: Uint8Array) {
-    send.mockImplementation(async (command) => {
-        if (command instanceof GetObjectCommand) {
-            return { Body: { transformToByteArray: async () => bytes } };
-        }
-        return {};
-    });
-}
 
 const deletedKeys = () =>
     send.mock.calls
@@ -35,57 +24,41 @@ const deletedKeys = () =>
 describe("handler", () => {
     beforeEach(() => {
         vi.resetAllMocks();
-        // Script: one expired upload.
+        // Script: one expired upload; S3 deletes succeed, even for a missing file.
         findExpired
             .mockResolvedValueOnce([{ id: "img-1", s3Key: "originals/a.jpg" }])
             .mockResolvedValue([]);
+        send.mockResolvedValue({});
     });
 
-    it("publishes the photo when its real type is a valid image", async () => {
-        photoInS3(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]));
-
+    it("returns the slot and removes the file of an upload never published", async () => {
         await handler();
 
-        expect(markReady).toHaveBeenCalledWith("img-1");
-        expect(release).not.toHaveBeenCalled();
-        expect(deletedKeys()).toEqual([]);
-    });
-
-    it("removes the file and returns the slot when its real type is not an image", async () => {
-        photoInS3(new TextEncoder().encode("%PDF-1.7"));
-
-        await handler();
-
-        expect(markReady).not.toHaveBeenCalled();
         expect(release).toHaveBeenCalledWith("img-1");
         expect(deletedKeys()).toEqual(["originals/a.jpg"]);
     });
 
-    it("returns the slot when the upload never reached S3", async () => {
-        // Script: no file in S3
-        send.mockRejectedValue(new NoSuchKey({ message: "x", $metadata: {} }));
-
+    it("deletes the file BEFORE releasing the row", async () => {
         await handler();
 
-        expect(markReady).not.toHaveBeenCalled();
-        expect(release).toHaveBeenCalledWith("img-1");
+        // If the Lambda dies in between, the next run finds the row again: never an orphan file.
+        expect(send.mock.invocationCallOrder[0])
+            .toBeLessThan(release.mock.invocationCallOrder[0]);
     });
 
-    it("fails and frees nothing when S3 throws another error", async () => {
+    it("fails and keeps the row when S3 cannot delete, so the next run retries", async () => {
         send.mockRejectedValue(new Error("AccessDenied")); // Script: S3 fails
 
         await expect(handler()).rejects.toThrow("AccessDenied");
 
         expect(release).not.toHaveBeenCalled();
-        expect(markReady).not.toHaveBeenCalled();
     });
 
-    it("settles a single batch per run", async () => {
+    it("frees a single batch per run", async () => {
         findExpired
             .mockReset()
             .mockResolvedValueOnce([{ id: "img-1", s3Key: "originals/a.jpg" }])
             .mockResolvedValueOnce([{ id: "img-2", s3Key: "originals/b.jpg" }]); // Script: two batches
-        send.mockRejectedValue(new NoSuchKey({ message: "x", $metadata: {} }));
 
         await handler();
 
@@ -100,6 +73,5 @@ describe("handler", () => {
 
         expect(send).not.toHaveBeenCalled();
         expect(release).not.toHaveBeenCalled();
-        expect(markReady).not.toHaveBeenCalled();
     });
 });

@@ -19,11 +19,6 @@ export async function findExpired(): Promise<PendingImage[]> {
   return result.rows;
 }
 
-export async function markReady(id: string): Promise<void> {
-  const pool = await getPool();
-  await pool.query("UPDATE images SET status = 'READY' WHERE id = $1 AND status = 'PENDING'", [id]);
-}
-
 // One statement: deletes the PENDING row and gives its quota slot back, or does nothing.
 export async function release(id: string): Promise<void> {
   const pool = await getPool();

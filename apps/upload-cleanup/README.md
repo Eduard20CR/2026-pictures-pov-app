@@ -1,9 +1,8 @@
 # Upload cleanup
 
-Scheduled Lambda that settles uploads still `PENDING` after twice P-10 (`UPLOAD_TTL_MINUTES`):
+Scheduled Lambda that frees uploads still `PENDING` after twice P-10 (`UPLOAD_TTL_MINUTES`). Only `image-processor` publishes a photo, with its thumbnail, so these uploads failed: the file never arrived, or was never processed.
 
-- File never arrived: the row is deleted and the quota slot returned ([ADR 0021](../../docs/adr/0021-rejected-upload-returns-quota.md)).
-- File arrived but its S3 event was lost: validated as `image-processor` does.
+- Deletes the file (if any), then the row, and returns the quota slot ([ADR 0021](../../docs/adr/0021-rejected-upload-returns-quota.md)).
 
 | Command | Does |
 |---|---|
