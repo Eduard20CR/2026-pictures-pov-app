@@ -19,6 +19,7 @@ module "api_lambda" {
     COGNITO_CLIENT_ID        = module.cognito.client_id
     PHOTOS_UPLOAD_URL_TTL    = "${local.upload_ttl_minutes}m"
     PHOTOS_THUMBNAIL_URL_TTL = "${local.thumbnail_ttl_minutes}m"
+    PHOTOS_DOWNLOAD_URL_TTL  = "${local.download_ttl_minutes}m"
   }
 }
 
