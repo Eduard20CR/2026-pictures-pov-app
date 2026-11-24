@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Pictures POV App: guests upload event photos via QR code, no account, and see or delete only their own; organizers and moderators review them, organizers download them as a ZIP.
+Pictures POV App: guests upload event photos via QR code, no account, and never see them afterwards; organizers and moderators review them, organizers download them as a ZIP.
 
 ## Commands
 

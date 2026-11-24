@@ -4,9 +4,9 @@
 |---|---|
 | Project | Pictures POV App |
 | Document | Functional requirements |
-| Version | 1.3 |
+| Version | 1.4 |
 | Status | Ready |
-| Date | 2026-11-18 |
+| Date | 2026-11-24 |
 | Owner | Oscar |
 
 ## Change history
@@ -26,6 +26,7 @@
 | 1.1 | 2026-11-17 | RN-06 defines the event lifecycle transitions. |
 | 1.2 | 2026-11-17 | Full review. Added RF-AUT-06 (create an account), RF-ORG-24 (gallery) and RN-10 (deleting a user). Sign-in with Google out of scope (RF-AUT-01, RN-04). RN-06: states Open, Closed and Archived; events start Open; deletion is not a state. Hiding affects only the gallery (RF-ORG-14, RF-ORG-16, RF-ORG-20). Location removed from thumbnails only (RF-SIS-03). Moderator permissions as an allow-list (section 7). Administrator manages users (RF-ADM-09 to RF-ADM-11). Out of scope: "self-service event creation". Fixed the link to section 3. |
 | 1.3 | 2026-11-18 | RN-03: a rejected or abandoned upload restores quota. Section 10 cites RF-AUT-06 for account creation. |
+| 1.4 | 2026-11-24 | Guests only upload photos: they no longer view or delete the photos they uploaded. Retired RF-INV-08 and RF-INV-13. Updated sections 1.1, 8 and 10. |
 
 ---
 
@@ -33,7 +34,7 @@
 
 ### 1.1 Purpose
 
-This document defines the functional capabilities of Pictures POV App, a web application that allows the guests of an event to upload photos through a QR code, without creating an account and without seeing other guests' photos, and allows organizers and moderators to view, moderate and download those photos.
+This document defines the functional capabilities of Pictures POV App, a web application that allows the guests of an event to upload photos through a QR code, without creating an account and without seeing any of the event's photos, and allows organizers and moderators to view, moderate and download those photos.
 
 ### 1.2 Scope
 
@@ -217,7 +218,7 @@ A moderator can do only what this section lists, and only on events where they h
 
 ## 8. Guest
 
-A guest can only upload photos and delete the photos they uploaded, and only while the event is Open (RN-06). A guest never sees photos uploaded by other devices.
+A guest can only upload photos, and only while the event is Open (RN-06). A guest never sees any photo of the event, including their own.
 
 | ID | Requirement | Priority |
 |---|---|---|
@@ -228,12 +229,12 @@ A guest can only upload photos and delete the photos they uploaded, and only whi
 | RF-INV-05 | The system must allow the guest to **select several photos at once**, must show the **status** of each upload and must allow **retrying** a failed upload. | M |
 | RF-INV-06 | The system must allow the guest to **provide their name** to identify their photos. | S |
 | RF-INV-07 | *Retired.* | — |
-| RF-INV-08 | The system must allow the guest to **view the photos they uploaded** from their device. | M |
+| RF-INV-08 | *Retired.* | — |
 | RF-INV-09 | *Retired.* | — |
 | RF-INV-10 | *Retired.* | — |
 | RF-INV-11 | The system must inform the guest when the event **is not available**. | M |
 | RF-INV-12 | The system must ask the guest to **accept the terms of use** before their first upload. | S |
-| RF-INV-13 | The system must allow the guest to **delete a photo they uploaded**. | M |
+| RF-INV-13 | *Retired.* | — |
 
 ---
 
@@ -270,3 +271,4 @@ The following capabilities are not part of this version (priority W):
 | Native mobile app | The application is web-based and responsive on mobile devices. |
 | Percentage progress bar per upload | Photos upload in a few seconds; the status of each upload is shown instead (RF-INV-05). |
 | Event gallery for guests | Guests do not view other guests' photos. Requirements RF-INV-07, RF-INV-10, RF-ORG-21, RF-MOD-07 and RF-SIS-07 retired. |
+| Guests viewing or deleting their own photos | Guests only upload; organizers and moderators review the photos. Requirements RF-INV-08 and RF-INV-13 retired. |
