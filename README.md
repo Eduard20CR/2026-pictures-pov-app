@@ -7,7 +7,7 @@ Guests scan a QR code at an event and upload their photos, with no account neede
 1. An administrator creates the event for an organizer's email; the event starts Open.
 2. The organizer creates an account with that email, accepts the event and places its QR code at the venue.
 3. Guests scan it and upload photos from their phone (10 per device by default).
-4. Each guest sees and can delete only the photos they uploaded, while the event is Open.
+4. Guests upload only while the event is Open and never see the photos afterwards, not even their own.
 5. The organizer and their moderators review the photos and hide the ones that should not appear in the gallery.
 6. The organizer downloads every photo as a ZIP.
 

@@ -26,7 +26,7 @@
 | 1.1 | 2026-11-17 | RN-06 defines the event lifecycle transitions. |
 | 1.2 | 2026-11-17 | Full review. Added RF-AUT-06 (create an account), RF-ORG-24 (gallery) and RN-10 (deleting a user). Sign-in with Google out of scope (RF-AUT-01, RN-04). RN-06: states Open, Closed and Archived; events start Open; deletion is not a state. Hiding affects only the gallery (RF-ORG-14, RF-ORG-16, RF-ORG-20). Location removed from thumbnails only (RF-SIS-03). Moderator permissions as an allow-list (section 7). Administrator manages users (RF-ADM-09 to RF-ADM-11). Out of scope: "self-service event creation". Fixed the link to section 3. |
 | 1.3 | 2026-11-18 | RN-03: a rejected or abandoned upload restores quota. Section 10 cites RF-AUT-06 for account creation. |
-| 1.4 | 2026-11-24 | Guests only upload photos: they no longer view or delete the photos they uploaded. Retired RF-INV-08 and RF-INV-13. Updated section 8 and section 10. |
+| 1.4 | 2026-11-24 | Guests only upload photos: they no longer view or delete the photos they uploaded. Retired RF-INV-08 and RF-INV-13. Updated sections 1.1, 8 and 10. |
 
 ---
 
@@ -34,7 +34,7 @@
 
 ### 1.1 Purpose
 
-This document defines the functional capabilities of Pictures POV App, a web application that allows the guests of an event to upload photos through a QR code, without creating an account and without seeing other guests' photos, and allows organizers and moderators to view, moderate and download those photos.
+This document defines the functional capabilities of Pictures POV App, a web application that allows the guests of an event to upload photos through a QR code, without creating an account and without seeing any of the event's photos, and allows organizers and moderators to view, moderate and download those photos.
 
 ### 1.2 Scope
 
