@@ -9,20 +9,21 @@ const { markReady, releasePending } = await import("../src/images");
 describe("markReady", () => {
   beforeEach(() => query.mockReset().mockResolvedValue({ rowCount: 1 }));
 
-  it("updates only PENDING images for the given key", async () => {
-    await markReady("events/1/photo.jpg");
+  it("publishes only a PENDING image for the given key, with its thumbnail", async () => {
+    await markReady("originals/e1/img-1", "thumbs/e1/img-1.webp");
 
     expect(query).toHaveBeenCalledOnce();
     const [sql, params] = query.mock.calls[0];
-    expect(sql).toContain("SET status = 'READY'");
+    expect(sql).toContain("status = 'READY'");
+    expect(sql).toContain("thumb_key = $2");
     expect(sql).toContain("status = 'PENDING'");
-    expect(params).toEqual(["events/1/photo.jpg"]);
+    expect(params).toEqual(["originals/e1/img-1", "thumbs/e1/img-1.webp"]);
   });
 
   it("does not fail when no row matches (idempotent)", async () => {
     query.mockResolvedValue({ rowCount: 0 });
 
-    await expect(markReady("events/1/photo.jpg")).resolves.toBeUndefined();
+    await expect(markReady("originals/e1/img-1", "thumbs/e1/img-1.webp")).resolves.toBeUndefined();
   });
 });
 

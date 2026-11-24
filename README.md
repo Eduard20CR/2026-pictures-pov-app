@@ -44,11 +44,11 @@ flowchart LR
     U -->|Sign-in| COG[Cognito]
     L -->|Validates token, reads user info| COG
     S3 -->|ObjectCreated originals/| IP[Lambda<br/>Image processor]
-    IP -->|Reads header, deletes invalid| S3
-    IP -->|Marks READY| DB
+    IP -->|Reads original, writes WebP thumbnail, deletes invalid| S3
+    IP -->|Marks READY with thumbnail| DB
     SCH[EventBridge Scheduler] -->|Daily| UC[Lambda<br/>Upload cleanup]
-    UC -->|Reads first bytes; deletes invalid files| S3
-    UC -->|Marks READY or releases quota| DB
+    UC -->|Deletes stale uploads| S3
+    UC -->|Releases quota| DB
     L -.->|ZIP request| Q[SQS]
     Q -.-> Z[Lambda<br/>ZIP generation]
     Z -.-> S3
@@ -61,7 +61,7 @@ flowchart LR
 | Backend | Spring Boot 4.1.1 + Java 21, Maven, on Lambda as a zip with SnapStart and Lambda Web Adapter | [0001](docs/adr/0001-backend-spring-boot-en-lambda.md), [0013](docs/adr/0013-lambda-zip-snapstart-web-adapter.md), [0005](docs/adr/0005-compute-aws-lambda.md), [0009](docs/adr/0009-backend-build-tool-maven.md) |
 | Database | Aurora Serverless v2 (PostgreSQL), Liquibase in CI/CD | [0004](docs/adr/0004-database-aurora-serverless-v2.md), [0010](docs/adr/0010-database-migrations-liquibase.md) |
 | Sign-in | Amazon Cognito | [0006](docs/adr/0006-authentication-amazon-cognito.md) |
-| Photos | S3 with direct uploads (presigned URLs) and WebP thumbnails | — |
+| Photos | S3 with direct uploads (presigned URLs); WebP thumbnails with sharp | [0022](docs/adr/0022-thumbnails-sharp-heic-wasm.md) |
 | ZIP | Background Lambda via SQS | [0008](docs/adr/0008-background-zip-generation.md) |
 | Infrastructure | Terraform, one AWS account, state in S3 | [0007](docs/adr/0007-infrastructure-as-code-terraform.md), [0011](docs/adr/0011-terraform-state-amazon-s3.md), [0012](docs/adr/0012-single-aws-account.md) |
 | CI/CD | GitHub Actions with OIDC | — |
@@ -72,8 +72,8 @@ flowchart LR
 apps/
   web/              Frontend (React)
   api/              Backend (Spring Boot)
-  image-processor/  Lambda that validates uploaded photos (Node.js)
-  upload-cleanup/   Scheduled Lambda that validates or frees stale uploads (Node.js)
+  image-processor/  Lambda that validates uploaded photos and makes their thumbnails (Node.js)
+  upload-cleanup/   Scheduled Lambda that frees stale uploads (Node.js)
 db/                 Liquibase migrations
 infra/
   bootstrap/        Bucket for the Terraform state

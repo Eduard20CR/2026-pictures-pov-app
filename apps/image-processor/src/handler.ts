@@ -1,22 +1,33 @@
 import type { S3Event } from "aws-lambda";
 import { detectImageType } from "./fileType";
 import { markReady, releasePending } from "./images";
-import { deleteObject, readFirstBytes } from "./s3";
+import { deleteObject, putObject, readObject } from "./s3";
+import { makeThumbnail } from "./thumbnail";
 
-// Triggered by S3 for each new original: publishes real images, rejects anything else.
+// Triggered by S3 for each new original: publishes real images with their thumbnail,
+// rejects anything else.
 export async function handler(event: S3Event): Promise<void> {
   for (const record of event.Records) {
-    await validateUpload(record.s3.bucket.name, decodeS3Key(record.s3.object.key));
+    await processUpload(record.s3.bucket.name, decodeS3Key(record.s3.object.key));
   }
 }
 
-async function validateUpload(bucket: string, key: string): Promise<void> {
-  const bytes = await readFirstBytes(bucket, key);
-  if (detectImageType(bytes)) {
-    await markReady(key);
+async function processUpload(bucket: string, key: string): Promise<void> {
+  const bytes = await readObject(bucket, key);
+  const type = detectImageType(bytes);
+  const thumbnail = type && (await makeThumbnail(bytes, type).catch(() => null));
+  if (!thumbnail) {
+    await reject(bucket, key);
     return;
   }
 
+  // Thumbnail first: a READY photo always has one. The bucket notifies only originals/.
+  const thumbKey = key.replace(/^originals\//, "thumbs/") + ".webp";
+  await putObject(bucket, thumbKey, thumbnail, "image/webp");
+  await markReady(key, thumbKey);
+}
+
+async function reject(bucket: string, key: string): Promise<void> {
   console.warn("Not a valid image, rejecting", key);
   // Row first: if the Lambda dies before the delete, S3 retries with the file still there.
   await releasePending(key);

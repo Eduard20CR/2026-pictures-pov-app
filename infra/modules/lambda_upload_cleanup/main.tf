@@ -42,13 +42,9 @@ resource "aws_iam_role_policy" "ssm_read" {
 
 data "aws_iam_policy_document" "photos_read" {
   statement {
-    # Delete: an upload that is not a real image is removed (RNF-SEG-03).
-    actions   = ["s3:GetObject", "s3:DeleteObject"]
+    # Only deletes: a failed upload loses its file without being read.
+    actions   = ["s3:DeleteObject"]
     resources = ["${var.photos_bucket_arn}/originals/*"]
-  }
-  statement {
-    actions   = ["s3:ListBucket"]
-    resources = [var.photos_bucket_arn]
   }
 }
 

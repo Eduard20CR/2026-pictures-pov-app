@@ -45,6 +45,10 @@ data "aws_iam_policy_document" "photos_read_delete" {
     actions   = ["s3:GetObject", "s3:DeleteObject"]
     resources = ["${var.photos_bucket_arn}/originals/*"]
   }
+  statement {
+    actions   = ["s3:PutObject"]
+    resources = ["${var.photos_bucket_arn}/thumbs/*"]
+  }
 }
 
 resource "aws_iam_role_policy" "photos_read_delete" {
@@ -63,8 +67,9 @@ resource "aws_lambda_function" "this" {
   s3_bucket     = var.s3_bucket
   s3_key        = var.s3_key
   architectures = ["arm64"]
-  memory_size   = 256
-  timeout       = 30
+  # RNF-REN-03: thumbnail in under 10 s, see ADR 0022.
+  memory_size = 1024
+  timeout     = 30
 
   environment {
     variables = var.environment_variables

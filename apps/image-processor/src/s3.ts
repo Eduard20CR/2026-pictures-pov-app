@@ -3,17 +3,22 @@ import {
   GetObjectCommand,
   HeadObjectCommand,
   NotFound,
+  PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
 
 const s3 = new S3Client({});
 
-// Only the first 12 bytes: enough for the magic bytes, no need to download the photo.
-export async function readFirstBytes(bucket: string, key: string): Promise<Uint8Array> {
-  const { Body } = await s3.send(
-    new GetObjectCommand({ Bucket: bucket, Key: key, Range: "bytes=0-11" }),
-  );
+// The whole original (at most P-02, 20 MB): the thumbnail needs every byte.
+export async function readObject(bucket: string, key: string): Promise<Uint8Array> {
+  const { Body } = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
   return Body!.transformToByteArray();
+}
+
+export async function putObject(
+  bucket: string, key: string, body: Uint8Array, contentType: string,
+): Promise<void> {
+  await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: contentType }));
 }
 
 export async function deleteObject(bucket: string, key: string): Promise<void> {

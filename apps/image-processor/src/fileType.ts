@@ -1,4 +1,3 @@
-// Copied in apps/upload-cleanup/src/fileType.ts (no shared packages): keep both in sync.
 export type ImageType = "jpeg" | "png" | "webp" | "heic";
 
 // The real type comes from the file's first bytes (magic bytes), never from its name.
