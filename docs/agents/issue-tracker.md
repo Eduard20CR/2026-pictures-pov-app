@@ -15,10 +15,22 @@ Issues live in GitHub Issues on `Eduard20CR/2026-pictures-pov-app`. Use `gh` (2.
 
 ## Conventions
 
-- Labels: `type:` epic (groups issues as sub-issues, not estimated) / story (value a user sees: "As a guest…") / technical (a system need users never see: "As the system, I need…"). Issues state the need, never the implementation; that is decided when the issue is refined. No tasks or spikes; `area:` api, web, infra, ci, docs; `priority:` must, should, could (MoSCoW); `points:` 1, 2, 3, 5, 8, 13. Items over 8 points are split. Stories use *Given / when / then* criteria and end with a `## References` line citing `RF-`, `RN-`, `P-` or `RNF-` IDs.
+- Labels: `type:` epic (groups issues as sub-issues, not estimated) / story (value a user sees: "As a guest…") / technical (a system need users never see: "As the system, I need…") / bug (a defect: what happens versus what should happen, with steps to reproduce). Issues state the need, never the implementation; that is decided when the issue is refined. No tasks or spikes; `area:` api, web, infra, ci, docs; `priority:` must, should, could (MoSCoW); `points:` 1, 2, 3, 5, 8, 13. Items over 8 points are split. Stories use *Given / when / then* criteria and end with a `## References` line citing `RF-`, `RN-`, `P-` or `RNF-` IDs.
 - Acceptance criteria live only in issues; the requirements documents hold one line per requirement.
 - "Publish to the issue tracker" means create a GitHub issue. "Fetch the ticket" means **Read** above.
 - **PRs as a request surface: no.**
+
+## Leftovers
+
+A **leftover** is anything found but not resolved in the current work: a review finding, a follow-up, a risk, a stale doc, a manual step still owed. Every leftover gets a record on the tracker before the work is reported done:
+
+| Case | Record |
+|---|---|
+| An open issue or epic already covers it | Comment there, naming the finding and the PR or commit that surfaced it |
+| It came from a story's work | New issue as a sub-issue of that story, so the story stays open until it is resolved |
+| Otherwise | New issue (story, technical or bug) under the closest epic |
+
+New leftover issues take every label above plus `ready-for-agent`. The final report lists each leftover with its issue or comment link; a leftover without a link is still open work.
 
 ## Wayfinding (`/wayfinder`)
 

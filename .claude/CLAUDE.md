@@ -38,5 +38,6 @@ Full picture in `README.md`. Rules that span several documents:
 ## Agent skills
 
 - **Issue tracker:** GitHub Issues via `gh`. See `docs/agents/issue-tracker.md`.
+- **Leftovers:** every finding, follow-up or risk left unresolved becomes an issue or a comment on the issue that covers it, linked in the final report. See "Leftovers" in `docs/agents/issue-tracker.md`.
 - **Triage labels:** default five roles. See `docs/agents/triage-labels.md`.
 - **Domain docs:** single-context, root `GLOSSARY.md` + `docs/adr/`. See `docs/agents/domain.md`.
