@@ -1,14 +1,19 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { useAuth } from 'react-oidc-context'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import ReviewPage from './ReviewPage'
 import { useMyEvent } from '../hooks/useMyEvent'
 import { useReviewImages } from '../hooks/useReviewImages'
+import { getImageDownloadUrl } from '../api/getImageDownloadUrl'
 import type { MyEvent, ReviewImage } from '../types'
 
 vi.mock('../hooks/useMyEvent')
 vi.mock('../hooks/useReviewImages')
+vi.mock('../api/getImageDownloadUrl')
+vi.mock('react-oidc-context')
 
 const fetchNextPage = vi.fn()
 
@@ -33,22 +38,32 @@ function givenPhotos(pages: ReviewImage[][], state: Partial<ReturnType<typeof us
 }
 
 function renderPage() {
+    const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
     render(
+        <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={['/my-events/1/review']}>
             <Routes>
                 <Route path="/my-events/:id/review" element={<ReviewPage />} />
             </Routes>
-        </MemoryRouter>,
+        </MemoryRouter>
+        </QueryClientProvider>,
     )
 }
 
+const assign = vi.fn()
+
 beforeEach(() => {
     vi.clearAllMocks()
+    vi.stubGlobal('location', { ...window.location, assign })
+    vi.mocked(useAuth).mockReturnValue({ user: { access_token: 'token' } } as unknown as ReturnType<typeof useAuth>)
     givenEvent(myEvent)
     givenPhotos([])
 })
 
-afterEach(cleanup)
+afterEach(() => {
+    cleanup()
+    vi.unstubAllGlobals()
+})
 
 test('shows every photo of the event as a thumbnail, across pages', () => {
     givenPhotos([[photo('p1'), photo('p2')], [photo('p3')]])
@@ -115,4 +130,45 @@ test('says the event was not found when I cannot reach it', () => {
 
     expect(screen.getByText('Evento no encontrado')).toBeTruthy()
     expect(screen.queryByRole('img')).toBeNull()
+})
+
+test('the organizer downloads a photo\'s original, hidden ones too', async () => {
+    givenEvent({ ...myEvent, role: 'OWNER' })
+    givenPhotos([[photo('p1', { hidden: true })]])
+    vi.mocked(getImageDownloadUrl).mockResolvedValue('https://s3.example/originals/p1?sig')
+
+    renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'Descargar foto 1' }))
+
+    await waitFor(() => expect(assign).toHaveBeenCalledWith('https://s3.example/originals/p1?sig'))
+    expect(getImageDownloadUrl).toHaveBeenCalledWith('token', '1', 'p1')
+})
+
+test('a moderator is not offered the download', () => {
+    givenPhotos([[photo('p1')]])
+
+    renderPage()
+
+    expect(screen.queryByRole('button', { name: /Descargar/ })).toBeNull()
+})
+
+test('says the download failed so I can try again', async () => {
+    givenEvent({ ...myEvent, role: 'OWNER' })
+    givenPhotos([[photo('p1')]])
+    vi.mocked(getImageDownloadUrl).mockRejectedValue(new Error('HTTP_500'))
+
+    renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'Descargar foto 1' }))
+
+    expect((await screen.findByRole('alert')).textContent).toBe('No se pudo descargar la foto. Intenta de nuevo.')
+    expect(assign).not.toHaveBeenCalled()
+})
+
+test('a photo still processing cannot be downloaded yet', () => {
+    givenEvent({ ...myEvent, role: 'OWNER' })
+    givenPhotos([[photo('p1', { thumbnailUrl: null })]])
+
+    renderPage()
+
+    expect(screen.queryByRole('button', { name: /Descargar/ })).toBeNull()
 })

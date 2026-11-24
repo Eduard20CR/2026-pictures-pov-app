@@ -148,6 +148,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/events/{id}/images/{imageId}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["downloadLink"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{publicCode}": {
         parameters: {
             query?: never;
@@ -201,7 +217,7 @@ export interface components {
             /** Format: uri */
             instance?: string;
             /** @enum {string} */
-            code: "EVENT_NOT_FOUND" | "UPLOAD_LIMIT_REACHED" | "UNSUPPORTED_CONTENT_TYPE" | "FILE_TOO_LARGE" | "INVALID_FILE_SIZE" | "EVENT_CLOSED" | "MALFORMED_REQUEST_BODY" | "VALIDATION_FAILED" | "INVITATION_ALREADY_EXISTS" | "INVITATION_NOT_FOUND" | "INVALID_CURSOR" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "INTERNAL_ERROR";
+            code: "EVENT_NOT_FOUND" | "UPLOAD_LIMIT_REACHED" | "UNSUPPORTED_CONTENT_TYPE" | "FILE_TOO_LARGE" | "INVALID_FILE_SIZE" | "EVENT_CLOSED" | "MALFORMED_REQUEST_BODY" | "VALIDATION_FAILED" | "INVITATION_ALREADY_EXISTS" | "INVITATION_NOT_FOUND" | "INVALID_CURSOR" | "IMAGE_NOT_FOUND" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "INTERNAL_ERROR";
             /** @description Invalid fields; only with VALIDATION_FAILED */
             errors?: components["schemas"]["FieldError"][];
         };
@@ -311,6 +327,10 @@ export interface components {
             hidden: boolean;
             /** Format: date-time */
             createdAt: string;
+        };
+        ImageDownloadResponse: {
+            /** @description Temporary signed link to the original file, served as a download (RNF-SEG-05) */
+            url: string;
         };
         GuestEventResponse: {
             publicCode: string;
@@ -884,6 +904,65 @@ export interface operations {
                 };
             };
             /** @description No Accepted invitation to the event, or it does not exist or was deleted */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Unexpected error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+        };
+    };
+    downloadLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                imageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A temporary signed link that downloads the photo's original file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ImageDownloadResponse"];
+                };
+            };
+            /** @description Missing or invalid access token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Moderator of the event: downloading is organizer-only (RN-05) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description No Accepted invitation to the event, it does not exist or was deleted, or the photo is not the event's or is still processing */
             404: {
                 headers: {
                     [name: string]: unknown;

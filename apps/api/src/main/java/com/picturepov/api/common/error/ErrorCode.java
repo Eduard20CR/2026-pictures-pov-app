@@ -12,6 +12,7 @@ public enum ErrorCode {
     INVITATION_ALREADY_EXISTS,
     INVITATION_NOT_FOUND,
     INVALID_CURSOR,
+    IMAGE_NOT_FOUND,
     // Generic codes, for errors without a specific one.
     BAD_REQUEST,
     UNAUTHENTICATED,

@@ -56,11 +56,14 @@ resource "aws_iam_role_policy" "photos_upload" {
   policy = data.aws_iam_policy_document.photos_upload.json
 }
 
-# Signed links that show thumbnails in the review (RNF-SEG-05).
+# Signed links that show thumbnails in the review and download originals (RNF-SEG-05).
 data "aws_iam_policy_document" "photos_view" {
   statement {
-    actions   = ["s3:GetObject"]
-    resources = ["${var.photos_bucket_arn}/thumbs/*"]
+    actions = ["s3:GetObject"]
+    resources = [
+      "${var.photos_bucket_arn}/thumbs/*",
+      "${var.photos_bucket_arn}/originals/*",
+    ]
   }
 }
 

@@ -69,7 +69,7 @@ class ImageUploadService {
     }
 
     private void validateFileFormat(PresignedUploadRequest request) {
-        if (!isAllowedType(request.contentType())) {
+        if (!ImageTypes.isAllowed(request.contentType())) {
             throw new BadRequestException(ErrorCode.UNSUPPORTED_CONTENT_TYPE, "Only JPEG, PNG, WebP or HEIC images are allowed");
         }
         if (request.sizeBytes() < 1) {
@@ -78,16 +78,6 @@ class ImageUploadService {
         if (request.sizeBytes() > maxSizeBytes) {
             throw new BadRequestException(ErrorCode.FILE_TOO_LARGE, "Image size must be at most " + maxSizeBytes + " bytes");
         }
-    }
-
-    private static boolean isAllowedType(String contentType) {
-        if (contentType == null) {
-            return false;
-        }
-        return switch (contentType) {
-            case "image/jpeg", "image/png", "image/webp", "image/heic" -> true;
-            default -> false;
-        };
     }
 
 }
