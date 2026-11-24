@@ -4,4 +4,7 @@ locals {
 
   # P-10: the only place that sets how long an upload authorization lasts.
   upload_ttl_minutes = 15
+
+  # P-13: the only place that sets how long a signed thumbnail link lasts.
+  view_ttl_minutes = 15
 }

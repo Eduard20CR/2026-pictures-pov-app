@@ -4,7 +4,7 @@
 |---|---|
 | Project | Pictures POV App |
 | Document | Functional requirements |
-| Version | 1.4 |
+| Version | 1.5 |
 | Status | Ready |
 | Date | 2026-11-24 |
 | Owner | Oscar |
@@ -27,6 +27,7 @@
 | 1.2 | 2026-11-17 | Full review. Added RF-AUT-06 (create an account), RF-ORG-24 (gallery) and RN-10 (deleting a user). Sign-in with Google out of scope (RF-AUT-01, RN-04). RN-06: states Open, Closed and Archived; events start Open; deletion is not a state. Hiding affects only the gallery (RF-ORG-14, RF-ORG-16, RF-ORG-20). Location removed from thumbnails only (RF-SIS-03). Moderator permissions as an allow-list (section 7). Administrator manages users (RF-ADM-09 to RF-ADM-11). Out of scope: "self-service event creation". Fixed the link to section 3. |
 | 1.3 | 2026-11-18 | RN-03: a rejected or abandoned upload restores quota. Section 10 cites RF-AUT-06 for account creation. |
 | 1.4 | 2026-11-24 | Guests only upload photos: they no longer view or delete the photos they uploaded. Retired RF-INV-08 and RF-INV-13. Updated sections 1.1, 8 and 10. |
+| 1.5 | 2026-11-24 | Added P-13, validity of a thumbnail view link; RN-08 cites it. |
 
 ---
 
@@ -73,7 +74,7 @@ Identifier format `RN-<NN>`, never reused.
 | RN-05 | The permissions of each role are fixed (administrator, organizer, moderator; section 7 for the moderator) and are checked on the server for every request. |
 | RN-06 | An event is Open, Closed or Archived, and is created Open; only Open accepts guests. The organizer closes and reopens uploads; the upload window, if set, opens them at its start and closes them at its end, and a manual change in between stands. When P-05 elapses after the event date, the event becomes Archived and its photos are deleted; Archived is final. An administrator can delete an event in any state; it then disappears for everyone (RN-07). |
 | RN-07 | Deletion takes effect for users immediately; the file is physically removed after P-04. |
-| RN-08 | Original photos and ZIP files are accessible only through signed, temporary links (P-07, P-12). ZIP generation per event is limited by P-08. |
+| RN-08 | Original photos, thumbnails and ZIP files are accessible only through signed, temporary links (P-07, P-12, P-13). ZIP generation per event is limited by P-08. |
 | RN-09 | Blocking an organizer does not affect guests: their events remain accessible. |
 | RN-10 | A user who is the organizer of an event that is not Archived cannot be deleted until it is reassigned or deleted. Deleting a user removes their MODERATOR invitations. |
 
@@ -95,6 +96,7 @@ Identifier format `P-<NN>`, never reused.
 | P-10 | Time allowed to complete an authorized upload | 15 minutes |
 | P-11 | *Retired.* | — |
 | P-12 | Validity of a single-photo download link | 15 minutes |
+| P-13 | Validity of a thumbnail view link | 15 minutes |
 
 ---
 

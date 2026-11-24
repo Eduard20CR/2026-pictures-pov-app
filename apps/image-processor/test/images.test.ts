@@ -20,6 +20,15 @@ describe("markReady", () => {
     expect(params).toEqual(["originals/e1/img-1", "thumbs/e1/img-1.webp"]);
   });
 
+  // Hiding is separate from processing (#280): a photo hidden while PENDING still gets its
+  // thumbnail and becomes READY, and stays hidden. Pre-moderation (#83) relies on this.
+  it("publishes a hidden photo like any other and leaves it hidden", async () => {
+    await markReady("originals/e1/img-1", "thumbs/e1/img-1.webp");
+
+    const [sql] = query.mock.calls[0];
+    expect(sql).not.toMatch(/hidden/i);
+  });
+
   it("does not fail when no row matches (idempotent)", async () => {
     query.mockResolvedValue({ rowCount: 0 });
 

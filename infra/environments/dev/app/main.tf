@@ -18,6 +18,7 @@ module "api_lambda" {
     COGNITO_USER_INFO_URI = "https://${module.cognito.login_domain}/oauth2/userInfo"
     COGNITO_CLIENT_ID     = module.cognito.client_id
     PHOTOS_UPLOAD_URL_TTL = "${local.upload_ttl_minutes}m"
+    PHOTOS_VIEW_URL_TTL   = "${local.view_ttl_minutes}m"
   }
 }
 

@@ -20,6 +20,9 @@ class ReviewImagesController {
     /** The signed-in user's id: the token's sub claim. */
     private static final String USER_ID = "T(java.util.UUID).fromString(subject)";
 
+    /** Largest page of photos one request may ask for. */
+    static final int MAX_LIMIT = 100;
+
     private final ReviewImagesService reviewImagesService;
 
     ReviewImagesController(ReviewImagesService reviewImagesService) {
@@ -35,7 +38,7 @@ class ReviewImagesController {
     @ApiResponse(responseCode = "404", description = "No Accepted invitation to the event, or it does not exist or was deleted",
             content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ApiProblem.class)))
     ReviewImagePage listImages(@PathVariable UUID id,
-                               @RequestParam(defaultValue = "30") @Min(1) @Max(100) int limit,
+                               @RequestParam(defaultValue = "30") @Min(1) @Max(MAX_LIMIT) int limit,
                                @RequestParam(required = false) String cursor,
                                @AuthenticationPrincipal(expression = USER_ID) UUID userId) {
         return reviewImagesService.listImages(id, userId, limit, cursor);

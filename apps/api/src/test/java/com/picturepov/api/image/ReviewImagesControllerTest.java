@@ -1,5 +1,6 @@
 package com.picturepov.api.image;
 
+import com.jayway.jsonpath.JsonPath;
 import com.picturepov.api.invitation.InvitationRole;
 import com.picturepov.api.invitation.InvitationStatus;
 import org.junit.jupiter.api.Test;
@@ -11,13 +12,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import static com.picturepov.api.image.ReviewImagesController.MAX_LIMIT;
 import static com.picturepov.api.invitation.InvitationRole.MODERATOR;
 import static com.picturepov.api.invitation.InvitationRole.OWNER;
 import static com.picturepov.api.invitation.InvitationStatus.ACCEPTED;
 import static com.picturepov.api.invitation.InvitationStatus.PENDING;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -45,8 +51,8 @@ class ReviewImagesControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[*].id", contains(newer.toString(), older.toString())))
                 .andExpect(jsonPath("$.items[0].createdAt").value("2099-01-01T11:00:00Z"))
-                .andExpect(jsonPath("$.items[0].thumbnailUrl").value(org.hamcrest.Matchers.containsString("thumbs/" + event + "/" + newer + ".webp")))
-                .andExpect(jsonPath("$.items[0].thumbnailUrl").value(org.hamcrest.Matchers.containsString("X-Amz-Signature=")))
+                .andExpect(jsonPath("$.items[0].thumbnailUrl").value(containsString("thumbs/" + event + "/" + newer + ".webp")))
+                .andExpect(jsonPath("$.items[0].thumbnailUrl").value(containsString("X-Amz-Signature=")))
                 .andExpect(jsonPath("$.nextCursor").isEmpty());
     }
 
@@ -73,7 +79,7 @@ class ReviewImagesControllerTest {
         invite(event, organizer, OWNER, ACCEPTED);
         UUID visible = addPhoto(event, "2099-01-01T10:00:00Z", true);
         UUID hidden = addPhoto(event, "2099-01-01T11:00:00Z", true);
-        jdbc.sql("UPDATE images SET hidden = true WHERE id = :id").param("id", hidden).update();
+        hide(hidden);
 
         // correr + revisar
         listImages(event, organizer, "")
@@ -90,20 +96,21 @@ class ReviewImagesControllerTest {
         UUID oldest = addPhoto(event, "2099-01-01T09:00:00Z", true);
         UUID tieA = addPhoto(event, "2099-01-01T10:00:00Z", true);
         UUID tieB = addPhoto(event, "2099-01-01T10:00:00Z", true);
-        String first = tieA.toString().compareTo(tieB.toString()) > 0 ? tieA.toString() : tieB.toString();
-        String second = tieA.toString().compareTo(tieB.toString()) > 0 ? tieB.toString() : tieA.toString();
+        List<String> ties = Stream.of(tieA, tieB).map(UUID::toString).sorted(Comparator.reverseOrder()).toList();
+        String first = ties.get(0);
+        String second = ties.get(1);
 
         // correr + revisar
         String body = listImages(event, organizer, "?limit=1")
                 .andExpect(jsonPath("$.items[*].id", contains(first)))
                 .andExpect(jsonPath("$.nextCursor").isNotEmpty())
                 .andReturn().getResponse().getContentAsString();
-        String cursor = com.jayway.jsonpath.JsonPath.read(body, "$.nextCursor");
+        String cursor = JsonPath.read(body, "$.nextCursor");
 
         body = listImages(event, organizer, "?limit=1&cursor=" + cursor)
                 .andExpect(jsonPath("$.items[*].id", contains(second)))
                 .andReturn().getResponse().getContentAsString();
-        cursor = com.jayway.jsonpath.JsonPath.read(body, "$.nextCursor");
+        cursor = JsonPath.read(body, "$.nextCursor");
 
         listImages(event, organizer, "?limit=2&cursor=" + cursor)
                 .andExpect(jsonPath("$.items[*].id", contains(oldest.toString())))
@@ -119,7 +126,7 @@ class ReviewImagesControllerTest {
 
         // correr + revisar
         listImages(event, organizer, "?limit=0").andExpect(status().isBadRequest());
-        listImages(event, organizer, "?limit=101").andExpect(status().isBadRequest());
+        listImages(event, organizer, "?limit=" + (MAX_LIMIT + 1)).andExpect(status().isBadRequest());
         listImages(event, organizer, "?cursor=not-a-cursor").andExpect(status().isBadRequest());
     }
 
@@ -192,6 +199,10 @@ class ReviewImagesControllerTest {
                 .param("id", UUID.randomUUID()).param("eventId", eventId).param("userId", userId)
                 .param("role", role.name()).param("status", status.name())
                 .update();
+    }
+
+    private void hide(UUID imageId) {
+        jdbc.sql("UPDATE images SET hidden = true WHERE id = :id").param("id", imageId).update();
     }
 
     /** A photo uploaded at createdAt; ready means its thumbnail exists. */
