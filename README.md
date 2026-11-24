@@ -103,6 +103,7 @@ cd apps/web && cp .env.example .env && npm ci && npm run dev
 | Task | Command |
 |---|---|
 | API tests (throwaway Postgres) | `./scripts/api-test.sh` |
+| Rebuild the database from scratch | `./scripts/reset-db.sh` |
 | Web checks | `cd apps/web && npm run lint && npm test && npm run build` |
 | Refresh the OpenAPI contract and web types | `./scripts/openapi-export.sh` |
 
