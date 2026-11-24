@@ -67,8 +67,8 @@ resource "aws_lambda_function" "this" {
   s3_bucket     = var.s3_bucket
   s3_key        = var.s3_key
   architectures = ["arm64"]
-  # RNF-REN-03: thumbnail in under 10 s, see ADR 0022.
-  memory_size = 1024
+  # RNF-REN-03: thumbnail in under 10 s, see ADR 0022. A 48 MP HEIC peaks at about 1.2 GB.
+  memory_size = 2048
   timeout     = 30
 
   environment {
