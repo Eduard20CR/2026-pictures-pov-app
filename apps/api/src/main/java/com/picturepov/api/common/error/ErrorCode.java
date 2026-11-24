@@ -11,6 +11,7 @@ public enum ErrorCode {
     VALIDATION_FAILED,
     INVITATION_ALREADY_EXISTS,
     INVITATION_NOT_FOUND,
+    INVALID_CURSOR,
     // Generic codes, for errors without a specific one.
     BAD_REQUEST,
     UNAUTHENTICATED,

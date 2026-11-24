@@ -127,6 +127,9 @@
                 <configuration>
                     <systemPropertyVariables>
                         <spring.profiles.active>local</spring.profiles.active>
+                        <!-- Fake keys: signing S3 links is local math, tests never call AWS. -->
+                        <aws.accessKeyId>test</aws.accessKeyId>
+                        <aws.secretAccessKey>test</aws.secretAccessKey>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

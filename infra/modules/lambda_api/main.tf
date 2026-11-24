@@ -56,6 +56,20 @@ resource "aws_iam_role_policy" "photos_upload" {
   policy = data.aws_iam_policy_document.photos_upload.json
 }
 
+# Signed links that show thumbnails in the review (RNF-SEG-05).
+data "aws_iam_policy_document" "photos_view" {
+  statement {
+    actions   = ["s3:GetObject"]
+    resources = ["${var.photos_bucket_arn}/thumbs/*"]
+  }
+}
+
+resource "aws_iam_role_policy" "photos_view" {
+  name   = "${var.name}-photos-view"
+  role   = aws_iam_role.this.id
+  policy = data.aws_iam_policy_document.photos_view.json
+}
+
 # LAMBDA
 
 resource "aws_lambda_function" "this" {

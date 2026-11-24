@@ -132,6 +132,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/events/{id}/images": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listImages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{publicCode}": {
         parameters: {
             query?: never;
@@ -185,7 +201,7 @@ export interface components {
             /** Format: uri */
             instance?: string;
             /** @enum {string} */
-            code: "EVENT_NOT_FOUND" | "UPLOAD_LIMIT_REACHED" | "UNSUPPORTED_CONTENT_TYPE" | "FILE_TOO_LARGE" | "INVALID_FILE_SIZE" | "EVENT_CLOSED" | "MALFORMED_REQUEST_BODY" | "VALIDATION_FAILED" | "INVITATION_ALREADY_EXISTS" | "INVITATION_NOT_FOUND" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "INTERNAL_ERROR";
+            code: "EVENT_NOT_FOUND" | "UPLOAD_LIMIT_REACHED" | "UNSUPPORTED_CONTENT_TYPE" | "FILE_TOO_LARGE" | "INVALID_FILE_SIZE" | "EVENT_CLOSED" | "MALFORMED_REQUEST_BODY" | "VALIDATION_FAILED" | "INVITATION_ALREADY_EXISTS" | "INVITATION_NOT_FOUND" | "INVALID_CURSOR" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "INTERNAL_ERROR";
             /** @description Invalid fields; only with VALIDATION_FAILED */
             errors?: components["schemas"]["FieldError"][];
         };
@@ -280,6 +296,21 @@ export interface components {
              * @enum {string}
              */
             role: "OWNER" | "MODERATOR";
+        };
+        ReviewImagePage: {
+            items: components["schemas"]["ReviewImageResponse"][];
+            /** @description Pass as cursor for the next page; null on the last page */
+            nextCursor: string | null;
+        };
+        ReviewImageResponse: {
+            /** Format: uuid */
+            id: string;
+            /** @description Temporary signed link (RNF-SEG-05); null until the thumbnail is generated */
+            thumbnailUrl: string | null;
+            /** @description Left out of the gallery */
+            hidden: boolean;
+            /** Format: date-time */
+            createdAt: string;
         };
         GuestEventResponse: {
             publicCode: string;
@@ -780,6 +811,67 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MyEventResponse"];
+                };
+            };
+            /** @description Missing or invalid access token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description No Accepted invitation to the event, or it does not exist or was deleted */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Unexpected error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+        };
+    };
+    listImages: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The review: every photo of the event, hidden ones included, newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReviewImagePage"];
+                };
+            };
+            /** @description Invalid limit or malformed cursor */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
                 };
             };
             /** @description Missing or invalid access token */

@@ -126,3 +126,11 @@ test.each(['OWNER', 'MODERATOR'] as const)('as %s I download the event QR code a
     expect(downloadEventQrPng).toHaveBeenCalledWith(link, 'qr-a.png')
     expect(downloadEventQrPdf).toHaveBeenCalledWith(link, 'Boda Ana y Luis', 'qr-a.pdf')
 })
+
+test.each(['OWNER', 'MODERATOR'] as const)('as %s I open the review of the event photos', (role) => {
+    givenEvent({ ...myEvent, role })
+
+    renderPage()
+
+    expect(screen.getByRole('link', { name: 'Revisar fotos' }).getAttribute('href')).toBe('/my-events/1/review')
+})

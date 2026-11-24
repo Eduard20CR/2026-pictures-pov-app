@@ -6,7 +6,6 @@ import CopyEventLinkButton from '../components/CopyEventLinkButton'
 import DownloadEventQrButtons from '../components/DownloadEventQrButtons'
 
 // Private page: RequireAuth guarantees there is a session here.
-// Photos are added by their own stories.
 export default function MyEventPage() {
     const { id = '' } = useParams()
     const event = useMyEvent(id)
@@ -32,6 +31,9 @@ export default function MyEventPage() {
                         <dd>{ROLE_LABELS[event.data.role]}</dd>
                     </dl>
                     <div className="flex flex-wrap items-center gap-2">
+                        <Link to={`/my-events/${event.data.id}/review`} className="rounded border px-3 py-1 text-sm">
+                            Revisar fotos
+                        </Link>
                         <CopyEventLinkButton publicCode={event.data.publicCode} />
                         <DownloadEventQrButtons publicCode={event.data.publicCode} eventName={event.data.name} />
                     </div>

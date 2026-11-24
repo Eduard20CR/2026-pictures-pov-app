@@ -383,6 +383,65 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ApiProblem"
+  /me/events/{id}/images:
+    get:
+      tags:
+      - review-images-controller
+      operationId: listImages
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 30
+          maximum: 100
+          minimum: 1
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "The review: every photo of the event, hidden ones included,\
+            \ newest first"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ReviewImagePage"
+        "400":
+          description: Invalid limit or malformed cursor
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "401":
+          description: Missing or invalid access token
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "404":
+          description: "No Accepted invitation to the event, or it does not exist\
+            \ or was deleted"
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
+        "500":
+          description: Unexpected error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiProblem"
   /events/{publicCode}:
     get:
       tags:
@@ -497,6 +556,7 @@ components:
           - VALIDATION_FAILED
           - INVITATION_ALREADY_EXISTS
           - INVITATION_NOT_FOUND
+          - INVALID_CURSOR
           - BAD_REQUEST
           - UNAUTHENTICATED
           - FORBIDDEN
@@ -700,6 +760,44 @@ components:
       - publicCode
       - role
       - status
+    ReviewImagePage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReviewImageResponse"
+        nextCursor:
+          type:
+          - string
+          - "null"
+          description: Pass as cursor for the next page; null on the last page
+      required:
+      - items
+      - nextCursor
+    ReviewImageResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        thumbnailUrl:
+          type:
+          - string
+          - "null"
+          description: Temporary signed link (RNF-SEG-05); null until the thumbnail
+            is generated
+        hidden:
+          type: boolean
+          description: Left out of the gallery
+        createdAt:
+          type: string
+          format: date-time
+      required:
+      - createdAt
+      - hidden
+      - id
+      - thumbnailUrl
     GuestEventResponse:
       type: object
       properties:

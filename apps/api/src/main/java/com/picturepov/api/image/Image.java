@@ -33,6 +33,10 @@ public class Image {
     @Column(name = "status")
     private ImageStatus status;
 
+    /** Left out of the gallery; still in the review and downloads (RF-ORG-16). */
+    @Column(name = "hidden")
+    private boolean hidden;
+
     @Column(name = "created_at")
     private Instant createdAt;
 
@@ -55,4 +59,7 @@ public class Image {
     public String getS3Key() { return s3Key; }
     public String getContentType() { return contentType; }
     public long getSizeBytes() { return sizeBytes; }
+    public String getThumbKey() { return thumbKey; }
+    public boolean isHidden() { return hidden; }
+    public Instant getCreatedAt() { return createdAt; }
 }
