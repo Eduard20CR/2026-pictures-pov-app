@@ -6,5 +6,5 @@ locals {
   upload_ttl_minutes = 15
 
   # P-13: the only place that sets how long a signed thumbnail link lasts.
-  view_ttl_minutes = 15
+  thumbnail_ttl_minutes = 15
 }

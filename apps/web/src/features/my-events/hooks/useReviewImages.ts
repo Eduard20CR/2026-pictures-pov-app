@@ -2,7 +2,7 @@ import { skipToken, useInfiniteQuery } from '@tanstack/react-query'
 import { useAuth } from 'react-oidc-context'
 import { listReviewImages } from '../api/listReviewImages'
 
-// Signed thumbnail links expire (P-13, 15 min): drop pages well before that.
+// Signed thumbnail links expire (P-13): drop pages well before that.
 const PAGE_LIFETIME_MS = 5 * 60 * 1000
 
 export function useReviewImages(eventId: string) {

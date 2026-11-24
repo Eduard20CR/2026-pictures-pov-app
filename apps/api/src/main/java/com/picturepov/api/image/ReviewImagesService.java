@@ -19,18 +19,18 @@ class ReviewImagesService {
     private final ImageRepository imageRepository;
     private final S3Presigner s3Presigner;
     private final String bucket;
-    private final Duration viewUrlTtl;
+    private final Duration thumbnailUrlTtl;
 
     ReviewImagesService(EventAccess eventAccess,
                         ImageRepository imageRepository,
                         S3Presigner s3Presigner,
                         @Value("${app.photos.bucket}") String bucket,
-                        @Value("${app.photos.view-url-ttl}") Duration viewUrlTtl) {
+                        @Value("${app.photos.thumbnail-url-ttl}") Duration thumbnailUrlTtl) {
         this.eventAccess = eventAccess;
         this.imageRepository = imageRepository;
         this.s3Presigner = s3Presigner;
         this.bucket = bucket;
-        this.viewUrlTtl = viewUrlTtl;
+        this.thumbnailUrlTtl = thumbnailUrlTtl;
     }
 
     /** cursor is null for the first page. */
@@ -59,7 +59,7 @@ class ReviewImagesService {
             return null;
         }
         return s3Presigner.presignGetObject(presign -> presign
-                        .signatureDuration(viewUrlTtl)
+                        .signatureDuration(thumbnailUrlTtl)
                         .getObjectRequest(get -> get.bucket(bucket).key(image.getThumbKey())))
                 .url().toString();
     }

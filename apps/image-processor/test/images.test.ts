@@ -9,7 +9,9 @@ const { markReady, releasePending } = await import("../src/images");
 describe("markReady", () => {
   beforeEach(() => query.mockReset().mockResolvedValue({ rowCount: 1 }));
 
-  it("publishes only a PENDING image for the given key, with its thumbnail", async () => {
+  // Hiding is separate from processing (#280): the hidden flag neither filters nor changes the
+  // update, so a photo hidden while PENDING still becomes READY and stays hidden (pre-moderation, #83).
+  it("publishes only a PENDING image for the given key, with its thumbnail, hidden or not", async () => {
     await markReady("originals/e1/img-1", "thumbs/e1/img-1.webp");
 
     expect(query).toHaveBeenCalledOnce();
@@ -17,16 +19,8 @@ describe("markReady", () => {
     expect(sql).toContain("status = 'READY'");
     expect(sql).toContain("thumb_key = $2");
     expect(sql).toContain("status = 'PENDING'");
-    expect(params).toEqual(["originals/e1/img-1", "thumbs/e1/img-1.webp"]);
-  });
-
-  // Hiding is separate from processing (#280): a photo hidden while PENDING still gets its
-  // thumbnail and becomes READY, and stays hidden. Pre-moderation (#83) relies on this.
-  it("publishes a hidden photo like any other and leaves it hidden", async () => {
-    await markReady("originals/e1/img-1", "thumbs/e1/img-1.webp");
-
-    const [sql] = query.mock.calls[0];
     expect(sql).not.toMatch(/hidden/i);
+    expect(params).toEqual(["originals/e1/img-1", "thumbs/e1/img-1.webp"]);
   });
 
   it("does not fail when no row matches (idempotent)", async () => {
