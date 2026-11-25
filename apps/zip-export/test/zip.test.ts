@@ -27,6 +27,8 @@ vi.mock("@aws-sdk/lib-storage", () => ({
       this.aborted.promise.catch(() => {});
     }
     async done() {
+      // As in the SDK: only Node's own Readable is accepted as a stream body.
+      if (!(this.options.params.Body instanceof Readable)) throw new Error("Body Data is unsupported format");
       const error = uploadFails();
       if (error) throw error; // Stops reading the body, as a failed multipart upload does.
       uploaded.bucket = this.options.params.Bucket;

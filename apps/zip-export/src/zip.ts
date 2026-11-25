@@ -2,7 +2,7 @@ import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { ZipArchive } from "archiver";
 import { once } from "node:events";
-import type { Readable } from "node:stream";
+import { PassThrough, type Readable } from "node:stream";
 
 export type Original = { id: string; s3Key: string; contentType: string };
 
@@ -23,9 +23,11 @@ export async function writeZip(bucket: string, key: string, originals: Original[
   // Photos are already compressed: entries are stored as they are.
   const zip = new ZipArchive({ store: true });
   // Uploads, in parts, whatever the ZIP produces. Started first: it reads the ZIP while it is written.
+  // Upload accepts only Node's own streams; archiver builds on the readable-stream package, so the
+  // ZIP passes through an empty Node stream on its way.
   const upload = new Upload({
     client: s3,
-    params: { Bucket: bucket, Key: key, Body: zip, ContentType: "application/zip" },
+    params: { Bucket: bucket, Key: key, Body: zip.pipe(new PassThrough()), ContentType: "application/zip" },
   });
   const uploaded = upload.done();
   const unlessFailed = stopOnFailure(zip, uploaded);
