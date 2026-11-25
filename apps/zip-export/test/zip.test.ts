@@ -21,15 +21,22 @@ const abort = vi.fn();
 const uploadFails = vi.fn<() => Error | undefined>();
 vi.mock("@aws-sdk/lib-storage", () => ({
   Upload: class {
-    constructor(private readonly options: { params: { Bucket: string; Key: string; Body: Readable } }) {}
+    // As in the SDK, abort() makes done() fail.
+    private readonly aborted = Promise.withResolvers<never>();
+    constructor(private readonly options: { params: { Bucket: string; Key: string; Body: Readable } }) {
+      this.aborted.promise.catch(() => {});
+    }
     async done() {
       const error = uploadFails();
       if (error) throw error; // Stops reading the body, as a failed multipart upload does.
       uploaded.bucket = this.options.params.Bucket;
       uploaded.key = this.options.params.Key;
-      uploaded.body = await buffer(this.options.params.Body);
+      uploaded.body = await Promise.race([buffer(this.options.params.Body), this.aborted.promise]);
     }
-    abort = abort;
+    async abort() {
+      abort();
+      this.aborted.reject(new Error("Upload aborted."));
+    }
   },
 }));
 
@@ -43,7 +50,6 @@ const originals = [
 describe("writeZip", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    abort.mockResolvedValue(undefined);
     send.mockImplementation(async (command: GetObjectCommand) => ({
       Body: Readable.from([Buffer.from(files[command.input.Key!])]),
     }));
@@ -57,6 +63,21 @@ describe("writeZip", () => {
     expect(Buffer.from(entries["a.jpg"]).toString()).toBe("first photo bytes");
     expect(Buffer.from(entries["b.heic"]).toString()).toBe("second photo bytes");
     expect(uploaded).toMatchObject({ bucket: "photos", key: "zips/x.zip" });
+  });
+
+  it("downloads one photo at a time, never the whole event at once", async () => {
+    let open = 0;
+    let maxOpen = 0;
+    send.mockImplementation(async (command: GetObjectCommand) => {
+      maxOpen = Math.max(maxOpen, ++open);
+      const body = Readable.from([Buffer.from(files[command.input.Key!])]);
+      return { Body: body.on("end", () => open--) };
+    });
+
+    await writeZip("photos", "zips/x.zip", originals);
+
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(maxOpen).toBe(1);
   });
 
   it("returns the size of the stored ZIP", async () => {
@@ -76,6 +97,18 @@ describe("writeZip", () => {
 
     await expect(writeZip("photos", "zips/x.zip", originals)).rejects.toThrow("NoSuchKey");
     expect(abort).toHaveBeenCalled(); // No multipart parts left behind
+  });
+
+  it("fails when a download is cut midway", async () => {
+    send.mockImplementation(async () => ({
+      Body: Readable.from((async function* () {
+        yield Buffer.from("half a photo");
+        throw new Error("ECONNRESET"); // Script: the connection drops
+      })()),
+    }));
+
+    await expect(writeZip("photos", "zips/x.zip", originals)).rejects.toThrow("ECONNRESET");
+    expect(abort).toHaveBeenCalled();
   });
 
   it("fails, instead of waiting for the timeout, when the upload stops", async () => {

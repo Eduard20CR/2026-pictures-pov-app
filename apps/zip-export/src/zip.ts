@@ -17,38 +17,55 @@ const extensions: Record<string, string> = {
   "image/heic": ".heic",
 };
 
-// Streams each original from S3 into one ZIP uploaded to S3 in parts: nothing is held in memory
-// beyond the upload's part buffers. Photos are already compressed, so entries are stored as is.
-// Returns the ZIP size in bytes.
+// Builds one ZIP of the originals and stores it in S3. Bytes flow S3 → ZIP → S3 while it runs,
+// so memory holds only a few MB, whatever the event's size. Returns the ZIP size in bytes.
 export async function writeZip(bucket: string, key: string, originals: Original[]): Promise<number> {
-  const archive = new ZipArchive({ store: true });
+  // Photos are already compressed: entries are stored as they are.
+  const zip = new ZipArchive({ store: true });
+  // Uploads, in parts, whatever the ZIP produces. Started first: it reads the ZIP while it is written.
   const upload = new Upload({
     client: s3,
-    params: { Bucket: bucket, Key: key, Body: archive, ContentType: "application/zip" },
+    params: { Bucket: bucket, Key: key, Body: zip, ContentType: "application/zip" },
   });
   const uploaded = upload.done();
-  // The archive or the upload may stop midway; either fails the export at once instead of waiting for the timeout.
-  const failed = Promise.race([
-    once(archive, "error").then(([error]) => { throw error; }),
-    uploaded.then(() => new Promise<never>(() => {})),
-  ]);
-  failed.catch(() => {}); // Raised through the races below.
+  const unlessFailed = stopOnFailure(zip, uploaded);
 
   try {
+    // One photo at a time: the next download starts once this one is inside the ZIP.
     for (const original of originals) {
-      // One original at a time: the next GetObject starts only once this entry is written.
-      const { Body } = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: original.s3Key }));
-      const written = once(archive, "entry");
-      archive.append(Body as Readable, { name: original.id + (extensions[original.contentType] ?? "") });
-      await Promise.race([written, failed]);
+      const photo = await download(bucket, original.s3Key);
+      photo.on("error", (error) => zip.destroy(error)); // A download cut midway breaks the ZIP.
+      zip.append(photo, { name: fileName(original) });
+      await unlessFailed(once(zip, "entry"));
     }
-    await Promise.race([archive.finalize(), failed]);
-    await Promise.race([uploaded, failed]);
+    await unlessFailed(zip.finalize()); // Writes the ZIP's table of contents.
+    await unlessFailed(uploaded);
   } catch (error) {
-    archive.abort();
+    // Cancel the upload, so S3 keeps no parts of a broken ZIP.
+    zip.abort();
     await upload.abort().catch(() => {});
-    await uploaded.catch(() => {}); // Rejects once aborted.
+    await uploaded.catch(() => {});
     throw error;
   }
-  return archive.pointer();
+  return zip.pointer();
+}
+
+// Waiting on the ZIP alone would hang until the Lambda timeout if the upload stopped reading it.
+// Returns a wait that also ends, with the error, as soon as the ZIP or the upload fails.
+function stopOnFailure(zip: ZipArchive, uploaded: Promise<unknown>) {
+  const failed = new Promise<never>((_, reject) => {
+    zip.on("error", reject);
+    uploaded.catch(reject);
+  });
+  failed.catch(() => {}); // Raised by the waits that use it.
+  return <T>(step: Promise<T>) => Promise.race([step, failed]);
+}
+
+async function download(bucket: string, key: string): Promise<Readable> {
+  const { Body } = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+  return Body as Readable;
+}
+
+function fileName(original: Original): string {
+  return original.id + (extensions[original.contentType] ?? "");
 }
