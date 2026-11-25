@@ -6,7 +6,6 @@ import com.picturepov.api.event.EventAccess;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -17,19 +16,16 @@ class ImageDownloadService {
 
     private final EventAccess eventAccess;
     private final ImageRepository imageRepository;
-    private final S3Presigner s3Presigner;
-    private final String bucket;
+    private final PhotoLinkSigner photoLinkSigner;
     private final Duration downloadUrlTtl;
 
     ImageDownloadService(EventAccess eventAccess,
                          ImageRepository imageRepository,
-                         S3Presigner s3Presigner,
-                         @Value("${app.photos.bucket}") String bucket,
+                         PhotoLinkSigner photoLinkSigner,
                          @Value("${app.photos.download-url-ttl}") Duration downloadUrlTtl) {
         this.eventAccess = eventAccess;
         this.imageRepository = imageRepository;
-        this.s3Presigner = s3Presigner;
-        this.bucket = bucket;
+        this.photoLinkSigner = photoLinkSigner;
         this.downloadUrlTtl = downloadUrlTtl;
     }
 
@@ -40,12 +36,7 @@ class ImageDownloadService {
         // A photo still processing may not have its original stored yet.
         Image image = imageRepository.findByIdAndEventIdAndStatus(imageId, eventId, ImageStatus.READY)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.IMAGE_NOT_FOUND, "Image not found"));
-        String url = s3Presigner.presignGetObject(presign -> presign
-                        .signatureDuration(downloadUrlTtl)
-                        .getObjectRequest(get -> get.bucket(bucket).key(image.getS3Key())
-                                .responseContentDisposition("attachment; filename=\"" + fileName(image) + "\"")))
-                .url().toString();
-        return new ImageDownloadResponse(url);
+        return new ImageDownloadResponse(photoLinkSigner.downloadLink(image.getS3Key(), fileName(image), downloadUrlTtl));
     }
 
     private static String fileName(Image image) {
