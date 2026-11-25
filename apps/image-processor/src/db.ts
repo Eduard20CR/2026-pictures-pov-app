@@ -1,4 +1,4 @@
-// Copied in apps/upload-cleanup/src/db.ts (no shared packages): keep both in sync.
+// Copied in apps/upload-cleanup/src/db.ts and apps/zip-export/src/db.ts (no shared packages): keep all in sync.
 import { GetParametersByPathCommand, SSMClient } from "@aws-sdk/client-ssm";
 import { Pool, type PoolConfig } from "pg";
 

@@ -2,7 +2,7 @@ package com.picturepov.api.image;
 
 import java.util.Map;
 
-/** The photo types a guest may upload, with the extension a download gets (originals are stored without one). */
+/** The photo types a guest may upload, with the extension a download gets (originals are stored without one). Copied in apps/zip-export/src/zip.ts: keep both in sync. */
 final class ImageTypes {
 
     private static final Map<String, String> EXTENSIONS = Map.of(

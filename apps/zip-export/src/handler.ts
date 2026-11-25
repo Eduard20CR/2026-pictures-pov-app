@@ -16,11 +16,11 @@ export async function handler(event: SQSEvent): Promise<void> {
 async function exportZip(record: SQSRecord): Promise<void> {
   const { exportId } = JSON.parse(record.body) as { exportId: string };
 
-  // Null once available or failed: a redelivered message leaves the single ZIP as it is.
-  const job = await claim(exportId);
-  if (!job) return;
-
   try {
+    // Null once available or failed: a redelivered message leaves the single ZIP as it is.
+    const job = await claim(exportId);
+    if (!job) return;
+
     const originals = await findOriginals(job.eventId);
     // One key per export: a retry overwrites the same ZIP.
     const key = `zips/${exportId}.zip`;

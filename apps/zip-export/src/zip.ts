@@ -8,7 +8,8 @@ export type Original = { id: string; s3Key: string; contentType: string };
 
 const s3 = new S3Client({});
 
-// Same names as a single-photo download (ImageTypes in the API): originals are stored without an extension.
+// Copy of apps/api/.../image/ImageTypes.java (no shared packages): keep both in sync.
+// Same names as a single-photo download: originals are stored without an extension.
 const extensions: Record<string, string> = {
   "image/jpeg": ".jpg",
   "image/png": ".png",
@@ -26,8 +27,12 @@ export async function writeZip(bucket: string, key: string, originals: Original[
     params: { Bucket: bucket, Key: key, Body: archive, ContentType: "application/zip" },
   });
   const uploaded = upload.done();
-  const failed = once(archive, "error").then(([error]) => { throw error; });
-  failed.catch(() => {}); // Raised through the race below.
+  // The archive or the upload may stop midway; either fails the export at once instead of waiting for the timeout.
+  const failed = Promise.race([
+    once(archive, "error").then(([error]) => { throw error; }),
+    uploaded.then(() => new Promise<never>(() => {})),
+  ]);
+  failed.catch(() => {}); // Raised through the races below.
 
   try {
     for (const original of originals) {
@@ -38,7 +43,7 @@ export async function writeZip(bucket: string, key: string, originals: Original[
       await Promise.race([written, failed]);
     }
     await Promise.race([archive.finalize(), failed]);
-    await uploaded;
+    await Promise.race([uploaded, failed]);
   } catch (error) {
     archive.abort();
     await upload.abort().catch(() => {});

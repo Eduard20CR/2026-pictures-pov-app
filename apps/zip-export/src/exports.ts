@@ -41,12 +41,13 @@ export async function markAvailable(id: string, s3Key: string, imageCount: numbe
   );
 }
 
+// PENDING too: the last receive may fail before the export started.
 export async function markFailed(id: string, reason: string): Promise<void> {
   const pool = await getPool();
   await pool.query(
     `UPDATE zip_exports
      SET status = 'FAILED', error_message = left($2, 1000), completed_at = now()
-     WHERE id = $1 AND status = 'RUNNING'`,
+     WHERE id = $1 AND status IN ('PENDING', 'RUNNING')`,
     [id, reason],
   );
 }

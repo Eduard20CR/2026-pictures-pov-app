@@ -72,4 +72,12 @@ describe("handler", () => {
 
     expect(markFailed).toHaveBeenCalledWith("exp-1", "SlowDown");
   });
+
+  it("marks the export failed on the last receive even when it could not be started", async () => {
+    claim.mockRejectedValue(new Error("connection refused")); // Script: the database fails
+
+    await expect(handler(message("exp-1", 3))).rejects.toThrow("connection refused");
+
+    expect(markFailed).toHaveBeenCalledWith("exp-1", "connection refused");
+  });
 });

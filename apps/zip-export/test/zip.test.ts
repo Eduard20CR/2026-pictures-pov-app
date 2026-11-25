@@ -18,10 +18,13 @@ vi.mock("@aws-sdk/client-s3", async (importOriginal) => ({
 // Actor 2: the multipart upload. Keeps what the worker streamed into it.
 const uploaded: { bucket?: string; key?: string; body?: Buffer } = {};
 const abort = vi.fn();
+const uploadFails = vi.fn<() => Error | undefined>();
 vi.mock("@aws-sdk/lib-storage", () => ({
   Upload: class {
     constructor(private readonly options: { params: { Bucket: string; Key: string; Body: Readable } }) {}
     async done() {
+      const error = uploadFails();
+      if (error) throw error; // Stops reading the body, as a failed multipart upload does.
       uploaded.bucket = this.options.params.Bucket;
       uploaded.key = this.options.params.Key;
       uploaded.body = await buffer(this.options.params.Body);
@@ -73,5 +76,12 @@ describe("writeZip", () => {
 
     await expect(writeZip("photos", "zips/x.zip", originals)).rejects.toThrow("NoSuchKey");
     expect(abort).toHaveBeenCalled(); // No multipart parts left behind
+  });
+
+  it("fails, instead of waiting for the timeout, when the upload stops", async () => {
+    uploadFails.mockReturnValue(new Error("AccessDenied")); // Script: S3 refuses the parts
+    send.mockImplementation(async () => ({ Body: Readable.from([Buffer.alloc(1024 * 1024)]) })); // More than the stream buffers
+
+    await expect(writeZip("photos", "zips/x.zip", originals)).rejects.toThrow("AccessDenied");
   });
 });
