@@ -26,5 +26,10 @@ variable "ssm_parameter_path" {
 
 variable "photos_bucket_arn" {
   type        = string
-  description = "ARN of the photos bucket. The function may sign uploads and downloads under originals/ and views under thumbs/."
+  description = "ARN of the photos bucket. The function may sign uploads and downloads under originals/, views under thumbs/ and ZIP downloads under zips/."
+}
+
+variable "zip_export_queue_arn" {
+  type        = string
+  description = "ARN of the ZIP worker's queue the function sends ZIP requests to."
 }

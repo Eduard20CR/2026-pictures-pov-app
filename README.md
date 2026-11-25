@@ -49,7 +49,7 @@ flowchart LR
     SCH[EventBridge Scheduler] -->|Daily| UC[Lambda<br/>Upload cleanup]
     UC -->|Deletes stale uploads| S3
     UC -->|Releases quota| DB
-    L -.->|ZIP request| Q[SQS<br/>ZIP exports]
+    L -->|ZIP request| Q[SQS<br/>ZIP exports]
     Q -->|One export per message| Z[Lambda<br/>ZIP export]
     Q -->|After 3 receives| DLQ[SQS<br/>Dead-letter queue]
     Z -->|Reads originals, writes zips/| S3

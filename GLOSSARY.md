@@ -62,3 +62,7 @@ Photo left out of the gallery. It stays in the review and in downloads, ZIP incl
 
 **Deleted photo**:
 Photo permanently removed for users (RN-07).
+
+**ZIP export**:
+One ZIP of all of an event's photos whose processing finished (`READY`), hidden ones included, requested by the organizer (RF-ORG-14). Status *in progress* (`PENDING`, `RUNNING`), *available* (`READY`, downloaded through a P-07 link) or *failed* (`FAILED`, or still in progress after every worker retry). One in progress per event.
+_Avoid_: download job

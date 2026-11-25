@@ -5,12 +5,13 @@ module "s3_artifacts_bucket" {
 }
 
 module "api_lambda" {
-  source             = "../../../modules/lambda_api"
-  name               = "${local.name_prefix}-api"
-  s3_bucket          = module.s3_artifacts_bucket.artifacts_bucket
-  s3_key             = "api/latest.zip"
-  ssm_parameter_path = local.ssm_parameter_path
-  photos_bucket_arn  = module.s3_photos_bucket.bucket_arn
+  source               = "../../../modules/lambda_api"
+  name                 = "${local.name_prefix}-api"
+  s3_bucket            = module.s3_artifacts_bucket.artifacts_bucket
+  s3_key               = "api/latest.zip"
+  ssm_parameter_path   = local.ssm_parameter_path
+  photos_bucket_arn    = module.s3_photos_bucket.bucket_arn
+  zip_export_queue_arn = module.zip_export_lambda.queue_arn
   environment_variables = {
     SSM_DB_PATH              = local.ssm_parameter_path
     PHOTOS_BUCKET            = module.s3_photos_bucket.bucket_name
@@ -20,6 +21,9 @@ module "api_lambda" {
     PHOTOS_UPLOAD_URL_TTL    = "${local.upload_ttl_minutes}m"
     PHOTOS_THUMBNAIL_URL_TTL = "${local.thumbnail_ttl_minutes}m"
     PHOTOS_DOWNLOAD_URL_TTL  = "${local.download_ttl_minutes}m"
+    ZIP_DOWNLOAD_URL_TTL     = "${local.zip_download_ttl_minutes}m"
+    ZIP_EXPORT_QUEUE_URL     = module.zip_export_lambda.queue_url
+    ZIP_EXPORT_MAX_RUN       = "${module.zip_export_lambda.max_run_minutes}m"
   }
 }
 

@@ -10,4 +10,7 @@ locals {
 
   # P-12: the only place that sets how long a signed single-photo download link lasts.
   download_ttl_minutes = 15
+
+  # P-07: the only place that sets how long a signed ZIP download link lasts.
+  zip_download_ttl_minutes = 24 * 60
 }

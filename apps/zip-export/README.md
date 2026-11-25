@@ -7,7 +7,7 @@ SQS-triggered Lambda that builds one ZIP of an event's photos ([ADR 0008](../../
 - `zip_exports.status`: `PENDING` → `RUNNING` → `READY` with `image_count` and `size_bytes`, or `FAILED` with `error_message`.
 - Idempotent: an export already `READY` or `FAILED` is skipped; a retry overwrites the same key.
 - A failure throws, so SQS retries. The last receive (`MAX_RECEIVE_COUNT`, the queue's `maxReceiveCount`) marks the export `FAILED`, then the message goes to the dead-letter queue.
-- The API's request (queueing, P-07 link, P-08 limit) is #294 and #295.
+- The API queues the message (`POST /me/events/{id}/zip-export`) and signs the P-07 link; it shows an export still `PENDING`/`RUNNING` after every receive (`max_run_minutes`) as failed. Reuse and the P-08 limit are #295.
 
 | Command | Does |
 |---|---|
