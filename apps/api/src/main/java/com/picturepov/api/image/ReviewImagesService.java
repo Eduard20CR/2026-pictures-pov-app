@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.time.Duration;
 import java.util.List;
@@ -17,19 +16,16 @@ class ReviewImagesService {
 
     private final EventAccess eventAccess;
     private final ImageRepository imageRepository;
-    private final S3Presigner s3Presigner;
-    private final String bucket;
+    private final PhotoLinkSigner photoLinkSigner;
     private final Duration thumbnailUrlTtl;
 
     ReviewImagesService(EventAccess eventAccess,
                         ImageRepository imageRepository,
-                        S3Presigner s3Presigner,
-                        @Value("${app.photos.bucket}") String bucket,
+                        PhotoLinkSigner photoLinkSigner,
                         @Value("${app.photos.thumbnail-url-ttl}") Duration thumbnailUrlTtl) {
         this.eventAccess = eventAccess;
         this.imageRepository = imageRepository;
-        this.s3Presigner = s3Presigner;
-        this.bucket = bucket;
+        this.photoLinkSigner = photoLinkSigner;
         this.thumbnailUrlTtl = thumbnailUrlTtl;
     }
 
@@ -58,9 +54,6 @@ class ReviewImagesService {
         if (image.getThumbKey() == null) {
             return null;
         }
-        return s3Presigner.presignGetObject(presign -> presign
-                        .signatureDuration(thumbnailUrlTtl)
-                        .getObjectRequest(get -> get.bucket(bucket).key(image.getThumbKey())))
-                .url().toString();
+        return photoLinkSigner.viewLink(image.getThumbKey(), thumbnailUrlTtl);
     }
 }
