@@ -1,0 +1,32 @@
+{
+  "name": "zip-export",
+  "private": true,
+  "version": "0.0.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "esbuild src/handler.ts --bundle --platform=node --target=node24 --format=cjs --outfile=dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "zip": "cd dist && zip -j function.zip index.js",
+    "local": "esbuild src/runLocal.ts --bundle --platform=node --target=node24 --format=cjs --outfile=dist/local.js --log-level=warning && node dist/local.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1177.0",
+    "@aws-sdk/client-ssm": "^3.1177.0",
+    "@aws-sdk/lib-storage": "^3.1177.0",
+    "archiver": "^8.0.0",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/archiver": "^8.0.0",
+    "@types/aws-lambda": "^8.10.164",
+    "@types/node": "^24.19.4",
+    "@types/pg": "^8.23.1",
+    "esbuild": "^0.28.2",
+    "fflate": "^0.8.3",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.2"
+  }
+}

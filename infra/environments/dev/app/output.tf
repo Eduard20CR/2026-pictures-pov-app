@@ -10,6 +10,14 @@ output "api_alias_name" {
   value = module.api_lambda.alias_name
 }
 
+output "zip_export_function_name" {
+  value = module.zip_export_lambda.function_name
+}
+
+output "zip_export_queue_url" {
+  value = module.zip_export_lambda.queue_url
+}
+
 output "api_endpoint" {
   value = module.api_http.api_endpoint
 }

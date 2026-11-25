@@ -24,6 +24,7 @@
 | `web-deploy-dev` | `<project>-dev-gha-web` | `AWS_DEV_GHA_ROLE_ARN_WEB` |
 | `image-processor-deploy-dev` | `<project>-dev-gha-image-processor` | `AWS_DEV_GHA_ROLE_ARN_IMAGE_PROCESSOR` |
 | `upload-cleanup-deploy-dev` | `<project>-dev-gha-upload-cleanup` | `AWS_DEV_GHA_ROLE_ARN_UPLOAD_CLEANUP` |
+| `zip-export-deploy-dev` | `<project>-dev-gha-zip-export` | `AWS_DEV_GHA_ROLE_ARN_ZIP_EXPORT` |
 | `infra-deploy-dev` | `<project>-dev-gha-infra` | `AWS_DEV_GHA_ROLE_ARN_INFRA` |
 
 Roles live in `infra/bootstrap/github_oidc_*.tf`. Each reaches only its own environment; `prod` roles, when added, require GitHub approval. `db-migrate-dev` uses repository secrets, not a role.

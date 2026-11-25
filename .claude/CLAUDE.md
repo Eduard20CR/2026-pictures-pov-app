@@ -10,7 +10,7 @@ Same as CI (`.github/workflows/*-build-test.yaml`, `infra-check.yaml`).
 |---|---|
 | `apps/api` (Spring Boot 4.1.1, Java 21) | `./mvnw -B verify` |
 | `apps/web` (React, Vite, TS) | `npm run lint && npm test && npm run build`; after an API change, `scripts/openapi-export.sh` (starts the API, exports the contract, runs `npm run api:types`) |
-| `apps/image-processor`, `apps/upload-cleanup` (Node Lambdas) | `npm run typecheck && npm test && npm run build` |
+| `apps/image-processor`, `apps/upload-cleanup`, `apps/zip-export` (Node Lambdas) | `npm run typecheck && npm test && npm run build` |
 | `infra/` (Terraform) | `terraform fmt -check -recursive`; per stack `terraform init -backend=false && terraform validate` |
 
 ## Architecture rules

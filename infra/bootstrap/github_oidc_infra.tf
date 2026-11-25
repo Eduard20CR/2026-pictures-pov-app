@@ -16,6 +16,12 @@ data "aws_iam_policy_document" "github_actions_dev_infra" {
   }
 
   statement {
+    sid       = "DevQueues"
+    actions   = ["sqs:*"]
+    resources = ["arn:aws:sqs:*:${data.aws_caller_identity.current.account_id}:${var.project}-dev-*"]
+  }
+
+  statement {
     sid       = "DevBuckets"
     actions   = ["s3:*"]
     resources = ["arn:aws:s3:::${var.project}-dev-*", "arn:aws:s3:::${var.project}-dev-*/*"]
