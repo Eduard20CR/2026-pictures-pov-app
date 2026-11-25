@@ -46,11 +46,19 @@ function renderPage() {
 }
 
 const requestZip = vi.fn()
+const refetchZip = vi.fn()
+const assign = vi.fn()
+const OLD_LINK = 'https://s3/zips/9.zip?X-Amz-Signature=old'
+const NEW_LINK = 'https://s3/zips/9.zip?X-Amz-Signature=new'
 
 function givenZip(zip: ZipExport | null) {
     vi.mocked(useZipExport).mockReturnValue(
-        { data: zip, isPending: false, isError: false } as unknown as ReturnType<typeof useZipExport>,
+        { data: zip, isPending: false, isError: false, refetch: refetchZip } as unknown as ReturnType<typeof useZipExport>,
     )
+}
+
+function availableZip(downloadUrl: string): ZipExport {
+    return { status: 'AVAILABLE', requestedAt: '2026-11-25T10:00:00Z', imageCount: 12, sizeBytes: 3_400_000, downloadUrl }
 }
 
 function givenZipRequest(state: Partial<ReturnType<typeof useRequestZipExport>>) {
@@ -64,9 +72,13 @@ beforeEach(() => {
     givenInvite({})
     givenZip(null)
     givenZipRequest({})
+    vi.stubGlobal('location', { ...window.location, assign })
 })
 
-afterEach(cleanup)
+afterEach(() => {
+    cleanup()
+    vi.unstubAllGlobals()
+})
 
 test('shows the event name, date, status and my role in Spanish', () => {
     givenEvent({ id: '1', publicCode: 'a', name: 'Boda Ana y Luis', eventDate: '2026-12-12', status: 'CLOSED', role: 'MODERATOR' })
@@ -178,15 +190,42 @@ test('a ZIP in progress says so and cannot be requested again', () => {
     expect(screen.queryByRole('button', { name: 'Generar ZIP' })).toBeNull()
 })
 
-test('an available ZIP is downloaded through its link', () => {
+test('an available ZIP downloads with a link signed at click time', async () => {
     givenEvent(myEvent)
-    givenZip({ status: 'AVAILABLE', requestedAt: '2026-11-25T10:00:00Z', imageCount: 12, sizeBytes: 3_400_000, downloadUrl: 'https://s3/zips/9.zip?X-Amz-Signature=x' })
+    givenZip(availableZip(OLD_LINK))
+    refetchZip.mockResolvedValue({ data: availableZip(NEW_LINK), isError: false })
 
     renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'Descargar ZIP' }))
 
-    expect(screen.getByRole('link', { name: 'Descargar ZIP' }).getAttribute('href')).toBe('https://s3/zips/9.zip?X-Amz-Signature=x')
+    await waitFor(() => expect(assign).toHaveBeenCalledWith(NEW_LINK))
     expect(screen.getByText(/12 fotos/)).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Generar ZIP de nuevo' })).toBeTruthy()
+})
+
+test('a ZIP no longer available is not downloaded', async () => {
+    givenEvent(myEvent)
+    givenZip(availableZip(OLD_LINK))
+    refetchZip.mockResolvedValue({ data: null, isError: false })
+
+    renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'Descargar ZIP' }))
+
+    await waitFor(() => expect(refetchZip).toHaveBeenCalled())
+    expect(assign).not.toHaveBeenCalled()
+})
+
+test('when the ZIP cannot be read again, its old link is not used', async () => {
+    givenEvent(myEvent)
+    givenZip(availableZip(OLD_LINK))
+    // A failed refetch keeps the previous data.
+    refetchZip.mockResolvedValue({ data: availableZip(OLD_LINK), isError: true })
+
+    renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'Descargar ZIP' }))
+
+    await waitFor(() => expect(refetchZip).toHaveBeenCalled())
+    expect(assign).not.toHaveBeenCalled()
 })
 
 test('a failed ZIP says so and can be requested again', () => {

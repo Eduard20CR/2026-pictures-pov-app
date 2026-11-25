@@ -22,6 +22,14 @@ export default function EventZipExport({ eventId }: { eventId: string }) {
     const canRequest = zip.data !== undefined && status !== 'IN_PROGRESS'
     const requestLabel = hasZip ? 'Generar ZIP de nuevo' : 'Generar ZIP'
 
+    // Each read signs a new link (RNF-SEG-05); one kept on the page could outlive the signer's credentials.
+    async function download() {
+        const fresh = await zip.refetch()
+        // A failed read keeps the old data, with its old link; the query's error alert shows instead.
+        if (fresh.isError) return
+        if (fresh.data?.status === 'AVAILABLE' && fresh.data.downloadUrl) window.location.assign(fresh.data.downloadUrl)
+    }
+
     return (
         <section className="flex flex-col gap-3">
             <h2 className="text-xl font-semibold">Descargar todas las fotos</h2>
@@ -34,9 +42,14 @@ export default function EventZipExport({ eventId }: { eventId: string }) {
 
             {status === 'AVAILABLE' && zip.data?.downloadUrl && (
                 <div className="flex flex-wrap items-center gap-2">
-                    <a href={zip.data.downloadUrl} className="rounded border px-4 py-2">
+                    <button
+                        type="button"
+                        onClick={download}
+                        disabled={zip.isFetching}
+                        className="rounded border px-4 py-2 disabled:opacity-50"
+                    >
                         Descargar ZIP
-                    </a>
+                    </button>
                     <span className="text-sm">
                         {zip.data.imageCount} fotos, {formatSize(zip.data.sizeBytes ?? 0)}
                     </span>
