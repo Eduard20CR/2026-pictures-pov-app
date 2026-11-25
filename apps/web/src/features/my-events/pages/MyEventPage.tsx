@@ -4,6 +4,7 @@ import { ROLE_LABELS, STATUS_LABELS } from '../labels'
 import InviteModeratorForm from '../components/InviteModeratorForm'
 import CopyEventLinkButton from '../components/CopyEventLinkButton'
 import DownloadEventQrButtons from '../components/DownloadEventQrButtons'
+import EventZipExport from '../components/EventZipExport'
 
 // Private page: RequireAuth guarantees there is a session here.
 export default function MyEventPage() {
@@ -37,6 +38,7 @@ export default function MyEventPage() {
                         <CopyEventLinkButton publicCode={event.data.publicCode} />
                         <DownloadEventQrButtons publicCode={event.data.publicCode} eventName={event.data.name} />
                     </div>
+                    {event.data.role === 'OWNER' && <EventZipExport eventId={event.data.id} />}
                     {event.data.role === 'OWNER' && <InviteModeratorForm eventId={event.data.id} />}
                 </>
             )}

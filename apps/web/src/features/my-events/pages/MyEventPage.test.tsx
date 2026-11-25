@@ -8,10 +8,16 @@ import { useInviteModerator } from '../hooks/useInviteModerator'
 import { InviteModeratorError } from '../api/InviteModeratorError'
 import type { MyEvent } from '../types'
 import { downloadEventQrPdf, downloadEventQrPng } from '../qr/eventQrCode'
+import { useZipExport } from '../hooks/useZipExport'
+import { useRequestZipExport } from '../hooks/useRequestZipExport'
+import { ZipExportError } from '../api/ZipExportError'
+import type { ZipExport } from '../types'
 
 vi.mock('../hooks/useMyEvent')
 vi.mock('../hooks/useInviteModerator')
 vi.mock('../qr/eventQrCode')
+vi.mock('../hooks/useZipExport')
+vi.mock('../hooks/useRequestZipExport')
 
 const mutate = vi.fn()
 
@@ -39,9 +45,25 @@ function renderPage() {
     )
 }
 
+const requestZip = vi.fn()
+
+function givenZip(zip: ZipExport | null) {
+    vi.mocked(useZipExport).mockReturnValue(
+        { data: zip, isPending: false, isError: false } as unknown as ReturnType<typeof useZipExport>,
+    )
+}
+
+function givenZipRequest(state: Partial<ReturnType<typeof useRequestZipExport>>) {
+    vi.mocked(useRequestZipExport).mockReturnValue(
+        { mutate: requestZip, isPending: false, isError: false, error: null, ...state } as unknown as ReturnType<typeof useRequestZipExport>,
+    )
+}
+
 beforeEach(() => {
     vi.clearAllMocks()
     givenInvite({})
+    givenZip(null)
+    givenZipRequest({})
 })
 
 afterEach(cleanup)
@@ -133,4 +155,64 @@ test.each(['OWNER', 'MODERATOR'] as const)('as %s I open the review of the event
     renderPage()
 
     expect(screen.getByRole('link', { name: 'Revisar fotos' }).getAttribute('href')).toBe('/my-events/1/review')
+})
+
+test('as organizer I request the ZIP of all the photos', () => {
+    givenEvent(myEvent)
+
+    renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'Generar ZIP' }))
+
+    expect(useZipExport).toHaveBeenCalledWith('1')
+    expect(useRequestZipExport).toHaveBeenCalledWith('1')
+    expect(requestZip).toHaveBeenCalled()
+})
+
+test('a ZIP in progress says so and cannot be requested again', () => {
+    givenEvent(myEvent)
+    givenZip({ status: 'IN_PROGRESS', requestedAt: '2026-11-25T10:00:00Z' })
+
+    renderPage()
+
+    expect(screen.getByText(/ZIP en preparación/)).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Generar ZIP' })).toBeNull()
+})
+
+test('an available ZIP is downloaded through its link', () => {
+    givenEvent(myEvent)
+    givenZip({ status: 'AVAILABLE', requestedAt: '2026-11-25T10:00:00Z', imageCount: 12, sizeBytes: 3_400_000, downloadUrl: 'https://s3/zips/9.zip?X-Amz-Signature=x' })
+
+    renderPage()
+
+    expect(screen.getByRole('link', { name: 'Descargar ZIP' }).getAttribute('href')).toBe('https://s3/zips/9.zip?X-Amz-Signature=x')
+    expect(screen.getByText(/12 fotos/)).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Generar ZIP de nuevo' })).toBeTruthy()
+})
+
+test('a failed ZIP says so and can be requested again', () => {
+    givenEvent(myEvent)
+    givenZip({ status: 'FAILED', requestedAt: '2026-11-25T10:00:00Z' })
+
+    renderPage()
+
+    expect(screen.getByText(/No se pudo generar el ZIP/)).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Generar ZIP de nuevo' })).toBeTruthy()
+})
+
+test('says the event has no photos to put in the ZIP yet', () => {
+    givenEvent(myEvent)
+    givenZipRequest({ isError: true, error: new ZipExportError('NO_PHOTOS_TO_EXPORT') })
+
+    renderPage()
+
+    expect(screen.getByRole('alert').textContent).toBe('El evento aún no tiene fotos para descargar.')
+})
+
+test('a moderator does not see the ZIP and never asks for it', () => {
+    givenEvent({ ...myEvent, role: 'MODERATOR' })
+
+    renderPage()
+
+    expect(screen.queryByRole('button', { name: 'Generar ZIP' })).toBeNull()
+    expect(useZipExport).not.toHaveBeenCalled()
 })

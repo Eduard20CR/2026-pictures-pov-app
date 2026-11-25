@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/me/events/{id}/zip-export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getZipExport"];
+        put?: never;
+        post: operations["requestZipExport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me/events/{id}/invitations": {
         parameters: {
             query?: never;
@@ -200,13 +216,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        InviteModeratorRequest: {
-            /**
-             * Format: email
-             * @example beto@example.com
-             */
-            email: string;
-        };
         ApiProblem: {
             /** Format: uri */
             type: string;
@@ -217,13 +226,41 @@ export interface components {
             /** Format: uri */
             instance?: string;
             /** @enum {string} */
-            code: "EVENT_NOT_FOUND" | "UPLOAD_LIMIT_REACHED" | "UNSUPPORTED_CONTENT_TYPE" | "FILE_TOO_LARGE" | "INVALID_FILE_SIZE" | "EVENT_CLOSED" | "MALFORMED_REQUEST_BODY" | "VALIDATION_FAILED" | "INVITATION_ALREADY_EXISTS" | "INVITATION_NOT_FOUND" | "INVALID_CURSOR" | "IMAGE_NOT_FOUND" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "INTERNAL_ERROR";
+            code: "EVENT_NOT_FOUND" | "UPLOAD_LIMIT_REACHED" | "UNSUPPORTED_CONTENT_TYPE" | "FILE_TOO_LARGE" | "INVALID_FILE_SIZE" | "EVENT_CLOSED" | "MALFORMED_REQUEST_BODY" | "VALIDATION_FAILED" | "INVITATION_ALREADY_EXISTS" | "INVITATION_NOT_FOUND" | "INVALID_CURSOR" | "IMAGE_NOT_FOUND" | "NO_PHOTOS_TO_EXPORT" | "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNSUPPORTED_MEDIA_TYPE" | "INTERNAL_ERROR";
             /** @description Invalid fields; only with VALIDATION_FAILED */
             errors?: components["schemas"]["FieldError"][];
         };
         FieldError: {
             field: string;
             message: string;
+        };
+        ZipExportResponse: {
+            /**
+             * @description IN_PROGRESS while queued or running, AVAILABLE once it can be downloaded, FAILED otherwise
+             * @enum {string}
+             */
+            status: "IN_PROGRESS" | "AVAILABLE" | "FAILED";
+            /** Format: date-time */
+            requestedAt: string;
+            /**
+             * Format: int32
+             * @description Photos in the ZIP; only when AVAILABLE
+             */
+            imageCount?: number;
+            /**
+             * Format: int64
+             * @description Size of the ZIP in bytes; only when AVAILABLE
+             */
+            sizeBytes?: number;
+            /** @description Temporary signed link that downloads the ZIP, valid for P-07 (RNF-SEG-05); only when AVAILABLE */
+            downloadUrl?: string;
+        };
+        InviteModeratorRequest: {
+            /**
+             * Format: email
+             * @example beto@example.com
+             */
+            email: string;
         };
         InvitationResponse: {
             /** Format: uuid */
@@ -369,6 +406,138 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getZipExport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The event's latest ZIP, with a fresh download link when available */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ZipExportResponse"];
+                };
+            };
+            /** @description No ZIP was requested for the event yet */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid access token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Moderator of the event: the ZIP is organizer-only (RN-05) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description No Accepted invitation to the event, or it does not exist or was deleted */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Unexpected error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+        };
+    };
+    requestZipExport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The ZIP is generated in the background; the one already in progress if any, so no second generation starts */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ZipExportResponse"];
+                };
+            };
+            /** @description Missing or invalid access token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Moderator of the event: the ZIP is organizer-only (RN-05) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description No Accepted invitation to the event, or it does not exist or was deleted */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description NO_PHOTOS_TO_EXPORT: the event has no processed photo */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+            /** @description Unexpected error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblem"];
+                };
+            };
+        };
+    };
     inviteModerator: {
         parameters: {
             query?: never;

@@ -13,6 +13,7 @@ public enum ErrorCode {
     INVITATION_NOT_FOUND,
     INVALID_CURSOR,
     IMAGE_NOT_FOUND,
+    NO_PHOTOS_TO_EXPORT,
     // Generic codes, for errors without a specific one.
     BAD_REQUEST,
     UNAUTHENTICATED,

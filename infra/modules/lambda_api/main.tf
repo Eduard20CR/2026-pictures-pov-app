@@ -56,13 +56,14 @@ resource "aws_iam_role_policy" "photos_upload" {
   policy = data.aws_iam_policy_document.photos_upload.json
 }
 
-# Signed links that show thumbnails in the review and download originals (RNF-SEG-05).
+# Signed links that show thumbnails in the review and download originals and ZIPs (RNF-SEG-05).
 data "aws_iam_policy_document" "photos_view" {
   statement {
     actions = ["s3:GetObject"]
     resources = [
       "${var.photos_bucket_arn}/thumbs/*",
       "${var.photos_bucket_arn}/originals/*",
+      "${var.photos_bucket_arn}/zips/*",
     ]
   }
 }
@@ -71,6 +72,20 @@ resource "aws_iam_role_policy" "photos_view" {
   name   = "${var.name}-photos-view"
   role   = aws_iam_role.this.id
   policy = data.aws_iam_policy_document.photos_view.json
+}
+
+# Queues ZIP requests for the worker (ADR 0008).
+data "aws_iam_policy_document" "zip_export_send" {
+  statement {
+    actions   = ["sqs:SendMessage"]
+    resources = [var.zip_export_queue_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "zip_export_send" {
+  name   = "${var.name}-zip-export-send"
+  role   = aws_iam_role.this.id
+  policy = data.aws_iam_policy_document.zip_export_send.json
 }
 
 # LAMBDA
