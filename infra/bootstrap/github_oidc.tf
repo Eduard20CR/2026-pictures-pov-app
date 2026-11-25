@@ -11,6 +11,7 @@ locals {
     infra           = "infra-deploy-dev.yaml"
     upload_cleanup  = "upload-cleanup-deploy-dev.yaml"
     web             = "web-deploy-dev.yaml"
+    zip_export      = "zip-export-deploy-dev.yaml"
   }
 }
 

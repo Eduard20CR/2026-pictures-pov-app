@@ -1,7 +1,7 @@
 module "s3_artifacts_bucket" {
   source = "../../../modules/s3_artifacts_bucket"
   name   = local.name_prefix
-  apps   = ["api", "image-processor", "upload-cleanup"]
+  apps   = ["api", "image-processor", "upload-cleanup", "zip-export"]
 }
 
 module "api_lambda" {
@@ -93,6 +93,19 @@ module "upload_cleanup_lambda" {
     SSM_DB_PATH        = local.ssm_parameter_path
     PHOTOS_BUCKET      = module.s3_photos_bucket.bucket_name
     UPLOAD_TTL_MINUTES = tostring(local.upload_ttl_minutes)
+  }
+}
+
+module "zip_export_lambda" {
+  source             = "../../../modules/lambda_zip_export"
+  name               = "${local.name_prefix}-zip-export"
+  s3_bucket          = module.s3_artifacts_bucket.artifacts_bucket
+  s3_key             = "zip-export/latest.zip"
+  ssm_parameter_path = local.ssm_parameter_path
+  photos_bucket_arn  = module.s3_photos_bucket.bucket_arn
+  environment_variables = {
+    SSM_DB_PATH   = local.ssm_parameter_path
+    PHOTOS_BUCKET = module.s3_photos_bucket.bucket_name
   }
 }
 

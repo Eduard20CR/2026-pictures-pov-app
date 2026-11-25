@@ -27,3 +27,21 @@ resource "aws_s3_bucket_cors_configuration" "photos" {
     max_age_seconds = 3000
   }
 }
+
+# A ZIP export that dies midway leaves multipart parts that are billed but never shown.
+resource "aws_s3_bucket_lifecycle_configuration" "photos" {
+  bucket = aws_s3_bucket.photos.id
+
+  rule {
+    id     = "abort-incomplete-zip-uploads"
+    status = "Enabled"
+
+    filter {
+      prefix = "zips/"
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 1
+    }
+  }
+}

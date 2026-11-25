@@ -49,10 +49,11 @@ flowchart LR
     SCH[EventBridge Scheduler] -->|Daily| UC[Lambda<br/>Upload cleanup]
     UC -->|Deletes stale uploads| S3
     UC -->|Releases quota| DB
-    L -.->|ZIP request| Q[SQS]
-    Q -.-> Z[Lambda<br/>ZIP generation]
-    Z -.-> S3
-    Z -.-> DB
+    L -.->|ZIP request| Q[SQS<br/>ZIP exports]
+    Q -->|One export per message| Z[Lambda<br/>ZIP export]
+    Q -->|After 3 receives| DLQ[SQS<br/>Dead-letter queue]
+    Z -->|Reads originals, writes zips/| S3
+    Z -->|Marks available or failed| DB
 ```
 
 | Part | Technology | ADR |
@@ -74,6 +75,7 @@ apps/
   api/              Backend (Spring Boot)
   image-processor/  Lambda that validates uploaded photos and makes their thumbnails (Node.js)
   upload-cleanup/   Scheduled Lambda that frees stale uploads (Node.js)
+  zip-export/       SQS-triggered Lambda that builds an event's ZIP (Node.js)
 db/                 Liquibase migrations
 infra/
   bootstrap/        Bucket for the Terraform state
@@ -117,6 +119,7 @@ Local uploads land in the dev bucket, but the dev Lambdas use the dev database, 
 |---|---|
 | [image-processor](apps/image-processor/README.md#local-run) | Validates the local `PENDING` photos already in the bucket |
 | [upload-cleanup](apps/upload-cleanup/README.md#local-run) | Releases local uploads abandoned for more than twice P-10 |
+| [zip-export](apps/zip-export/README.md#local-run) | Builds the ZIP of one local export, given its id |
 
 ### First administrator
 
