@@ -6,7 +6,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.time.Duration;
 
-/** The one place that issues signed, temporary links to stored photo files (RN-08, RNF-SEG-05); each caller passes its own validity. */
+/** The one place that issues signed, temporary GET links to stored photo files (RN-08, RNF-SEG-05); each caller passes its own validity. Public for the ZIP link (#79). */
 @Component
 public class PhotoLinkSigner {
 
