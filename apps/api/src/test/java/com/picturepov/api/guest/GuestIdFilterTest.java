@@ -17,51 +17,62 @@ class GuestIdFilterTest {
 
     @Test
     void newGuestGetsASecureCookie() throws Exception {
+        // Arrange
         MockHttpServletRequest request = guestRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
+        // Act
         filter.doFilter(request, response, new MockFilterChain());
 
-        String cookie = response.getHeader(HttpHeaders.SET_COOKIE);
+        // Assert
         UUID guestId = (UUID) request.getAttribute(GuestIdFilter.ATTRIBUTE);
-        assertThat(cookie)
+        assertThat(response.getHeader(HttpHeaders.SET_COOKIE))
                 .startsWith("guest_id=" + guestId)
                 .contains("HttpOnly", "Secure", "SameSite=Lax", "Path=/api");
     }
 
     @Test
     void returningGuestKeepsTheSameId() throws Exception {
+        // Arrange
         UUID existing = UUID.randomUUID();
         MockHttpServletRequest request = guestRequest();
         request.setCookies(new Cookie("guest_id", existing.toString()));
         MockHttpServletResponse response = new MockHttpServletResponse();
 
+        // Act
         filter.doFilter(request, response, new MockFilterChain());
 
+        // Assert
         assertThat(request.getAttribute(GuestIdFilter.ATTRIBUTE)).isEqualTo(existing);
         assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isNull();
     }
 
     @Test
     void invalidCookieGetsANewId() throws Exception {
+        // Arrange
         MockHttpServletRequest request = guestRequest();
         request.setCookies(new Cookie("guest_id", "not-a-uuid"));
         MockHttpServletResponse response = new MockHttpServletResponse();
 
+        // Act
         filter.doFilter(request, response, new MockFilterChain());
 
+        // Assert
         assertThat(request.getAttribute(GuestIdFilter.ATTRIBUTE)).isInstanceOf(UUID.class);
         assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).startsWith("guest_id=");
     }
 
     @Test
     void ignoresRoutesOutsideEvents() throws Exception {
+        // Arrange
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/admin/events");
         request.setServletPath("/admin/events");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
+        // Act
         filter.doFilter(request, response, new MockFilterChain());
 
+        // Assert
         assertThat(request.getAttribute(GuestIdFilter.ATTRIBUTE)).isNull();
         assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isNull();
     }

@@ -1,55 +1,69 @@
 package com.picturepov.api.user;
 
+import com.picturepov.api.configuration.WebLayerTestConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.web.servlet.ResultActions;
+
 import java.util.UUID;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-@SpringBootTest
-@AutoConfigureMockMvc
-@Transactional
-public class CurrentUserControllerTest {
+/** The HTTP contract only; the sign-in rules are in CurrentUserServiceTest. */
+@WebMvcTest(CurrentUserController.class)
+@Import(WebLayerTestConfiguration.class)
+class CurrentUserControllerTest {
 
     @Autowired MockMvc mockMvc;
-    @Autowired UserRepository userRepository;
-    @MockitoBean CognitoUserInfoClient userInfoClient;
-
+    @MockitoBean CurrentUserService currentUserService;
 
     @Test
-    void firstRequestCreatesUserWithCognitoSub() throws Exception {
-        // guion
+    void signedInUserGets200WithTheirAccount() throws Exception {
+        // Arrange
         UUID sub = UUID.randomUUID();
-        when(userInfoClient.fetchUserInfo(anyString())).thenReturn(new CognitoUserInfoClient.UserInfo("new@example.com", "true"));
+        when(currentUserService.getCurrentUser(any(Jwt.class))).thenReturn(new CurrentUserResponse(sub, "ana@example.com"));
 
-        // correr
-        mockMvc.perform(get("/me").with(jwt().jwt(token -> token.subject(sub.toString()))))
-                .andExpect(status().isOk());
+        // Act
+        ResultActions result = mockMvc.perform(get("/me").with(jwt().jwt(token -> token.subject(sub.toString()))));
 
-        // revisar
-        assertThat(userRepository.findById(sub)).isPresent();
+        // Assert
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(sub.toString()))
+                .andExpect(jsonPath("$.email").value("ana@example.com"));
     }
 
     @Test
-    void unexpectedFailureReturnsProblemWithoutInternalDetails() throws Exception {
-        // guion
-        when(userInfoClient.fetchUserInfo(anyString())).thenThrow(new IllegalStateException("Cognito userInfo returned no email"));
+    void unexpectedFailureAnswers500WithoutInternalDetails() throws Exception {
+        // Arrange
+        when(currentUserService.getCurrentUser(any(Jwt.class))).thenThrow(new IllegalStateException("Cognito userInfo returned no email"));
 
-        // correr + revisar
-        mockMvc.perform(get("/me").with(jwt().jwt(token -> token.subject(UUID.randomUUID().toString()))))
-                .andExpect(status().isInternalServerError())
+        // Act
+        ResultActions result = mockMvc.perform(get("/me").with(jwt()));
+
+        // Assert
+        result.andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.detail").value("Unexpected error."));
+    }
+
+    @Test
+    void anonymousCallerGets401() throws Exception {
+        // Act
+        ResultActions result = mockMvc.perform(get("/me"));
+
+        // Assert
+        result.andExpect(status().isUnauthorized());
+        verifyNoInteractions(currentUserService);
     }
 }

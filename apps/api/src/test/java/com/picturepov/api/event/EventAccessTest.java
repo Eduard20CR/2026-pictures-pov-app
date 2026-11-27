@@ -3,137 +3,92 @@ package com.picturepov.api.event;
 import com.picturepov.api.common.error.ErrorCode;
 import com.picturepov.api.common.error.NotFoundException;
 import com.picturepov.api.invitation.InvitationRole;
-import com.picturepov.api.invitation.InvitationStatus;
-import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.simple.JdbcClient;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.picturepov.api.invitation.InvitationRole.MODERATOR;
 import static com.picturepov.api.invitation.InvitationRole.OWNER;
-import static com.picturepov.api.invitation.InvitationStatus.ACCEPTED;
-import static com.picturepov.api.invitation.InvitationStatus.PENDING;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@Transactional
+@ExtendWith(MockitoExtension.class)
 class EventAccessTest {
 
-    @Autowired EventAccess eventAccess;
-    @Autowired JdbcClient jdbc;
+    @Mock EventRepository eventRepository;
+    @InjectMocks EventAccess eventAccess;
 
-    @Test
-    void organizerReachesTheirEventAsOwner() {
-        // guion
-        UUID event = createEvent();
-        UUID organizer = createUser("ana@example.com");
-        invite(event, organizer, OWNER, ACCEPTED);
+    UUID eventId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
 
-        // correr + revisar
-        assertThat(eventAccess.getUserRoleInEvent(event, organizer)).isEqualTo(InvitationRole.OWNER);
+    @ParameterizedTest
+    @EnumSource(InvitationRole.class)
+    void userWithAnAcceptedInvitationGetsTheirRole(InvitationRole invitedRole) {
+        // Arrange
+        when(eventRepository.findAcceptedInvitationRole(eventId, userId)).thenReturn(Optional.of(invitedRole));
+
+        // Act
+        InvitationRole role = eventAccess.getUserRoleInEvent(eventId, userId);
+
+        // Assert
+        assertThat(role).isEqualTo(invitedRole);
     }
 
     @Test
-    void organizerOfAnotherEventGets404() {
-        // guion
-        UUID eventOfA = createEvent();
-        UUID userA = createUser("ana@example.com");
-        invite(eventOfA, userA, OWNER, ACCEPTED);
-        UUID eventOfB = createEvent();
-        UUID userB = createUser("beto@example.com");
-        invite(eventOfB, userB, OWNER, ACCEPTED);
+    void userWithoutAnAcceptedInvitationGets404SoTheEventStaysHidden() {
+        // Arrange
+        when(eventRepository.findAcceptedInvitationRole(eventId, userId)).thenReturn(Optional.empty());
 
-        // correr + revisar
-        assertNotFound(() -> eventAccess.getUserRoleInEvent(eventOfA, userB));
-    }
+        // Act
+        Throwable thrown = catchThrowable(() -> eventAccess.getUserRoleInEvent(eventId, userId));
 
-    @Test
-    void pendingInvitationGets404() {
-        // guion
-        UUID event = createEvent();
-        UUID invitee = createUser("ana@example.com");
-        invite(event, invitee, OWNER, PENDING);
-
-        // correr + revisar
-        assertNotFound(() -> eventAccess.getUserRoleInEvent(event, invitee));
-    }
-
-    @Test
-    void deletedEventGets404() {
-        // guion
-        UUID event = createEvent();
-        UUID organizer = createUser("ana@example.com");
-        invite(event, organizer, OWNER, ACCEPTED);
-        jdbc.sql("UPDATE events SET deleted_at = now() WHERE id = :id").param("id", event).update();
-
-        // correr + revisar
-        assertNotFound(() -> eventAccess.getUserRoleInEvent(event, organizer));
-    }
-
-    @Test
-    void moderatorIsRefusedAnOrganizerOnlyAction() {
-        // guion
-        UUID event = createEvent();
-        UUID moderator = createUser("mod@example.com");
-        invite(event, moderator, MODERATOR, ACCEPTED);
-
-        // correr + revisar
-        assertThatThrownBy(() -> eventAccess.requireOrganizer(event, moderator))
-                .isInstanceOf(AccessDeniedException.class);
+        // Assert
+        assertThat(thrown).isInstanceOf(NotFoundException.class)
+                .extracting("code").isEqualTo(ErrorCode.EVENT_NOT_FOUND);
     }
 
     @Test
     void organizerMayDoAnOrganizerOnlyAction() {
-        // guion
-        UUID event = createEvent();
-        UUID organizer = createUser("ana@example.com");
-        invite(event, organizer, OWNER, ACCEPTED);
+        // Arrange
+        when(eventRepository.findAcceptedInvitationRole(eventId, userId)).thenReturn(Optional.of(OWNER));
 
-        // correr + revisar
-        assertThatCode(() -> eventAccess.requireOrganizer(event, organizer)).doesNotThrowAnyException();
+        // Act
+        Throwable thrown = catchThrowable(() -> eventAccess.requireOrganizer(eventId, userId));
+
+        // Assert
+        assertThat(thrown).isNull();
     }
 
-    private static void assertNotFound(ThrowingCallable call) {
-        assertThatThrownBy(call)
-                .isInstanceOf(NotFoundException.class)
-                .extracting(e -> ((NotFoundException) e).getCode())
-                .isEqualTo(ErrorCode.EVENT_NOT_FOUND);
+    @Test
+    void moderatorIsRefusedAnOrganizerOnlyAction() {
+        // Arrange
+        when(eventRepository.findAcceptedInvitationRole(eventId, userId)).thenReturn(Optional.of(MODERATOR));
+
+        // Act
+        Throwable thrown = catchThrowable(() -> eventAccess.requireOrganizer(eventId, userId));
+
+        // Assert
+        assertThat(thrown).isInstanceOf(AccessDeniedException.class);
     }
 
-    private UUID createEvent() {
-        UUID id = UUID.randomUUID();
-        jdbc.sql("""
-                INSERT INTO events (id, name, color, public_code, event_date, images_per_user, status)
-                VALUES (:id, 'Test event', '#000000', :code, DATE '2099-12-12', 10, 'OPEN')
-                """)
-                .param("id", id)
-                .param("code", id.toString().substring(0, 22))
-                .update();
-        return id;
-    }
+    @Test
+    void userWithoutAnAcceptedInvitationGets404OnAnOrganizerOnlyAction() {
+        // Arrange
+        when(eventRepository.findAcceptedInvitationRole(eventId, userId)).thenReturn(Optional.empty());
 
-    private UUID createUser(String email) {
-        UUID id = UUID.randomUUID();
-        jdbc.sql("INSERT INTO users (id, email) VALUES (:id, :email)")
-                .param("id", id).param("email", email).update();
-        return id;
-    }
+        // Act
+        Throwable thrown = catchThrowable(() -> eventAccess.requireOrganizer(eventId, userId));
 
-    /** An invitation for the user's email, linked to the user. */
-    private void invite(UUID eventId, UUID userId, InvitationRole role, InvitationStatus status) {
-        jdbc.sql("""
-                INSERT INTO invitations (id, event_id, email, user_id, role, status)
-                SELECT :id, :eventId, email, id, :role, :status FROM users WHERE id = :userId
-                """)
-                .param("id", UUID.randomUUID()).param("eventId", eventId).param("userId", userId)
-                .param("role", role.name()).param("status", status.name())
-                .update();
+        // Assert
+        assertThat(thrown).isInstanceOf(NotFoundException.class);
     }
 }

@@ -20,6 +20,7 @@ Full picture in `README.md`. Rules that span several documents:
 - **Separate toolchains, no workspaces:** Maven (`mvnw`) for the API, npm per Node app. No `packages/shared`, no pnpm.
 - **OpenAPI is the boundary:** springdoc generates it (RNF-OPE-06); openapi-typescript generates `apps/web/src/api/`. CI fails if they drift. Update `openapi.yaml` and `schema.d.ts` only by running `scripts/openapi-export.sh`, never by hand.
 - **Lambda zip with SnapStart:** `run.sh` + jar with AWS Lambda Web Adapter; API Gateway calls the `live` alias (ADR 0013). Open PostgreSQL connections after the snapshot restore, never during the captured init.
+- **API tests:** business rules in `*ServiceTest` (repositories, SQS and Cognito mocked; own classes real); `*ControllerTest` with `@WebMvcTest` only for the HTTP contract; custom queries in `*RepositoryTest` against Postgres. AAA comments.
 - **Migrations in CI/CD, not at startup:** Liquibase changelogs in `db/`, backward compatible with the running version.
 - **Photos never go through the backend:** presigned S3 uploads; S3-triggered Lambdas make thumbnails; photos and ZIPs only via temporary signed links (RNF-SEG-05).
 - **Cost:** each idle environment ≤ 25 USD/month (RNF-COS-01). No services with fixed idle cost (e.g. Fargate + ALB).
