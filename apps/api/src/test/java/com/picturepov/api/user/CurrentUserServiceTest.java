@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -22,45 +22,74 @@ import static org.mockito.Mockito.when;
 class CurrentUserServiceTest {
 
     @Mock UserRepository userRepository;
-    @Mock CognitoUserInfoClient userInfoClient;
-
+    @Mock CognitoUserInfoClient cognito;
     @InjectMocks CurrentUserService currentUserService;
 
+    UUID sub = UUID.randomUUID();
+    Jwt jwt = Jwt.withTokenValue("token").header("alg", "none").subject(sub.toString()).build();
+
     @Test
-    void existingUserDoesNotCallCognito() {
-        UUID id = UUID.randomUUID();
-        User existing = new User(id, "owner@example.com");
-        when(userRepository.findById(id)).thenReturn(Optional.of(existing));
+    void existingUserIsReturnedWithoutCallingCognito() {
+        // Arrange
+        when(userRepository.findById(sub)).thenReturn(Optional.of(new User(sub, "ana@example.com")));
 
-        User user = currentUserService.findOrCreateFromToken(jwtFor(id));
+        // Act
+        CurrentUserResponse user = currentUserService.getCurrentUser(jwt);
 
-        assertThat(user).isSameAs(existing);
-        verifyNoInteractions(userInfoClient);
+        // Assert
+        assertThat(user).isEqualTo(new CurrentUserResponse(sub, "ana@example.com"));
+        verifyNoInteractions(cognito);
     }
 
     @Test
-    void newUserIsStoredWithTheEmailTrimmedAndLowercased() {
-        UUID id = UUID.randomUUID();
-        when(userRepository.findById(id)).thenReturn(Optional.empty());
-        when(userInfoClient.fetchUserInfo("token")).thenReturn(new CognitoUserInfoClient.UserInfo(" Ana@X.com ", "true"));
+    void firstSignInStoresTheUserUnderTheCognitoSubWithTheEmailLowercased() {
+        // Arrange
+        when(userRepository.findById(sub)).thenReturn(Optional.empty());
+        when(cognito.fetchUserInfo("token")).thenReturn(new CognitoUserInfoClient.UserInfo(" Ana@X.com ", "true"));
         when(userRepository.save(any(User.class))).thenAnswer(call -> call.getArgument(0));
 
-        User user = currentUserService.findOrCreateFromToken(jwtFor(id));
+        // Act
+        CurrentUserResponse user = currentUserService.getCurrentUser(jwt);
 
-        assertThat(user.getEmail()).isEqualTo("ana@x.com");
+        // Assert
+        assertThat(user).isEqualTo(new CurrentUserResponse(sub, "ana@x.com"));
     }
 
     @Test
     void unverifiedEmailIsNotStored() {
-        UUID id = UUID.randomUUID();
-        when(userRepository.findById(id)).thenReturn(Optional.empty());
-        when(userInfoClient.fetchUserInfo("token")).thenReturn(new CognitoUserInfoClient.UserInfo("ana@x.com", "false"));
+        // Arrange
+        when(userRepository.findById(sub)).thenReturn(Optional.empty());
+        when(cognito.fetchUserInfo("token")).thenReturn(new CognitoUserInfoClient.UserInfo("ana@x.com", "false"));
 
-        assertThatThrownBy(() -> currentUserService.findOrCreateFromToken(jwtFor(id))).isInstanceOf(IllegalStateException.class);
+        // Act
+        Throwable thrown = catchThrowable(() -> currentUserService.findOrCreateFromToken(jwt));
+
+        // Assert
+        assertThat(thrown).isInstanceOf(IllegalStateException.class);
         verify(userRepository, never()).save(any(User.class));
     }
 
-    private static Jwt jwtFor(UUID sub) {
-        return Jwt.withTokenValue("token").header("alg", "none").subject(sub.toString()).build();
+    @Test
+    void verifiedEmailIsReadLiveFromCognitoInLowercase() {
+        // Arrange
+        when(cognito.fetchUserInfo("token")).thenReturn(new CognitoUserInfoClient.UserInfo("Ana@X.com", "TRUE"));
+
+        // Act
+        Optional<String> email = currentUserService.findVerifiedEmail(jwt);
+
+        // Assert
+        assertThat(email).contains("ana@x.com");
+    }
+
+    @Test
+    void unverifiedEmailIsNotReturned() {
+        // Arrange
+        when(cognito.fetchUserInfo("token")).thenReturn(new CognitoUserInfoClient.UserInfo("ana@x.com", "false"));
+
+        // Act
+        Optional<String> email = currentUserService.findVerifiedEmail(jwt);
+
+        // Assert
+        assertThat(email).isEmpty();
     }
 }
