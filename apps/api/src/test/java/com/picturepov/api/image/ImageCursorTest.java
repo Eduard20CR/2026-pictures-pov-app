@@ -19,22 +19,22 @@ class ImageCursorTest {
     @Test
     void decodingAnEncodedCursorGivesTheSamePosition() {
         // Arrange
-        ImageCursor cursor = new ImageCursor(Instant.parse("2099-01-01T10:00:00.123456Z"), UUID.randomUUID());
+        ImageCursor sut = new ImageCursor(Instant.parse("2099-01-01T10:00:00.123456Z"), UUID.randomUUID());
 
         // Act
-        ImageCursor decoded = ImageCursor.decode(cursor.encode());
+        ImageCursor decoded = ImageCursor.decode(sut.encode());
 
         // Assert
-        assertThat(decoded).isEqualTo(cursor);
+        assertThat(decoded).isEqualTo(sut);
     }
 
     @Test
     void encodedCursorIsUrlSafe() {
         // Arrange
-        ImageCursor cursor = new ImageCursor(Instant.parse("2099-01-01T10:00:00Z"), UUID.randomUUID());
+        ImageCursor sut = new ImageCursor(Instant.parse("2099-01-01T10:00:00Z"), UUID.randomUUID());
 
         // Act
-        String encoded = cursor.encode();
+        String encoded = sut.encode();
 
         // Assert
         assertThat(encoded).matches("[A-Za-z0-9_-]+");

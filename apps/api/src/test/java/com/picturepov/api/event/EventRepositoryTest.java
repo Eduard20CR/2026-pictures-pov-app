@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.tuple;
 @Transactional
 class EventRepositoryTest {
 
-    @Autowired EventRepository eventRepository;
+    @Autowired EventRepository sut;
     @Autowired JdbcClient jdbc;
 
     TestData data;
@@ -45,7 +45,7 @@ class EventRepositoryTest {
         data.invite(event, moderator, MODERATOR, ACCEPTED);
 
         // Act
-        Optional<InvitationRole> role = eventRepository.findAcceptedInvitationRole(event, moderator);
+        Optional<InvitationRole> role = sut.findAcceptedInvitationRole(event, moderator);
 
         // Assert
         assertThat(role).contains(MODERATOR);
@@ -59,7 +59,7 @@ class EventRepositoryTest {
         data.invite(event, invitee, OWNER, PENDING);
 
         // Act
-        Optional<InvitationRole> role = eventRepository.findAcceptedInvitationRole(event, invitee);
+        Optional<InvitationRole> role = sut.findAcceptedInvitationRole(event, invitee);
 
         // Assert
         assertThat(role).isEmpty();
@@ -74,7 +74,7 @@ class EventRepositoryTest {
         data.invite(data.event(), userB, OWNER, ACCEPTED);
 
         // Act
-        Optional<InvitationRole> role = eventRepository.findAcceptedInvitationRole(eventOfA, userB);
+        Optional<InvitationRole> role = sut.findAcceptedInvitationRole(eventOfA, userB);
 
         // Assert
         assertThat(role).isEmpty();
@@ -89,7 +89,7 @@ class EventRepositoryTest {
         data.deleteEvent(event);
 
         // Act
-        Optional<InvitationRole> role = eventRepository.findAcceptedInvitationRole(event, organizer);
+        Optional<InvitationRole> role = sut.findAcceptedInvitationRole(event, organizer);
 
         // Assert
         assertThat(role).isEmpty();
@@ -104,7 +104,7 @@ class EventRepositoryTest {
         data.invite(data.event("Nuevo", "2099-12-01"), user, MODERATOR, ACCEPTED);
 
         // Act
-        List<MyEventResponse> events = eventRepository.findEventsWithAcceptedInvitation(user);
+        List<MyEventResponse> events = sut.findEventsWithAcceptedInvitation(user);
 
         // Assert
         assertThat(events).extracting(MyEventResponse::name, MyEventResponse::role)
@@ -122,7 +122,7 @@ class EventRepositoryTest {
         data.invite(data.event("De otro", "2099-12-12"), data.user("beto@example.com"), OWNER, ACCEPTED);
 
         // Act
-        List<MyEventResponse> events = eventRepository.findEventsWithAcceptedInvitation(user);
+        List<MyEventResponse> events = sut.findEventsWithAcceptedInvitation(user);
 
         // Assert
         assertThat(events).isEmpty();
@@ -176,7 +176,7 @@ class EventRepositoryTest {
         data.deleteEvent(deleted);
 
         // Act
-        Optional<Event> event = eventRepository.findByPublicCode(TestData.publicCode(deleted));
+        Optional<Event> event = sut.findByPublicCode(TestData.publicCode(deleted));
 
         // Assert
         assertThat(event).isEmpty();
@@ -185,7 +185,7 @@ class EventRepositoryTest {
     /** The admin list with AdminEventService's sort, narrowed to these events so other rows do not matter. */
     private List<AdminEventResponse> listAll(List<UUID> ids) {
         Sort newestFirst = Sort.by(Sort.Order.desc("eventDate"), Sort.Order.desc("id"));
-        return eventRepository.findAllWithOrganizerEmail(PageRequest.of(0, 1000, newestFirst))
+        return sut.findAllWithOrganizerEmail(PageRequest.of(0, 1000, newestFirst))
                 .filter(event -> ids.contains(event.id()))
                 .toList();
     }

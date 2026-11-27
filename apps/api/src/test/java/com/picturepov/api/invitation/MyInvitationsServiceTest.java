@@ -30,14 +30,14 @@ class MyInvitationsServiceTest {
     @Mock UserRepository userRepository;
     @Mock CognitoUserInfoClient cognito;
 
-    MyInvitationsService service;
+    MyInvitationsService sut;
 
     UUID userId = UUID.randomUUID();
     Jwt jwt = Jwt.withTokenValue("token").header("alg", "none").subject(userId.toString()).build();
 
     @BeforeEach
     void setUp() {
-        service = new MyInvitationsService(invitationRepository, UserFixtures.currentUserService(userRepository, cognito));
+        sut = new MyInvitationsService(invitationRepository, UserFixtures.currentUserService(userRepository, cognito));
     }
 
     @Test
@@ -49,7 +49,7 @@ class MyInvitationsServiceTest {
         when(invitationRepository.findPendingByEmail("beto@example.com")).thenReturn(pending);
 
         // Act
-        List<PendingInvitationResponse> invitations = service.listPending(jwt);
+        List<PendingInvitationResponse> invitations = sut.listPending(jwt);
 
         // Assert
         assertThat(invitations).isEqualTo(pending);
@@ -61,7 +61,7 @@ class MyInvitationsServiceTest {
         signedInAs("beto@example.com", false);
 
         // Act
-        List<PendingInvitationResponse> invitations = service.listPending(jwt);
+        List<PendingInvitationResponse> invitations = sut.listPending(jwt);
 
         // Assert
         assertThat(invitations).isEmpty();
@@ -77,7 +77,7 @@ class MyInvitationsServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(new User(userId, "beto@example.com")));
 
         // Act
-        service.accept(invitation.getId(), jwt);
+        sut.accept(invitation.getId(), jwt);
 
         // Assert
         assertThat(invitation.getStatus()).isEqualTo(InvitationStatus.ACCEPTED);
@@ -90,7 +90,7 @@ class MyInvitationsServiceTest {
         signedInAs("beto@example.com", false);
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.accept(UUID.randomUUID(), jwt));
+        Throwable thrown = catchThrowable(() -> sut.accept(UUID.randomUUID(), jwt));
 
         // Assert
         assertThat(thrown).isInstanceOf(AccessDeniedException.class);
@@ -105,7 +105,7 @@ class MyInvitationsServiceTest {
         when(invitationRepository.findPendingById(invitation.getId())).thenReturn(Optional.of(invitation));
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.accept(invitation.getId(), jwt));
+        Throwable thrown = catchThrowable(() -> sut.accept(invitation.getId(), jwt));
 
         // Assert
         assertThat(thrown).isInstanceOf(AccessDeniedException.class);
@@ -120,7 +120,7 @@ class MyInvitationsServiceTest {
         when(invitationRepository.findPendingById(invitationId)).thenReturn(Optional.empty());
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.accept(invitationId, jwt));
+        Throwable thrown = catchThrowable(() -> sut.accept(invitationId, jwt));
 
         // Assert
         assertThat(thrown).isInstanceOf(NotFoundException.class)

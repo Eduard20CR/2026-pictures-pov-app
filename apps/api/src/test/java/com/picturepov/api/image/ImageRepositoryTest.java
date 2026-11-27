@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 class ImageRepositoryTest {
 
-    @Autowired ImageRepository imageRepository;
+    @Autowired ImageRepository sut;
     @Autowired JdbcClient jdbc;
 
     TestData data;
@@ -41,7 +41,7 @@ class ImageRepositoryTest {
         UUID photo = data.photo(event, "2099-01-01T10:00:00Z", "READY");
 
         // Act
-        Optional<Image> found = imageRepository.findByIdAndEventIdAndStatus(photo, event, ImageStatus.READY);
+        Optional<Image> found = sut.findByIdAndEventIdAndStatus(photo, event, ImageStatus.READY);
 
         // Assert
         assertThat(found).map(Image::getId).contains(photo);
@@ -54,8 +54,8 @@ class ImageRepositoryTest {
         UUID processing = data.photo(event, "2099-01-01T10:00:00Z", "PENDING");
 
         // Act
-        Optional<Image> fromOtherEvent = imageRepository.findByIdAndEventIdAndStatus(otherEventPhoto, event, ImageStatus.READY);
-        Optional<Image> stillProcessing = imageRepository.findByIdAndEventIdAndStatus(processing, event, ImageStatus.READY);
+        Optional<Image> fromOtherEvent = sut.findByIdAndEventIdAndStatus(otherEventPhoto, event, ImageStatus.READY);
+        Optional<Image> stillProcessing = sut.findByIdAndEventIdAndStatus(processing, event, ImageStatus.READY);
 
         // Assert
         assertThat(fromOtherEvent).isEmpty();
@@ -72,7 +72,7 @@ class ImageRepositoryTest {
         data.photo(data.event(), "2099-01-01T11:00:00Z", "READY");
 
         // Act
-        List<Image> page = imageRepository.findByEventIdOrderByCreatedAtDescIdDesc(event, Limit.of(10));
+        List<Image> page = sut.findByEventIdOrderByCreatedAtDescIdDesc(event, Limit.of(10));
 
         // Assert
         assertThat(page).extracting(Image::getId).containsExactly(ties.get(0), ties.get(1), oldest);
@@ -87,7 +87,7 @@ class ImageRepositoryTest {
                 data.photo(event, "2099-01-01T10:00:00Z", "READY"));
 
         // Act
-        List<Image> page = imageRepository.findPageAfter(event, Instant.parse("2099-01-01T10:00:00Z"), ties.get(0), Limit.of(10));
+        List<Image> page = sut.findPageAfter(event, Instant.parse("2099-01-01T10:00:00Z"), ties.get(0), Limit.of(10));
 
         // Assert
         assertThat(page).extracting(Image::getId).containsExactly(ties.get(1), oldest);
@@ -100,7 +100,7 @@ class ImageRepositoryTest {
         data.photo(event, "2099-01-01T10:00:00Z", "READY");
 
         // Act
-        List<Image> page = imageRepository.findByEventIdOrderByCreatedAtDescIdDesc(event, Limit.of(1));
+        List<Image> page = sut.findByEventIdOrderByCreatedAtDescIdDesc(event, Limit.of(1));
 
         // Assert
         assertThat(page).extracting(Image::getId).containsExactly(newest);

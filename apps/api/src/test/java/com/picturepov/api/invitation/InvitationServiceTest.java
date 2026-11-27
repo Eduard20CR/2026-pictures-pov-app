@@ -32,12 +32,12 @@ class InvitationServiceTest {
     @Test
     void organizerInvitesAModeratorWhoNeedsNoAccountYet() {
         // Arrange
-        InvitationService service = serviceFor(InvitationRole.OWNER);
+        InvitationService sut = serviceFor(InvitationRole.OWNER);
         when(invitationRepository.existsByEventIdAndEmail(eventId, "beto@example.com")).thenReturn(false);
         when(invitationRepository.saveAndFlush(any(Invitation.class))).thenAnswer(call -> call.getArgument(0));
 
         // Act
-        InvitationResponse response = service.inviteModerator(eventId, userId, " Beto@Example.COM ");
+        InvitationResponse response = sut.inviteModerator(eventId, userId, " Beto@Example.COM ");
 
         // Assert
         assertThat(response.id()).isNotNull();
@@ -49,11 +49,11 @@ class InvitationServiceTest {
     @Test
     void emailThatAlreadyHasAnInvitationToTheEventGets409() {
         // Arrange
-        InvitationService service = serviceFor(InvitationRole.OWNER);
+        InvitationService sut = serviceFor(InvitationRole.OWNER);
         when(invitationRepository.existsByEventIdAndEmail(eventId, "beto@example.com")).thenReturn(true);
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.inviteModerator(eventId, userId, "BETO@example.com"));
+        Throwable thrown = catchThrowable(() -> sut.inviteModerator(eventId, userId, "BETO@example.com"));
 
         // Assert
         assertThat(thrown).isInstanceOf(ConflictException.class)
@@ -64,13 +64,13 @@ class InvitationServiceTest {
     @Test
     void concurrentDuplicateInvitationGets409NotA500() {
         // Arrange: another request stored the same email between the check and the insert
-        InvitationService service = serviceFor(InvitationRole.OWNER);
+        InvitationService sut = serviceFor(InvitationRole.OWNER);
         when(invitationRepository.existsByEventIdAndEmail(eventId, "beto@example.com")).thenReturn(false);
         when(invitationRepository.saveAndFlush(any(Invitation.class)))
                 .thenThrow(new DataIntegrityViolationException("uq_invitations_event_email"));
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.inviteModerator(eventId, userId, "beto@example.com"));
+        Throwable thrown = catchThrowable(() -> sut.inviteModerator(eventId, userId, "beto@example.com"));
 
         // Assert
         assertThat(thrown).isInstanceOf(ConflictException.class)
@@ -80,10 +80,10 @@ class InvitationServiceTest {
     @Test
     void moderatorCannotInvite() {
         // Arrange
-        InvitationService service = serviceFor(InvitationRole.MODERATOR);
+        InvitationService sut = serviceFor(InvitationRole.MODERATOR);
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.inviteModerator(eventId, userId, "carla@example.com"));
+        Throwable thrown = catchThrowable(() -> sut.inviteModerator(eventId, userId, "carla@example.com"));
 
         // Assert
         assertThat(thrown).isInstanceOf(AccessDeniedException.class);
@@ -93,10 +93,10 @@ class InvitationServiceTest {
     @Test
     void userWithoutAnAcceptedInvitationGets404() {
         // Arrange
-        InvitationService service = serviceFor(InvitationRole.OWNER);
+        InvitationService sut = serviceFor(InvitationRole.OWNER);
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.inviteModerator(eventId, UUID.randomUUID(), "carla@example.com"));
+        Throwable thrown = catchThrowable(() -> sut.inviteModerator(eventId, UUID.randomUUID(), "carla@example.com"));
 
         // Assert
         assertThat(thrown).isInstanceOf(NotFoundException.class)
@@ -107,11 +107,11 @@ class InvitationServiceTest {
     @Test
     void ownerInvitationOfANewEventIsPendingWithTheLowercasedEmail() {
         // Arrange
-        InvitationService service = serviceFor(InvitationRole.OWNER);
+        InvitationService sut = serviceFor(InvitationRole.OWNER);
         when(invitationRepository.save(any(Invitation.class))).thenAnswer(call -> call.getArgument(0));
 
         // Act
-        Invitation invitation = service.createOwnerInvitation(eventId, " Ana@Example.com ");
+        Invitation invitation = sut.createOwnerInvitation(eventId, " Ana@Example.com ");
 
         // Assert
         assertThat(invitation.getEventId()).isEqualTo(eventId);

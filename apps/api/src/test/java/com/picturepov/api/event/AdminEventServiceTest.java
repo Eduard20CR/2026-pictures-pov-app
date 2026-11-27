@@ -31,11 +31,11 @@ class AdminEventServiceTest {
     @Mock EventRepository eventRepository;
     @Mock InvitationRepository invitationRepository;
 
-    AdminEventService adminEventService;
+    AdminEventService sut;
 
     @BeforeEach
     void setUp() {
-        adminEventService = new AdminEventService(
+        sut = new AdminEventService(
                 eventRepository, new PublicCodeGenerator(), InvitationFixtures.invitationService(invitationRepository));
     }
 
@@ -47,7 +47,7 @@ class AdminEventServiceTest {
         CreateEventRequest request = new CreateEventRequest("  Boda Ana y Luis ", LocalDate.of(2099, 12, 20), "Ana@Example.com");
 
         // Act
-        AdminEventResponse response = adminEventService.createEvent(request);
+        AdminEventResponse response = sut.createEvent(request);
 
         // Assert
         assertThat(response.status()).isEqualTo(EventStatus.OPEN);
@@ -64,7 +64,7 @@ class AdminEventServiceTest {
         ArgumentCaptor<Invitation> stored = ArgumentCaptor.forClass(Invitation.class);
 
         // Act
-        AdminEventResponse response = adminEventService.createEvent(
+        AdminEventResponse response = sut.createEvent(
                 new CreateEventRequest("Boda", LocalDate.of(2099, 12, 20), " Ana@Example.com "));
 
         // Assert
@@ -86,7 +86,7 @@ class AdminEventServiceTest {
         ArgumentCaptor<Pageable> asked = ArgumentCaptor.forClass(Pageable.class);
 
         // Act
-        AdminEventPage page = adminEventService.listAllEvents(2, 5);
+        AdminEventPage page = sut.listAllEvents(2, 5);
 
         // Assert
         assertThat(page).isEqualTo(new AdminEventPage(List.of(event), 2, 5, 11, 3));

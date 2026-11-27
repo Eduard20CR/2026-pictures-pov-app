@@ -37,12 +37,12 @@ class ReviewImagesServiceTest {
     @EnumSource(InvitationRole.class)
     void organizerAndModeratorSeeEveryPhotoWithASignedThumbnail(InvitationRole role) {
         // Arrange
-        ReviewImagesService service = serviceFor(role);
+        ReviewImagesService sut = serviceFor(role);
         Image photo = ImageFixtures.readyPhoto(eventId, NOON);
         when(imageRepository.findByEventIdOrderByCreatedAtDescIdDesc(eventId, Limit.of(31))).thenReturn(List.of(photo));
 
         // Act
-        ReviewImagePage page = service.listImages(eventId, userId, 30, null);
+        ReviewImagePage page = sut.listImages(eventId, userId, 30, null);
 
         // Assert
         assertThat(page.items()).hasSize(1);
@@ -59,13 +59,13 @@ class ReviewImagesServiceTest {
     @Test
     void hiddenPhotosAreListedAndMarkedHidden() {
         // Arrange
-        ReviewImagesService service = serviceFor(InvitationRole.OWNER);
+        ReviewImagesService sut = serviceFor(InvitationRole.OWNER);
         Image hidden = ImageFixtures.hidden(ImageFixtures.readyPhoto(eventId, NOON));
         Image visible = ImageFixtures.readyPhoto(eventId, NOON.minusSeconds(60));
         when(imageRepository.findByEventIdOrderByCreatedAtDescIdDesc(eventId, Limit.of(31))).thenReturn(List.of(hidden, visible));
 
         // Act
-        ReviewImagePage page = service.listImages(eventId, userId, 30, null);
+        ReviewImagePage page = sut.listImages(eventId, userId, 30, null);
 
         // Assert
         assertThat(page.items()).extracting(ReviewImageResponse::id, ReviewImageResponse::hidden)
@@ -77,12 +77,12 @@ class ReviewImagesServiceTest {
     @Test
     void photoWithoutAThumbnailYetHasNoThumbnailUrl() {
         // Arrange
-        ReviewImagesService service = serviceFor(InvitationRole.OWNER);
+        ReviewImagesService sut = serviceFor(InvitationRole.OWNER);
         Image processing = ImageFixtures.processingPhoto(eventId, NOON);
         when(imageRepository.findByEventIdOrderByCreatedAtDescIdDesc(eventId, Limit.of(31))).thenReturn(List.of(processing));
 
         // Act
-        ReviewImagePage page = service.listImages(eventId, userId, 30, null);
+        ReviewImagePage page = sut.listImages(eventId, userId, 30, null);
 
         // Assert
         assertThat(page.items().getFirst().thumbnailUrl()).isNull();
@@ -91,16 +91,16 @@ class ReviewImagesServiceTest {
     @Test
     void morePhotosThanTheLimitGiveACursorThatContinuesAfterTheLastOne() {
         // Arrange
-        ReviewImagesService service = serviceFor(InvitationRole.OWNER);
+        ReviewImagesService sut = serviceFor(InvitationRole.OWNER);
         Image first = ImageFixtures.readyPhoto(eventId, NOON);
         Image second = ImageFixtures.readyPhoto(eventId, NOON.minusSeconds(60));
         Image third = ImageFixtures.readyPhoto(eventId, NOON.minusSeconds(120));
         when(imageRepository.findByEventIdOrderByCreatedAtDescIdDesc(eventId, Limit.of(3))).thenReturn(List.of(first, second, third));
         when(imageRepository.findPageAfter(eventId, second.getCreatedAt(), second.getId(), Limit.of(3))).thenReturn(List.of(third));
-        ReviewImagePage firstPage = service.listImages(eventId, userId, 2, null);
+        ReviewImagePage firstPage = sut.listImages(eventId, userId, 2, null);
 
         // Act
-        ReviewImagePage nextPage = service.listImages(eventId, userId, 2, firstPage.nextCursor());
+        ReviewImagePage nextPage = sut.listImages(eventId, userId, 2, firstPage.nextCursor());
 
         // Assert
         assertThat(firstPage.items()).extracting(ReviewImageResponse::id).containsExactly(first.getId(), second.getId());
@@ -111,12 +111,12 @@ class ReviewImagesServiceTest {
     @Test
     void exactlyLimitPhotosIsTheLastPage() {
         // Arrange
-        ReviewImagesService service = serviceFor(InvitationRole.OWNER);
+        ReviewImagesService sut = serviceFor(InvitationRole.OWNER);
         List<Image> photos = List.of(ImageFixtures.readyPhoto(eventId, NOON), ImageFixtures.readyPhoto(eventId, NOON.minusSeconds(60)));
         when(imageRepository.findByEventIdOrderByCreatedAtDescIdDesc(eventId, Limit.of(3))).thenReturn(photos);
 
         // Act
-        ReviewImagePage page = service.listImages(eventId, userId, 2, null);
+        ReviewImagePage page = sut.listImages(eventId, userId, 2, null);
 
         // Assert
         assertThat(page.items()).hasSize(2);
@@ -126,10 +126,10 @@ class ReviewImagesServiceTest {
     @Test
     void malformedCursorGets400() {
         // Arrange
-        ReviewImagesService service = serviceFor(InvitationRole.OWNER);
+        ReviewImagesService sut = serviceFor(InvitationRole.OWNER);
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.listImages(eventId, userId, 30, "not-a-cursor"));
+        Throwable thrown = catchThrowable(() -> sut.listImages(eventId, userId, 30, "not-a-cursor"));
 
         // Assert
         assertThat(thrown).isInstanceOf(BadRequestException.class)
@@ -139,10 +139,10 @@ class ReviewImagesServiceTest {
     @Test
     void userWithoutAnAcceptedInvitationGets404() {
         // Arrange
-        ReviewImagesService service = serviceFor(InvitationRole.OWNER);
+        ReviewImagesService sut = serviceFor(InvitationRole.OWNER);
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.listImages(eventId, UUID.randomUUID(), 30, null));
+        Throwable thrown = catchThrowable(() -> sut.listImages(eventId, UUID.randomUUID(), 30, null));
 
         // Assert
         assertThat(thrown).isInstanceOf(NotFoundException.class)

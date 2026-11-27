@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 class ZipExportRepositoryTest {
 
-    @Autowired ZipExportRepository zipExportRepository;
+    @Autowired ZipExportRepository sut;
     @Autowired JdbcClient jdbc;
 
     TestData data;
@@ -38,7 +38,7 @@ class ZipExportRepositoryTest {
         data.photo(event, "2099-01-01T10:00:00Z", "READY");
 
         // Act
-        boolean hasPhotos = zipExportRepository.hasProcessedPhotos(event);
+        boolean hasPhotos = sut.hasProcessedPhotos(event);
 
         // Assert
         assertThat(hasPhotos).isTrue();
@@ -51,7 +51,7 @@ class ZipExportRepositoryTest {
         data.photo(data.event(), "2099-01-01T10:00:00Z", "READY");
 
         // Act
-        boolean hasPhotos = zipExportRepository.hasProcessedPhotos(event);
+        boolean hasPhotos = sut.hasProcessedPhotos(event);
 
         // Assert
         assertThat(hasPhotos).isFalse();
@@ -65,7 +65,7 @@ class ZipExportRepositoryTest {
         data.zipExport(data.event(), organizer, "PENDING", "2099-01-01T11:00:00Z");
 
         // Act
-        Optional<ZipExport> found = zipExportRepository.findFirstByEventIdOrderByCreatedAtDesc(event);
+        Optional<ZipExport> found = sut.findFirstByEventIdOrderByCreatedAtDesc(event);
 
         // Assert
         assertThat(found).map(ZipExport::getId).contains(latest);
@@ -77,10 +77,10 @@ class ZipExportRepositoryTest {
         UUID export = data.zipExport(event, organizer, "PENDING", "2099-01-01T10:00:00Z");
 
         // Act
-        zipExportRepository.markNotQueued(export, "Not queued: SQS unavailable");
+        sut.markNotQueued(export, "Not queued: SQS unavailable");
 
         // Assert
-        ZipExport stored = zipExportRepository.findById(export).orElseThrow();
+        ZipExport stored = sut.findById(export).orElseThrow();
         assertThat(stored.getStatus()).isEqualTo(ZipExportStatus.FAILED);
         assertThat(stored.getCompletedAt()).isNotNull();
         assertThat(stored).extracting("errorMessage").isEqualTo("Not queued: SQS unavailable");
@@ -92,9 +92,9 @@ class ZipExportRepositoryTest {
         UUID export = data.zipExport(event, organizer, "RUNNING", "2099-01-01T10:00:00Z");
 
         // Act
-        zipExportRepository.markNotQueued(export, "Not queued: SQS unavailable");
+        sut.markNotQueued(export, "Not queued: SQS unavailable");
 
         // Assert
-        assertThat(zipExportRepository.findById(export).orElseThrow().getStatus()).isEqualTo(ZipExportStatus.RUNNING);
+        assertThat(sut.findById(export).orElseThrow().getStatus()).isEqualTo(ZipExportStatus.RUNNING);
     }
 }

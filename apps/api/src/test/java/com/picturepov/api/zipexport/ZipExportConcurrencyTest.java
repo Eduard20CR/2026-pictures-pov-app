@@ -36,7 +36,7 @@ class ZipExportConcurrencyTest {
 
     static final int REQUESTS = 5;
 
-    @Autowired ZipExportService zipExportService;
+    @Autowired ZipExportService sut;
     @Autowired JdbcClient jdbc;
     @MockitoBean ZipExportQueue queue;
 
@@ -67,7 +67,7 @@ class ZipExportConcurrencyTest {
         CountDownLatch start = new CountDownLatch(1);
         Callable<ZipExportResponse> request = () -> {
             start.await();
-            return zipExportService.request(event, organizer);
+            return sut.request(event, organizer);
         };
         ExecutorService pool = Executors.newFixedThreadPool(REQUESTS);
 

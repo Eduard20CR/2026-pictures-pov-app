@@ -33,12 +33,12 @@ class ImageDownloadServiceTest {
     @Test
     void organizerGetsASignedLinkThatSavesTheOriginalWithItsExtension() {
         // Arrange
-        ImageDownloadService service = serviceFor(InvitationRole.OWNER);
+        ImageDownloadService sut = serviceFor(InvitationRole.OWNER);
         Image photo = ImageFixtures.hidden(ImageFixtures.readyPhoto(eventId, Instant.now()));
         when(imageRepository.findByIdAndEventIdAndStatus(photo.getId(), eventId, ImageStatus.READY)).thenReturn(Optional.of(photo));
 
         // Act
-        ImageDownloadResponse response = service.downloadLink(eventId, photo.getId(), userId);
+        ImageDownloadResponse response = sut.downloadLink(eventId, photo.getId(), userId);
 
         // Assert
         assertThat(response.url())
@@ -51,12 +51,12 @@ class ImageDownloadServiceTest {
     @Test
     void photoThatIsMissingFromAnotherEventOrStillProcessingGets404() {
         // Arrange
-        ImageDownloadService service = serviceFor(InvitationRole.OWNER);
+        ImageDownloadService sut = serviceFor(InvitationRole.OWNER);
         UUID imageId = UUID.randomUUID();
         when(imageRepository.findByIdAndEventIdAndStatus(imageId, eventId, ImageStatus.READY)).thenReturn(Optional.empty());
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.downloadLink(eventId, imageId, userId));
+        Throwable thrown = catchThrowable(() -> sut.downloadLink(eventId, imageId, userId));
 
         // Assert
         assertThat(thrown).isInstanceOf(NotFoundException.class)
@@ -66,10 +66,10 @@ class ImageDownloadServiceTest {
     @Test
     void moderatorCannotDownload() {
         // Arrange
-        ImageDownloadService service = serviceFor(InvitationRole.MODERATOR);
+        ImageDownloadService sut = serviceFor(InvitationRole.MODERATOR);
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.downloadLink(eventId, UUID.randomUUID(), userId));
+        Throwable thrown = catchThrowable(() -> sut.downloadLink(eventId, UUID.randomUUID(), userId));
 
         // Assert
         assertThat(thrown).isInstanceOf(AccessDeniedException.class);
@@ -79,10 +79,10 @@ class ImageDownloadServiceTest {
     @Test
     void userWithoutAnAcceptedInvitationGets404() {
         // Arrange
-        ImageDownloadService service = serviceFor(InvitationRole.OWNER);
+        ImageDownloadService sut = serviceFor(InvitationRole.OWNER);
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.downloadLink(eventId, UUID.randomUUID(), UUID.randomUUID()));
+        Throwable thrown = catchThrowable(() -> sut.downloadLink(eventId, UUID.randomUUID(), UUID.randomUUID()));
 
         // Assert
         assertThat(thrown).isInstanceOf(NotFoundException.class)

@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 class GuestEventServiceTest {
 
     @Mock EventRepository eventRepository;
-    @InjectMocks GuestEventService guestEventService;
+    @InjectMocks GuestEventService sut;
 
     @Test
     void guestSeesTheOpenEvent() {
@@ -29,7 +29,7 @@ class GuestEventServiceTest {
         when(eventRepository.findByPublicCode(PUBLIC_CODE)).thenReturn(Optional.of(EventFixtures.openEvent(10)));
 
         // Act
-        GuestEventResponse response = guestEventService.getGuestEvent(PUBLIC_CODE);
+        GuestEventResponse response = sut.getGuestEvent(PUBLIC_CODE);
 
         // Assert
         assertThat(response).isEqualTo(new GuestEventResponse(
@@ -42,7 +42,7 @@ class GuestEventServiceTest {
         when(eventRepository.findByPublicCode(PUBLIC_CODE)).thenReturn(Optional.empty());
 
         // Act
-        Throwable thrown = catchThrowable(() -> guestEventService.getGuestEvent(PUBLIC_CODE));
+        Throwable thrown = catchThrowable(() -> sut.getGuestEvent(PUBLIC_CODE));
 
         // Assert
         assertThat(thrown).isInstanceOf(NotFoundException.class)
@@ -56,7 +56,7 @@ class GuestEventServiceTest {
                 .thenReturn(Optional.of(EventFixtures.event(EventStatus.ARCHIVED, 10)));
 
         // Act
-        Throwable thrown = catchThrowable(() -> guestEventService.getGuestEvent(PUBLIC_CODE));
+        Throwable thrown = catchThrowable(() -> sut.getGuestEvent(PUBLIC_CODE));
 
         // Assert
         assertThat(thrown).isInstanceOf(NotFoundException.class)
@@ -70,7 +70,7 @@ class GuestEventServiceTest {
                 .thenReturn(Optional.of(EventFixtures.event(EventStatus.CLOSED, 10)));
 
         // Act
-        Throwable thrown = catchThrowable(() -> guestEventService.getGuestEvent(PUBLIC_CODE));
+        Throwable thrown = catchThrowable(() -> sut.getGuestEvent(PUBLIC_CODE));
 
         // Assert
         assertThat(thrown).isInstanceOf(ConflictException.class)
