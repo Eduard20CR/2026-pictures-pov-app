@@ -52,14 +52,14 @@ class ZipExportServiceTest {
     @Test
     void organizerRequestsTheZipAndItIsQueuedInProgress() {
         // Arrange
-        ZipExportService service = serviceFor(InvitationRole.OWNER);
+        ZipExportService sut = serviceFor(InvitationRole.OWNER);
         when(zipExportRepository.findFirstByEventIdOrderByCreatedAtDesc(eventId)).thenReturn(Optional.empty());
         when(zipExportRepository.hasProcessedPhotos(eventId)).thenReturn(true);
         when(zipExportRepository.saveAndFlush(any(ZipExport.class))).thenAnswer(call -> call.getArgument(0));
         ArgumentCaptor<ZipExport> stored = ArgumentCaptor.forClass(ZipExport.class);
 
         // Act
-        ZipExportResponse response = service.request(eventId, userId);
+        ZipExportResponse response = sut.request(eventId, userId);
 
         // Assert
         assertThat(response.status()).isEqualTo(ZipExportResponse.State.IN_PROGRESS);
@@ -72,12 +72,12 @@ class ZipExportServiceTest {
     @Test
     void requestingWhileAZipIsInProgressStartsNoSecondGeneration() {
         // Arrange
-        ZipExportService service = serviceFor(InvitationRole.OWNER);
+        ZipExportService sut = serviceFor(InvitationRole.OWNER);
         ZipExport running = zipExport(ZipExportStatus.RUNNING, Instant.now().minus(Duration.ofMinutes(10)));
         when(zipExportRepository.findFirstByEventIdOrderByCreatedAtDesc(eventId)).thenReturn(Optional.of(running));
 
         // Act
-        ZipExportResponse response = service.request(eventId, userId);
+        ZipExportResponse response = sut.request(eventId, userId);
 
         // Assert
         assertThat(response.status()).isEqualTo(ZipExportResponse.State.IN_PROGRESS);
@@ -90,14 +90,14 @@ class ZipExportServiceTest {
     @EnumSource(value = ZipExportStatus.class, names = {"READY", "FAILED"})
     void finishedZipCanBeRequestedAgain(ZipExportStatus status) {
         // Arrange
-        ZipExportService service = serviceFor(InvitationRole.OWNER);
+        ZipExportService sut = serviceFor(InvitationRole.OWNER);
         ZipExport previous = zipExport(status, Instant.now().minus(Duration.ofMinutes(5)));
         when(zipExportRepository.findFirstByEventIdOrderByCreatedAtDesc(eventId)).thenReturn(Optional.of(previous));
         when(zipExportRepository.hasProcessedPhotos(eventId)).thenReturn(true);
         when(zipExportRepository.saveAndFlush(any(ZipExport.class))).thenAnswer(call -> call.getArgument(0));
 
         // Act
-        ZipExportResponse response = service.request(eventId, userId);
+        ZipExportResponse response = sut.request(eventId, userId);
 
         // Assert
         assertThat(response.status()).isEqualTo(ZipExportResponse.State.IN_PROGRESS);
@@ -108,14 +108,14 @@ class ZipExportServiceTest {
     @Test
     void zipStillRunningAfterMaxRunIsReplacedByANewOne() {
         // Arrange: the worker timed out on its last receive, so nothing marked it failed
-        ZipExportService service = serviceFor(InvitationRole.OWNER);
+        ZipExportService sut = serviceFor(InvitationRole.OWNER);
         ZipExport stuck = zipExport(ZipExportStatus.RUNNING, Instant.now().minus(Duration.ofMinutes(49)));
         when(zipExportRepository.findFirstByEventIdOrderByCreatedAtDesc(eventId)).thenReturn(Optional.of(stuck));
         when(zipExportRepository.hasProcessedPhotos(eventId)).thenReturn(true);
         when(zipExportRepository.saveAndFlush(any(ZipExport.class))).thenAnswer(call -> call.getArgument(0));
 
         // Act
-        ZipExportResponse response = service.request(eventId, userId);
+        ZipExportResponse response = sut.request(eventId, userId);
 
         // Assert
         assertThat(response.status()).isEqualTo(ZipExportResponse.State.IN_PROGRESS);
@@ -126,12 +126,12 @@ class ZipExportServiceTest {
     @Test
     void eventWithoutProcessedPhotosGets409AndNothingIsQueued() {
         // Arrange
-        ZipExportService service = serviceFor(InvitationRole.OWNER);
+        ZipExportService sut = serviceFor(InvitationRole.OWNER);
         when(zipExportRepository.findFirstByEventIdOrderByCreatedAtDesc(eventId)).thenReturn(Optional.empty());
         when(zipExportRepository.hasProcessedPhotos(eventId)).thenReturn(false);
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.request(eventId, userId));
+        Throwable thrown = catchThrowable(() -> sut.request(eventId, userId));
 
         // Assert
         assertThat(thrown).isInstanceOf(ConflictException.class)
@@ -143,7 +143,7 @@ class ZipExportServiceTest {
     @Test
     void zipThatCouldNotBeQueuedIsMarkedFailedSoItCanBeRequestedAgain() {
         // Arrange
-        ZipExportService service = serviceFor(InvitationRole.OWNER);
+        ZipExportService sut = serviceFor(InvitationRole.OWNER);
         when(zipExportRepository.findFirstByEventIdOrderByCreatedAtDesc(eventId)).thenReturn(Optional.empty());
         when(zipExportRepository.hasProcessedPhotos(eventId)).thenReturn(true);
         when(zipExportRepository.saveAndFlush(any(ZipExport.class))).thenAnswer(call -> call.getArgument(0));
@@ -152,7 +152,7 @@ class ZipExportServiceTest {
         ArgumentCaptor<ZipExport> stored = ArgumentCaptor.forClass(ZipExport.class);
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.request(eventId, userId));
+        Throwable thrown = catchThrowable(() -> sut.request(eventId, userId));
 
         // Assert
         assertThat(thrown).isSameAs(sqsDown);
@@ -163,7 +163,7 @@ class ZipExportServiceTest {
     @Test
     void longQueueErrorIsCutToFitTheErrorColumn() {
         // Arrange
-        ZipExportService service = serviceFor(InvitationRole.OWNER);
+        ZipExportService sut = serviceFor(InvitationRole.OWNER);
         when(zipExportRepository.findFirstByEventIdOrderByCreatedAtDesc(eventId)).thenReturn(Optional.empty());
         when(zipExportRepository.hasProcessedPhotos(eventId)).thenReturn(true);
         when(zipExportRepository.saveAndFlush(any(ZipExport.class))).thenAnswer(call -> call.getArgument(0));
@@ -171,7 +171,7 @@ class ZipExportServiceTest {
         ArgumentCaptor<String> reason = ArgumentCaptor.forClass(String.class);
 
         // Act
-        catchThrowable(() -> service.request(eventId, userId));
+        catchThrowable(() -> sut.request(eventId, userId));
 
         // Assert
         verify(zipExportRepository).markNotQueued(any(UUID.class), reason.capture());
@@ -181,11 +181,11 @@ class ZipExportServiceTest {
     @Test
     void moderatorCannotRequestNorFollowTheZip() {
         // Arrange
-        ZipExportService service = serviceFor(InvitationRole.MODERATOR);
+        ZipExportService sut = serviceFor(InvitationRole.MODERATOR);
 
         // Act
-        Throwable onRequest = catchThrowable(() -> service.request(eventId, userId));
-        Throwable onLatest = catchThrowable(() -> service.latest(eventId, userId));
+        Throwable onRequest = catchThrowable(() -> sut.request(eventId, userId));
+        Throwable onLatest = catchThrowable(() -> sut.latest(eventId, userId));
 
         // Assert
         assertThat(onRequest).isInstanceOf(AccessDeniedException.class);
@@ -196,12 +196,12 @@ class ZipExportServiceTest {
     @Test
     void userWithoutAnAcceptedInvitationGets404() {
         // Arrange
-        ZipExportService service = serviceFor(InvitationRole.OWNER);
+        ZipExportService sut = serviceFor(InvitationRole.OWNER);
         UUID stranger = UUID.randomUUID();
 
         // Act
-        Throwable onRequest = catchThrowable(() -> service.request(eventId, stranger));
-        Throwable onLatest = catchThrowable(() -> service.latest(eventId, stranger));
+        Throwable onRequest = catchThrowable(() -> sut.request(eventId, stranger));
+        Throwable onLatest = catchThrowable(() -> sut.latest(eventId, stranger));
 
         // Assert
         assertThat(onRequest).isInstanceOf(NotFoundException.class).extracting("code").isEqualTo(ErrorCode.EVENT_NOT_FOUND);
@@ -212,11 +212,11 @@ class ZipExportServiceTest {
     @Test
     void eventWithoutAZipHasNoLatest() {
         // Arrange
-        ZipExportService service = serviceFor(InvitationRole.OWNER);
+        ZipExportService sut = serviceFor(InvitationRole.OWNER);
         when(zipExportRepository.findFirstByEventIdOrderByCreatedAtDesc(eventId)).thenReturn(Optional.empty());
 
         // Act
-        Optional<ZipExportResponse> latest = service.latest(eventId, userId);
+        Optional<ZipExportResponse> latest = sut.latest(eventId, userId);
 
         // Assert
         assertThat(latest).isEmpty();
@@ -225,12 +225,12 @@ class ZipExportServiceTest {
     @Test
     void availableZipComesWithASignedDownloadLinkValidForP07() {
         // Arrange
-        ZipExportService service = serviceFor(InvitationRole.OWNER);
+        ZipExportService sut = serviceFor(InvitationRole.OWNER);
         ZipExport ready = readyZipExport();
         when(zipExportRepository.findFirstByEventIdOrderByCreatedAtDesc(eventId)).thenReturn(Optional.of(ready));
 
         // Act
-        ZipExportResponse response = service.latest(eventId, userId).orElseThrow();
+        ZipExportResponse response = sut.latest(eventId, userId).orElseThrow();
 
         // Assert
         assertThat(response.status()).isEqualTo(ZipExportResponse.State.AVAILABLE);
@@ -246,12 +246,12 @@ class ZipExportServiceTest {
     @Test
     void zipStillRunningIsShownInProgress() {
         // Arrange
-        ZipExportService service = serviceFor(InvitationRole.OWNER);
+        ZipExportService sut = serviceFor(InvitationRole.OWNER);
         ZipExport running = zipExport(ZipExportStatus.RUNNING, Instant.now().minus(Duration.ofMinutes(47)));
         when(zipExportRepository.findFirstByEventIdOrderByCreatedAtDesc(eventId)).thenReturn(Optional.of(running));
 
         // Act
-        ZipExportResponse response = service.latest(eventId, userId).orElseThrow();
+        ZipExportResponse response = sut.latest(eventId, userId).orElseThrow();
 
         // Assert
         assertThat(response.status()).isEqualTo(ZipExportResponse.State.IN_PROGRESS);
@@ -260,12 +260,12 @@ class ZipExportServiceTest {
     @Test
     void failedOrStuckZipIsShownFailedWithoutALink() {
         // Arrange
-        ZipExportService service = serviceFor(InvitationRole.OWNER);
+        ZipExportService sut = serviceFor(InvitationRole.OWNER);
         ZipExport stuck = zipExport(ZipExportStatus.RUNNING, Instant.now().minus(Duration.ofMinutes(49)));
         when(zipExportRepository.findFirstByEventIdOrderByCreatedAtDesc(eventId)).thenReturn(Optional.of(stuck));
 
         // Act
-        ZipExportResponse response = service.latest(eventId, userId).orElseThrow();
+        ZipExportResponse response = sut.latest(eventId, userId).orElseThrow();
 
         // Assert
         assertThat(response.status()).isEqualTo(ZipExportResponse.State.FAILED);

@@ -25,13 +25,13 @@ class MyEventsServiceTest {
 
     @Mock EventRepository eventRepository;
 
-    MyEventsService myEventsService;
+    MyEventsService sut;
 
     UUID userId = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
-        myEventsService = new MyEventsService(eventRepository, new EventAccess(eventRepository));
+        sut = new MyEventsService(eventRepository, new EventAccess(eventRepository));
     }
 
     @ParameterizedTest
@@ -43,7 +43,7 @@ class MyEventsServiceTest {
         when(eventRepository.findById(event.getId())).thenReturn(Optional.of(event));
 
         // Act
-        MyEventResponse response = myEventsService.getMyEvent(event.getId(), userId);
+        MyEventResponse response = sut.getMyEvent(event.getId(), userId);
 
         // Assert
         assertThat(response).isEqualTo(new MyEventResponse(
@@ -57,7 +57,7 @@ class MyEventsServiceTest {
         when(eventRepository.findAcceptedInvitationRole(eventId, userId)).thenReturn(Optional.empty());
 
         // Act
-        Throwable thrown = catchThrowable(() -> myEventsService.getMyEvent(eventId, userId));
+        Throwable thrown = catchThrowable(() -> sut.getMyEvent(eventId, userId));
 
         // Assert
         assertThat(thrown).isInstanceOf(NotFoundException.class)
@@ -72,7 +72,7 @@ class MyEventsServiceTest {
         when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
 
         // Act
-        Throwable thrown = catchThrowable(() -> myEventsService.getMyEvent(eventId, userId));
+        Throwable thrown = catchThrowable(() -> sut.getMyEvent(eventId, userId));
 
         // Assert
         assertThat(thrown).isInstanceOf(NotFoundException.class)

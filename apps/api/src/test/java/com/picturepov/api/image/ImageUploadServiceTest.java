@@ -45,11 +45,11 @@ class ImageUploadServiceTest {
     void guestGetsASignedUrlToUploadThePhoto() {
         // Arrange
         Event event = EventFixtures.openEvent(10);
-        ImageUploadService service = serviceFor(event);
+        ImageUploadService sut = serviceFor(event);
         when(imageRepository.save(any(Image.class))).thenAnswer(call -> call.getArgument(0));
 
         // Act
-        PresignedUploadResponse response = service.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(1000));
+        PresignedUploadResponse response = sut.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(1000));
 
         // Assert
         assertThat(response.uploadUrl())
@@ -63,12 +63,12 @@ class ImageUploadServiceTest {
     void thePhotoIsStoredPendingUntilItsThumbnailExists() {
         // Arrange
         Event event = EventFixtures.openEvent(10);
-        ImageUploadService service = serviceFor(event);
+        ImageUploadService sut = serviceFor(event);
         when(imageRepository.save(any(Image.class))).thenAnswer(call -> call.getArgument(0));
         ArgumentCaptor<Image> stored = ArgumentCaptor.forClass(Image.class);
 
         // Act
-        PresignedUploadResponse response = service.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(1000));
+        PresignedUploadResponse response = sut.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(1000));
 
         // Assert
         verify(imageRepository).save(stored.capture());
@@ -80,11 +80,11 @@ class ImageUploadServiceTest {
     @Test
     void signedUrlOnlyCreatesThePhotoSoItCannotReplaceIt() {
         // Arrange
-        ImageUploadService service = serviceFor(EventFixtures.openEvent(10));
+        ImageUploadService sut = serviceFor(EventFixtures.openEvent(10));
         when(imageRepository.save(any(Image.class))).thenAnswer(call -> call.getArgument(0));
 
         // Act
-        PresignedUploadResponse response = service.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(1000));
+        PresignedUploadResponse response = sut.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(1000));
 
         // Assert: S3 refuses the PUT with 412 once the object exists (conditional write)
         assertThat(response.uploadUrl()).containsPattern("X-Amz-SignedHeaders=[^&]*if-none-match");
@@ -98,11 +98,11 @@ class ImageUploadServiceTest {
     })
     void invalidFileGets400AndUsesNoUpload(String contentType, long sizeBytes, ErrorCode code) {
         // Arrange
-        ImageUploadService service = serviceFor(EventFixtures.openEvent(10));
+        ImageUploadService sut = serviceFor(EventFixtures.openEvent(10));
 
         // Act
         Throwable thrown = catchThrowable(() ->
-                service.createPresignedUpload(PUBLIC_CODE, guestId, new PresignedUploadRequest(contentType, sizeBytes)));
+                sut.createPresignedUpload(PUBLIC_CODE, guestId, new PresignedUploadRequest(contentType, sizeBytes)));
 
         // Assert
         assertThat(thrown).isInstanceOf(BadRequestException.class).extracting("code").isEqualTo(code);
@@ -112,11 +112,11 @@ class ImageUploadServiceTest {
     @Test
     void largestAllowedFileIsAccepted() {
         // Arrange
-        ImageUploadService service = serviceFor(EventFixtures.openEvent(10));
+        ImageUploadService sut = serviceFor(EventFixtures.openEvent(10));
         when(imageRepository.save(any(Image.class))).thenAnswer(call -> call.getArgument(0));
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(MAX_SIZE_BYTES)));
+        Throwable thrown = catchThrowable(() -> sut.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(MAX_SIZE_BYTES)));
 
         // Assert
         assertThat(thrown).isNull();
@@ -125,12 +125,12 @@ class ImageUploadServiceTest {
     @Test
     void guestAtTheUploadLimitGets409AndNoPhotoIsStored() {
         // Arrange
-        ImageUploadService service = serviceFor(EventFixtures.openEvent(1));
+        ImageUploadService sut = serviceFor(EventFixtures.openEvent(1));
         when(imageRepository.save(any(Image.class))).thenAnswer(call -> call.getArgument(0));
-        service.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(1000));
+        sut.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(1000));
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(1000)));
+        Throwable thrown = catchThrowable(() -> sut.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(1000)));
 
         // Assert
         assertThat(thrown).isInstanceOf(ConflictException.class)
@@ -141,10 +141,10 @@ class ImageUploadServiceTest {
     @Test
     void closedEventGets409AndNoPhotoIsStored() {
         // Arrange
-        ImageUploadService service = serviceFor(EventFixtures.event(EventStatus.CLOSED, 10));
+        ImageUploadService sut = serviceFor(EventFixtures.event(EventStatus.CLOSED, 10));
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(1000)));
+        Throwable thrown = catchThrowable(() -> sut.createPresignedUpload(PUBLIC_CODE, guestId, jpeg(1000)));
 
         // Assert
         assertThat(thrown).isInstanceOf(ConflictException.class)
@@ -155,10 +155,10 @@ class ImageUploadServiceTest {
     @Test
     void unknownEventGets404() {
         // Arrange
-        ImageUploadService service = serviceFor(EventFixtures.openEvent(10));
+        ImageUploadService sut = serviceFor(EventFixtures.openEvent(10));
 
         // Act
-        Throwable thrown = catchThrowable(() -> service.createPresignedUpload("unknownCode", guestId, jpeg(1000)));
+        Throwable thrown = catchThrowable(() -> sut.createPresignedUpload("unknownCode", guestId, jpeg(1000)));
 
         // Assert
         assertThat(thrown).isInstanceOf(NotFoundException.class)

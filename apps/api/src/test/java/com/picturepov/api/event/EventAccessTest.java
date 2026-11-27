@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 class EventAccessTest {
 
     @Mock EventRepository eventRepository;
-    @InjectMocks EventAccess eventAccess;
+    @InjectMocks EventAccess sut;
 
     UUID eventId = UUID.randomUUID();
     UUID userId = UUID.randomUUID();
@@ -37,7 +37,7 @@ class EventAccessTest {
         when(eventRepository.findAcceptedInvitationRole(eventId, userId)).thenReturn(Optional.of(invitedRole));
 
         // Act
-        InvitationRole role = eventAccess.getUserRoleInEvent(eventId, userId);
+        InvitationRole role = sut.getUserRoleInEvent(eventId, userId);
 
         // Assert
         assertThat(role).isEqualTo(invitedRole);
@@ -49,7 +49,7 @@ class EventAccessTest {
         when(eventRepository.findAcceptedInvitationRole(eventId, userId)).thenReturn(Optional.empty());
 
         // Act
-        Throwable thrown = catchThrowable(() -> eventAccess.getUserRoleInEvent(eventId, userId));
+        Throwable thrown = catchThrowable(() -> sut.getUserRoleInEvent(eventId, userId));
 
         // Assert
         assertThat(thrown).isInstanceOf(NotFoundException.class)
@@ -62,7 +62,7 @@ class EventAccessTest {
         when(eventRepository.findAcceptedInvitationRole(eventId, userId)).thenReturn(Optional.of(OWNER));
 
         // Act
-        Throwable thrown = catchThrowable(() -> eventAccess.requireOrganizer(eventId, userId));
+        Throwable thrown = catchThrowable(() -> sut.requireOrganizer(eventId, userId));
 
         // Assert
         assertThat(thrown).isNull();
@@ -74,7 +74,7 @@ class EventAccessTest {
         when(eventRepository.findAcceptedInvitationRole(eventId, userId)).thenReturn(Optional.of(MODERATOR));
 
         // Act
-        Throwable thrown = catchThrowable(() -> eventAccess.requireOrganizer(eventId, userId));
+        Throwable thrown = catchThrowable(() -> sut.requireOrganizer(eventId, userId));
 
         // Assert
         assertThat(thrown).isInstanceOf(AccessDeniedException.class);
@@ -86,7 +86,7 @@ class EventAccessTest {
         when(eventRepository.findAcceptedInvitationRole(eventId, userId)).thenReturn(Optional.empty());
 
         // Act
-        Throwable thrown = catchThrowable(() -> eventAccess.requireOrganizer(eventId, userId));
+        Throwable thrown = catchThrowable(() -> sut.requireOrganizer(eventId, userId));
 
         // Assert
         assertThat(thrown).isInstanceOf(NotFoundException.class);

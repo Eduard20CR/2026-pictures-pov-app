@@ -16,7 +16,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @Transactional
 public class GuestLimitRepositoryTest {
 
-    @Autowired GuestLimitRepository guestLimitRepository;
+    @Autowired GuestLimitRepository sut;
     @Autowired JdbcClient jdbc;
 
     UUID eventId = UUID.randomUUID();
@@ -35,19 +35,19 @@ public class GuestLimitRepositoryTest {
 
     @Test
     void stopsReservingWhenLimitIsReached(){
-        boolean first = guestLimitRepository.tryReserveUploadSlot(eventId, guestId, 2);
-        boolean second = guestLimitRepository.tryReserveUploadSlot(eventId, guestId, 2);
-        boolean third = guestLimitRepository.tryReserveUploadSlot(eventId, guestId, 2);
+        boolean first = sut.tryReserveUploadSlot(eventId, guestId, 2);
+        boolean second = sut.tryReserveUploadSlot(eventId, guestId, 2);
+        boolean third = sut.tryReserveUploadSlot(eventId, guestId, 2);
 
         assertThat(first).isTrue();
         assertThat(second).isTrue();
         assertThat(third).isFalse();
-        assertThat(guestLimitRepository.countUploadsByGuest(eventId, guestId)).isEqualTo(2);
+        assertThat(sut.countUploadsByGuest(eventId, guestId)).isEqualTo(2);
     }
 
     @Test
     void reservesNothingWhenLimitIsZero() {
-        assertThat(guestLimitRepository.tryReserveUploadSlot(eventId, guestId, 0)).isFalse();
-        assertThat(guestLimitRepository.countUploadsByGuest(eventId, guestId)).isEqualTo(0);
+        assertThat(sut.tryReserveUploadSlot(eventId, guestId, 0)).isFalse();
+        assertThat(sut.countUploadsByGuest(eventId, guestId)).isEqualTo(0);
     }
 }

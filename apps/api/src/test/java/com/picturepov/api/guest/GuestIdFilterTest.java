@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class GuestIdFilterTest {
 
-    GuestIdFilter filter = new GuestIdFilter();
+    GuestIdFilter sut = new GuestIdFilter();
 
     @Test
     void newGuestGetsASecureCookie() throws Exception {
@@ -22,7 +22,7 @@ class GuestIdFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         // Act
-        filter.doFilter(request, response, new MockFilterChain());
+        sut.doFilter(request, response, new MockFilterChain());
 
         // Assert
         UUID guestId = (UUID) request.getAttribute(GuestIdFilter.ATTRIBUTE);
@@ -40,7 +40,7 @@ class GuestIdFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         // Act
-        filter.doFilter(request, response, new MockFilterChain());
+        sut.doFilter(request, response, new MockFilterChain());
 
         // Assert
         assertThat(request.getAttribute(GuestIdFilter.ATTRIBUTE)).isEqualTo(existing);
@@ -55,7 +55,7 @@ class GuestIdFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         // Act
-        filter.doFilter(request, response, new MockFilterChain());
+        sut.doFilter(request, response, new MockFilterChain());
 
         // Assert
         assertThat(request.getAttribute(GuestIdFilter.ATTRIBUTE)).isInstanceOf(UUID.class);
@@ -70,7 +70,7 @@ class GuestIdFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         // Act
-        filter.doFilter(request, response, new MockFilterChain());
+        sut.doFilter(request, response, new MockFilterChain());
 
         // Assert
         assertThat(request.getAttribute(GuestIdFilter.ATTRIBUTE)).isNull();

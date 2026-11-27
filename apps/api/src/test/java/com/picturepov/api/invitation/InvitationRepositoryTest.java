@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 @Transactional
 class InvitationRepositoryTest {
 
-    @Autowired InvitationRepository invitationRepository;
+    @Autowired InvitationRepository sut;
     @Autowired JdbcClient jdbc;
 
     TestData data;
@@ -35,11 +35,11 @@ class InvitationRepositoryTest {
     void secondInvitationForTheSameEventAndEmailIsRefusedByTheDatabase() {
         // Arrange: InvitationService turns this into 409 when two requests race
         UUID event = data.event();
-        invitationRepository.saveAndFlush(Invitation.createModerator(event, "beto@example.com"));
+        sut.saveAndFlush(Invitation.createModerator(event, "beto@example.com"));
 
         // Act
         Throwable thrown = catchThrowable(() ->
-                invitationRepository.saveAndFlush(Invitation.createModerator(event, "beto@example.com")));
+                sut.saveAndFlush(Invitation.createModerator(event, "beto@example.com")));
 
         // Assert
         assertThat(thrown).isInstanceOf(DataIntegrityViolationException.class);
@@ -52,8 +52,8 @@ class InvitationRepositoryTest {
         data.pendingInvitation(event, "beto@example.com");
 
         // Act
-        boolean sameEvent = invitationRepository.existsByEventIdAndEmail(event, "beto@example.com");
-        boolean otherEvent = invitationRepository.existsByEventIdAndEmail(data.event(), "beto@example.com");
+        boolean sameEvent = sut.existsByEventIdAndEmail(event, "beto@example.com");
+        boolean otherEvent = sut.existsByEventIdAndEmail(data.event(), "beto@example.com");
 
         // Assert
         assertThat(sameEvent).isTrue();
@@ -66,7 +66,7 @@ class InvitationRepositoryTest {
         UUID invitation = data.pendingInvitation(data.event(), "beto@example.com");
 
         // Act
-        Optional<Invitation> found = invitationRepository.findPendingById(invitation);
+        Optional<Invitation> found = sut.findPendingById(invitation);
 
         // Assert
         assertThat(found).map(Invitation::getEmail).contains("beto@example.com");
@@ -78,7 +78,7 @@ class InvitationRepositoryTest {
         UUID invitation = data.invite(data.event(), data.user("beto@example.com"), InvitationRole.MODERATOR, InvitationStatus.ACCEPTED);
 
         // Act
-        Optional<Invitation> found = invitationRepository.findPendingById(invitation);
+        Optional<Invitation> found = sut.findPendingById(invitation);
 
         // Assert
         assertThat(found).isEmpty();
@@ -92,8 +92,8 @@ class InvitationRepositoryTest {
         data.deleteEvent(event);
 
         // Act
-        Optional<Invitation> byId = invitationRepository.findPendingById(invitation);
-        List<PendingInvitationResponse> byEmail = invitationRepository.findPendingByEmail("beto@example.com");
+        Optional<Invitation> byId = sut.findPendingById(invitation);
+        List<PendingInvitationResponse> byEmail = sut.findPendingByEmail("beto@example.com");
 
         // Assert
         assertThat(byId).isEmpty();
@@ -109,7 +109,7 @@ class InvitationRepositoryTest {
         data.invite(data.event("Aceptada", "2099-12-12"), data.user("beto@example.com"), InvitationRole.MODERATOR, InvitationStatus.ACCEPTED);
 
         // Act
-        List<PendingInvitationResponse> pending = invitationRepository.findPendingByEmail("beto@example.com");
+        List<PendingInvitationResponse> pending = sut.findPendingByEmail("beto@example.com");
 
         // Assert
         assertThat(pending).containsExactly(

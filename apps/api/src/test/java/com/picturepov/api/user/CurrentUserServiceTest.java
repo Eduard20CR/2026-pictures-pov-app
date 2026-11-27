@@ -23,7 +23,7 @@ class CurrentUserServiceTest {
 
     @Mock UserRepository userRepository;
     @Mock CognitoUserInfoClient cognito;
-    @InjectMocks CurrentUserService currentUserService;
+    @InjectMocks CurrentUserService sut;
 
     UUID sub = UUID.randomUUID();
     Jwt jwt = Jwt.withTokenValue("token").header("alg", "none").subject(sub.toString()).build();
@@ -34,7 +34,7 @@ class CurrentUserServiceTest {
         when(userRepository.findById(sub)).thenReturn(Optional.of(new User(sub, "ana@example.com")));
 
         // Act
-        CurrentUserResponse user = currentUserService.getCurrentUser(jwt);
+        CurrentUserResponse user = sut.getCurrentUser(jwt);
 
         // Assert
         assertThat(user).isEqualTo(new CurrentUserResponse(sub, "ana@example.com"));
@@ -49,7 +49,7 @@ class CurrentUserServiceTest {
         when(userRepository.save(any(User.class))).thenAnswer(call -> call.getArgument(0));
 
         // Act
-        CurrentUserResponse user = currentUserService.getCurrentUser(jwt);
+        CurrentUserResponse user = sut.getCurrentUser(jwt);
 
         // Assert
         assertThat(user).isEqualTo(new CurrentUserResponse(sub, "ana@x.com"));
@@ -62,7 +62,7 @@ class CurrentUserServiceTest {
         when(cognito.fetchUserInfo("token")).thenReturn(new CognitoUserInfoClient.UserInfo("ana@x.com", "false"));
 
         // Act
-        Throwable thrown = catchThrowable(() -> currentUserService.findOrCreateFromToken(jwt));
+        Throwable thrown = catchThrowable(() -> sut.findOrCreateFromToken(jwt));
 
         // Assert
         assertThat(thrown).isInstanceOf(IllegalStateException.class);
@@ -75,7 +75,7 @@ class CurrentUserServiceTest {
         when(cognito.fetchUserInfo("token")).thenReturn(new CognitoUserInfoClient.UserInfo("Ana@X.com", "TRUE"));
 
         // Act
-        Optional<String> email = currentUserService.findVerifiedEmail(jwt);
+        Optional<String> email = sut.findVerifiedEmail(jwt);
 
         // Assert
         assertThat(email).contains("ana@x.com");
@@ -87,7 +87,7 @@ class CurrentUserServiceTest {
         when(cognito.fetchUserInfo("token")).thenReturn(new CognitoUserInfoClient.UserInfo("ana@x.com", "false"));
 
         // Act
-        Optional<String> email = currentUserService.findVerifiedEmail(jwt);
+        Optional<String> email = sut.findVerifiedEmail(jwt);
 
         // Assert
         assertThat(email).isEmpty();
